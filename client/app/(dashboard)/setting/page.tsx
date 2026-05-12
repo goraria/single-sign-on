@@ -1,3 +1,9 @@
 export default function SettingPage() {
-  return null
+  return (
+    <>
+      <div>
+        Dashboard setting
+      </div>
+    </>
+  )
 }
