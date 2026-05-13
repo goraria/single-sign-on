@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { resolveRedirect } from "@/lib/formatter"
+import { resolveRedirect, buildAppExchangeUrl } from "@/lib/formatter"
 import { createServer } from "@/lib/supabase/server"
 
 export const runtime = "nodejs"
@@ -22,25 +22,6 @@ async function getCurrentSessionTokens() {
     access_token: session.access_token,
     refresh_token: session.refresh_token,
   }
-}
-
-function buildAppExchangeUrl(
-  redirect: string,
-  tokens: { access_token: string; refresh_token?: string }
-) {
-  const target = new URL(redirect)
-  const next = `${target.pathname}${target.search}${target.hash}` || "/"
-
-  target.pathname = "/auth/exchange"
-  target.search = ""
-  target.hash = ""
-  target.searchParams.set("token", tokens.access_token)
-  if (tokens.refresh_token) {
-    target.searchParams.set("refresh_token", tokens.refresh_token)
-  }
-  target.searchParams.set("next", next)
-
-  return target.toString()
 }
 
 export async function GET(request: NextRequest) {

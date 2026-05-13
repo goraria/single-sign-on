@@ -1,29 +1,10 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { createServer } from "@/lib/supabase/server"
-import { resolveRedirect } from "@/lib/formatter"
+import { resolveRedirect, isAbsoluteHttpUrl, buildAppExchangeUrl } from "@/lib/formatter"
 
 export const runtime = "nodejs"
 
-function buildAppExchangeUrl(
-  redirect: string,
-  tokens: { access_token: string; refresh_token?: string }
-) {
-  const target = new URL(redirect)
-  const next = `${target.pathname}${target.search}${target.hash}` || "/"
-
-  target.pathname = "/auth/exchange"
-  target.search = ""
-  target.hash = ""
-  target.searchParams.set("token", tokens.access_token)
-  if (tokens.refresh_token) {
-    target.searchParams.set("refresh_token", tokens.refresh_token)
-  }
-  target.searchParams.set("next", next)
-
-  return target.toString()
-}
-
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const redirectTo = searchParams.get('redirectTo')
@@ -43,6 +24,10 @@ export async function GET(request: Request) {
             refresh_token: data.session.refresh_token,
           })
         )
+      }
+
+      if (isAbsoluteHttpUrl(redirectTo) || isAbsoluteHttpUrl(next)) {
+        return NextResponse.redirect(`${origin}/auth/error?error=invalid_redirect`)
       }
 
       const relativeNext = next?.startsWith('/') && !next.startsWith('//') ? next : '/'

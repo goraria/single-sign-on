@@ -8,3 +8,4 @@ export const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHAB
 // --- AUTH & API CONFIG ---
 export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const apiAuthUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+export const redirectUrl = process.env.NEXT_PUBLIC_ALLOWED_REDIRECT_ORIGINS;
