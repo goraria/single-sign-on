@@ -1,10 +1,14 @@
-import { createClient } from "gorth-base/cores/supabase-js";
+import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
+import { createClient } from "@/lib/structure/cores/supabase/index";
 // import type { Server as SocketIOServer } from "socket.io";
-import { models } from "@/lib/constants";
-import { Logger } from "gorth-base/lib/logger";
+import { models } from "@/lib/utils/constant";
+
+function Logger(message: string, _type?: string, _color?: string) {
+  return message;
+}
 
 let isRealtimeBootstrapped = false;
-
+``
 export async function createRealtime() {
   if (isRealtimeBootstrapped) {
     return;
@@ -13,8 +17,8 @@ export async function createRealtime() {
   isRealtimeBootstrapped = true;
 
   const supabase = createClient(
-    process.env.EXPRESS_PUBLIC_SUPABASE_URL!,
-    process.env.EXPRESS_PRIVATE_SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseUrl!,
+    supabaseServiceRoleKey!,
     {
       auth: {
         persistSession: false,

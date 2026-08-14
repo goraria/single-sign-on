@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from 'gorth-ui/default/card'
+} from '@gorth/primitive/default/card'
 
 export default function Page() {
   return (

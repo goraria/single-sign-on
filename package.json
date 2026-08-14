@@ -1,6 +1,6 @@
 {
-  "name": "single-sign-on",
-  "version": "0.0.1",
+  "name": "@gorth/single-sign-on",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "turbo build",
@@ -10,12 +10,12 @@
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {
-    "prettier": "^3.8.3",
-    "turbo": "^2.9.7",
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.7",
     "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@10.33.4"
 }

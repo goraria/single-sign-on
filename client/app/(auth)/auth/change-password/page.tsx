@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { UpdatePasswordForm } from '@/components/change-password-form'
+import { UpdatePasswordForm } from '@/components/auth/change-password-form'
 
 export default function Page() {
   return (

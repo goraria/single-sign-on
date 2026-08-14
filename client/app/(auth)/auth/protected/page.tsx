@@ -1,22 +1,13 @@
-import { redirect } from 'next/navigation'
+import { LogoutButton } from '@/components/auth/sign-out-element'
+import { Suspense } from 'react'
 
-import { LogoutButton } from '@/components/sign-out-element'
-import { createServer } from '@/lib/supabase/server'
-
-export default async function ProtectedPage() {
-  const supabase = await createServer()
-
-  const { data, error } = await supabase.auth.getClaims()
-  if (error || !data?.claims) {
-    redirect('/auth/sign-in')
-  }
-
+export default function ProtectedPage() {
   return (
-    <div className="flex h-svh w-full items-center justify-center gap-2">
-      <p>
-        Hello <span>{data.claims.email}</span>
-      </p>
-      <LogoutButton />
-    </div>
+    <Suspense>
+      <div className="flex h-svh w-full items-center justify-center gap-2">
+        <p>Signed in</p>
+        <LogoutButton />
+      </div>
+    </Suspense>
   )
 }

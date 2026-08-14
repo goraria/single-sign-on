@@ -1,82 +1,30 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    "rootDir": "./",
-    "outDir": "./.express",
-    // "baseUrl": ".",
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./*"]
     },
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "esnext",
-    "target": "ES2024",
-    // "types": ["node"],
-    // "types": [],
-    // For nodejs:
-    "lib": [
-      "dom",
-      // "dom.iterable",
-      "esnext"
-    ],
-    // and npm install -D @types/node
-
-    // Other Outputs
-    "sourceMap": true,
-    // "declaration": true,
-    // "declarationMap": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    // "exactOptionalPropertyTypes": true,
-
-    // Recommended Options
-    "strict": true,
-    // "jsx": "react-jsx",
-    // "verbatimModuleSyntax": true,
-    // "isolatedModules": true,
-    // "noUncheckedSideEffectImports": true,
-    // "moduleDetection": "force",
-    "skipLibCheck": true,
-    "incremental": true,
-
-    "moduleResolution": "bundler",
+    "allowArbitraryExtensions": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // "allowSyntheticDefaultImports": true,
-    // "allowJs": true,
-    // "checkJs": false,
-    // "noEmit": true,
-    // "noEmitOnError": true,
-    // "noImplicitAny": true,
-    // "noImplicitThis": true,
-    // "noImplicitReturns": true
-
-    // "ignoreDeprecations": "6.0"
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": false
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "express-env.d.ts",
-    ".express/types/**/*.ts",
-    ".express/dev/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["app/main.ts", "vite.config.ts", "express-env.d.ts", "**/*.ts"],
+  "exclude": ["node_modules", "dist", ".express"]
 }

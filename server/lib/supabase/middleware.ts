@@ -1,9 +1,10 @@
+import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
 import {
   createClient as createServerClient,
   type SupabaseClient,
   type User,
-  type Session
-} from 'gorth-base/cores/supabase-js'
+  type Session,
+} from "@/lib/structure/cores/supabase/index"
 import type { Request, Response, NextFunction } from 'express'
 
 // Extend Express Request type to include Supabase properties
@@ -33,8 +34,8 @@ export async function supabaseSessionMiddleware(
   try {
     // Always create a new client on each request (similar to Next.js approach)
     const supabase = createServerClient(
-      process.env.EXPRESS_PUBLIC_SUPABASE_URL!,
-      process.env.EXPRESS_PUBLIC_SUPABASE_ANON_KEY!,
+      supabaseUrl!,
+      supabaseAnonKey!,
       {
         auth: {
           flowType: 'pkce',
@@ -77,16 +78,16 @@ export async function supabaseSessionMiddleware(
           // Update cookies with new tokens
           res.cookie('access_token', refreshData.session.access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: isExpressProduction,
+            sameSite: isExpressProduction ? 'none' : 'lax',
             maxAge: 55 * 60 * 1000, // 55 minutes
           })
 
           if (refreshData.session.refresh_token) {
             res.cookie('refresh_token', refreshData.session.refresh_token, {
               httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+              secure: isExpressProduction,
+              sameSite: isExpressProduction ? 'none' : 'lax',
               maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             })
           }
@@ -175,7 +176,7 @@ export function redirectIfNotAuth(redirectTo: string = '/sign-in') {
  * 
  * Usage:
  * import { requireRole } from '@/lib/supabase/middleware'
- * router.post('/admin/action', requireRole(['admin']), (req, res) => { ... })
+ * router.post('/administrator/action', requireRole(['administrator']), (req, res) => { ... })
  */
 export function requireRole(allowedRoles: string[]) {
   return async (req: Request, res: Response, next: NextFunction) => {

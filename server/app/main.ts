@@ -1,8 +1,12 @@
-import AppModule from "@/app/module";
+import AppModule from "@/app/module"
 
-async function bootstrap() {
-  const app = await AppModule();
-  await app.listen();
-}
+// async function bootstrap() {
+//   const app = await AppModule();
+//   await app.listen();
+// }
 
-bootstrap();
+// bootstrap();
+
+const app = await AppModule()
+
+export default app

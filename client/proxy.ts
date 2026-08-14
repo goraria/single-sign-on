@@ -1,9 +1,29 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
+import { getSessionCookie } from "@gorth/structure/cores/auth/cookies/index"
 
-import { updateSession } from '@/lib/supabase/middleware'
+const protectedRoutes = ['x'] // ['/dashboard', '/account']
+const publicRoutes = ['/sign-in', '/sign-up', '/', '/dashboard', '/account']
 
 export async function proxy(request: NextRequest) {
-  return await updateSession(request)
+  // if (!sessionCookie) {
+  //   return NextResponse.redirect(new URL("/", request.url))
+  // }
+
+  const path = request.nextUrl.pathname
+  const isProtected = protectedRoutes.some(r => path.startsWith(r))
+  const isPublic = publicRoutes.includes(path)
+
+  const sessionCookie = getSessionCookie(request)
+
+  if (isProtected && !sessionCookie) {
+    return NextResponse.redirect(new URL('/auth/sign-in', request.url))
+  }
+
+  if (isPublic && sessionCookie && path !== '/') {
+    return NextResponse.redirect(new URL('/setting', request.url))
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
@@ -16,6 +36,7 @@ export const config = {
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
      * Feel free to modify this pattern to include more paths.
      */
+    // "/setting/:path*", "/account/:path*",
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

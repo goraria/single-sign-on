@@ -1,89 +1,114 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import axios from "gorth-base/cores/axios";
-import { toast } from "gorth-ui/cores/sonner";
+import axios from "@gorth/structure/cores/axios";
+import { toast } from "@gorth/primitive/cores/sonner";
 
-const supabase = createClient();
-
-interface FetchArgs {
-  url: string;
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  body?: unknown;
-  params?: Record<string, string | number | boolean | null | undefined>;
-  headers?: HeadersInit;
+export interface ApiResponseEnvelope {
+  data?: unknown
+  message?: string
 }
 
-interface FetchBaseQueryError {
-  status: number | "FETCH_ERROR";
-  data?: unknown;
-  error?: string;
+export interface BaseQueryApi {
+  signal?: AbortSignal
 }
 
-interface QueryMeta {
-  response?: {
-    status: number;
-  };
+export interface FetchArgs {
+  url: string
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+  body?: unknown
+  params?: Record<string, string | number | boolean | null | undefined>
+  headers?: HeadersInit
 }
 
-interface QueryReturnValue<TResult, TError> {
-  data?: TResult;
-  error?: TError;
-  meta?: QueryMeta;
+export interface FetchBaseQueryError {
+  status: number | "FETCH_ERROR"
+  data?: unknown
+  error?: string
 }
 
-interface BaseQueryApi {
-  signal?: AbortSignal;
-}
-
-type BaseQueryFn<TArgs, TResult, TError> = (
-  args: TArgs,
-  api: BaseQueryApi,
-  extraOptions?: unknown,
-) => Promise<QueryReturnValue<TResult, TError>>;
-
-type BivariantQuery<TArg> = {
-  bivarianceHack: (arg: TArg) => string | FetchArgs;
-}["bivarianceHack"];
-
-interface QueryDefinition<
-  TResult = unknown,
-  TArg = unknown,
-  TType extends "query" | "mutation" = "query",
-> {
-  type: TType;
-  query: BivariantQuery<TArg>;
-  transformResponse?: (raw: unknown) => TResult;
-}
-
-type EndpointFunctions<TEndpoints extends Record<string, unknown>> = {
+export type EndpointFunctions<TEndpoints extends Record<string, unknown>> = {
   [K in keyof TEndpoints]: TEndpoints[K] extends QueryDefinition<
     infer TResult,
     infer TArg,
     "query" | "mutation"
   >
-    ? (
-        arg: TArg,
-        api?: BaseQueryApi,
-      ) => Promise<QueryReturnValue<TResult, FetchBaseQueryError>>
-    : never;
-};
-
-interface EndpointBuilder {
-  query<TResult, TArg>(
-    definition: Omit<QueryDefinition<TResult, TArg, "query">, "type">,
-  ): QueryDefinition<TResult, TArg, "query">;
-  mutation<TResult, TArg>(
-    definition: Omit<QueryDefinition<TResult, TArg, "mutation">, "type">,
-  ): QueryDefinition<TResult, TArg, "mutation">;
+  ? (
+    arg: TArg,
+    api?: BaseQueryApi,
+  ) => Promise<QueryReturnValue<TResult, FetchBaseQueryError>>
+  : never
 }
 
-interface CreateApiConfig<TEndpoints extends Record<string, unknown>> {
-  baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>;
-  reducerPath: string;
-  tagTypes: string[];
-  endpoints: (builder: EndpointBuilder) => TEndpoints;
+export interface EndpointBuilder {
+  query<TResult, TArg>(
+    definition: Omit<QueryDefinition<TResult, TArg, "query">, "type">,
+  ): QueryDefinition<TResult, TArg, "query">
+  mutation<TResult, TArg>(
+    definition: Omit<QueryDefinition<TResult, TArg, "mutation">, "type">,
+  ): QueryDefinition<TResult, TArg, "mutation">
+}
+
+export interface CreateApiConfig<TEndpoints extends Record<string, unknown>> {
+  baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>
+  reducerPath: string
+  tagTypes: string[]
+  endpoints: (builder: EndpointBuilder) => TEndpoints
+}
+
+export type BaseQueryFn<TArgs, TResult, TError> = (
+  args: TArgs,
+  api: BaseQueryApi,
+  extraOptions?: unknown,
+) => Promise<QueryReturnValue<TResult, TError>>
+
+export interface QueryHookState<TResult> {
+  data?: TResult
+  error?: FetchBaseQueryError
+  isUninitialized: boolean
+  isLoading: boolean
+  isFetching: boolean
+  isSuccess: boolean
+  isError: boolean
+}
+
+export interface QueryMeta {
+  response?: {
+    status: number
+  }
+}
+
+export interface QueryReturnValue<TResult, TError> {
+  data?: TResult
+  error?: TError
+  meta?: QueryMeta
+}
+
+export type BivariantQuery<TArg> = {
+  bivarianceHack: (arg: TArg) => string | FetchArgs
+}["bivarianceHack"]
+
+export interface QueryDefinition<
+  TResult = unknown,
+  TArg = unknown,
+  TType extends "query" | "mutation" = "query",
+> {
+  type: TType
+  query: BivariantQuery<TArg>
+  transformResponse?: (raw: unknown) => TResult
+}
+
+export interface FetchBaseQueryConfig {
+  baseUrl?: string
+  prepareHeaders?: (headers: Headers) => Promise<Headers> | Headers
+}
+
+export interface ParamRequest {
+  id: string
+}
+
+export interface QueryRequest {
+  q: string
 }
 
 const createApi = <TEndpoints extends Record<string, unknown>>(
@@ -137,16 +162,6 @@ const createApi = <TEndpoints extends Record<string, unknown>>(
     ...endpointFunctions,
   };
 };
-
-interface QueryHookState<TResult> {
-  data?: TResult;
-  error?: FetchBaseQueryError;
-  isUninitialized: boolean;
-  isLoading: boolean;
-  isFetching: boolean;
-  isSuccess: boolean;
-  isError: boolean;
-}
 
 const useEndpointQuery = <TArg, TResult>(
   requester: (arg: TArg, api?: BaseQueryApi) => Promise<QueryReturnValue<TResult, FetchBaseQueryError>>,
@@ -204,24 +219,6 @@ const useEndpointQuery = <TArg, TResult>(
     refetch,
   };
 };
-
-interface FetchBaseQueryConfig {
-  baseUrl?: string;
-  prepareHeaders?: (headers: Headers) => Promise<Headers> | Headers;
-}
-
-interface ApiResponseEnvelope {
-  data?: unknown;
-  message?: string;
-}
-
-interface ParamRequest {
-  id: string;
-}
-
-interface QueryRequest {
-  q: string;
-}
 
 const fetchBaseQuery = ({ baseUrl, prepareHeaders }: FetchBaseQueryConfig) => {
   const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
@@ -293,22 +290,7 @@ const authorizeBaseQuery: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    // credentials: 'include',
     prepareHeaders: async (headers) => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
-        // headers.set("Session", session);
-      }
-
-      // const token = supabase.auth.getSession();
-      // if (token) {
-      //   headers.set("Authorization", `Bearer ${token}`);
-      // }
-
       return headers;
     },
   });

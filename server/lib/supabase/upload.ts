@@ -1,12 +1,13 @@
+import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
 import {
   createClient as createBrowserClient,
   SupabaseClient
-} from 'gorth-base/cores/supabase-js'
+} from '@/lib/structure/cores/supabase/index'
 
 export function createUpload(): SupabaseClient {
   const supabase = createBrowserClient(
-    process.env.EXPRESS_PUBLIC_SUPABASE_URL!,
-    process.env.EXPRESS_PRIVATE_SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseUrl!,
+    supabaseServiceRoleKey!,
     {
       auth: {
         autoRefreshToken: false,

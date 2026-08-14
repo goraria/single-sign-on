@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from 'gorth-ui/default/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@gorth/primitive/default/card'
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ error: string }> }) {
   const params = await searchParams

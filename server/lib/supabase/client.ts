@@ -1,7 +1,8 @@
+import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
 import {
   createClient as createBrowserClient,
   SupabaseClient
-} from 'gorth-base/cores/supabase-js'
+} from '@/lib/structure/cores/supabase/index'
 
 /**
  * Creates a Supabase client for Express (server-side)
@@ -13,8 +14,8 @@ import {
  */
 export function createClient(): SupabaseClient {
   return createBrowserClient(
-    process.env.EXPRESS_PUBLIC_SUPABASE_URL!,
-    process.env.EXPRESS_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl!,
+    supabaseAnonKey!,
     {
       auth: {
         flowType: 'pkce',
@@ -48,8 +49,8 @@ export function createClient(): SupabaseClient {
 //   res: Response
 // ): SupabaseClient {
 //   return createServerClient(
-//     process.env.EXPRESS_PUBLIC_SUPABASE_URL!,
-//     process.env.EXPRESS_PUBLIC_SUPABASE_ANON_KEY!,
+//     supabaseUrl!,
+//     supabaseAnonKey!,
 //     {
 //       auth: {
 //         flowType: 'pkce',

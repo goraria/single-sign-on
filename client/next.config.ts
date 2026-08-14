@@ -2,19 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  transpilePackages: ["gorth-ui"],
+  transpilePackages: ["@gorth/primitive"],
 
   devIndicators: false,
   images: {
-    // domains: ["rqocjwpyckhupjbzheev.supabase.co"],
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "rqocjwpyckhupjbzheev.supabase.co",
-        // pathname: "/storage/v1/object/public/**",
-      },
-    ],
+    remotePatterns: [],
   },
+  allowedDevOrigins: ['192.168.1.37'],
 };
 
 export default nextConfig;
