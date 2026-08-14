@@ -42,8 +42,15 @@ export function normalizeEmail(email: string): string {
 }
 
 export function getCorsOrigins(): string[] {
-  return [expressClientUrl, expressMobileUrl, expressLocalUrl].filter(
-    (origin): origin is string => Boolean(origin)
+  return Array.from(
+    new Set(
+      [
+        expressClientUrl,
+        expressMobileUrl,
+        expressLocalUrl,
+        allowedRedirectOrigins,
+      ].flatMap(splitOrigins)
+    )
   )
 }
 
