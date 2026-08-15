@@ -26,6 +26,10 @@ import { ensureOAuthClients } from "@/services/oauth-client"
 export default async function AppModule() {
   const app = express()
 
+  if (isExpressProduction) {
+    app.set("trust proxy", 1)
+  }
+
   // ================================
   // 🌐 EXPRESS SERVER CONFIGURATION
   // ================================
@@ -83,7 +87,7 @@ export default async function AppModule() {
         secure: isExpressProduction,
         httpOnly: true,
         maxAge: 30 * 60 * 60 * 24,
-        sameSite: "lax",
+        sameSite: isExpressProduction ? "none" : "lax",
         // expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // Thời gian hết hạn cookie
         // secure: true, // Chỉ gửi cookie qua HTTPS
         // sameSite: 'Lax' // Hoặc 'Strict'. 'None' cần secure: true
@@ -133,6 +137,10 @@ export async function AppModuleX(): Promise<{
   const timer = Date.now()
   const app = express()
 
+  if (isExpressProduction) {
+    app.set("trust proxy", 1)
+  }
+
   // ================================
   // 🌐 EXPRESS SERVER CONFIGURATION
   // ================================
@@ -171,7 +179,7 @@ export async function AppModuleX(): Promise<{
         secure: isExpressProduction,
         httpOnly: true,
         maxAge: 30 * 60 * 60 * 24,
-        sameSite: "lax",
+        sameSite: isExpressProduction ? "none" : "lax",
         // expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // Thời gian hết hạn cookie
         // secure: true, // Chỉ gửi cookie qua HTTPS
         // sameSite: 'Lax' // Hoặc 'Strict'. 'None' cần secure: true

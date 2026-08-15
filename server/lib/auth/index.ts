@@ -122,7 +122,7 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
-    // useSecureCookies: true,
+    useSecureCookies: false,
     cookiePrefix: "gorth",
     cookies: {
       session_token: {
@@ -148,7 +148,7 @@ export const auth = betterAuth({
   // },
   cookies: {
     secure: isExpressProduction,
-    sameSite: "lax",
+    sameSite: isExpressProduction ? "none" : "lax",
   },
   emailAndPassword: {
     enabled: true,
