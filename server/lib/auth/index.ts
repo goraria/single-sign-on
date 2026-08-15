@@ -123,6 +123,12 @@ export const auth = betterAuth({
       generateId: false,
     },
     useSecureCookies: false,
+    defaultCookieAttributes: {
+      httpOnly: true,
+      secure: isExpressProduction,
+      sameSite: isExpressProduction ? "none" : "lax",
+      path: "/",
+    },
     cookiePrefix: "gorth",
     cookies: {
       session_token: {
@@ -146,10 +152,6 @@ export const auth = betterAuth({
   // pages: {
   //   signIn: "/login",
   // },
-  cookies: {
-    secure: isExpressProduction,
-    sameSite: isExpressProduction ? "none" : "lax",
-  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
