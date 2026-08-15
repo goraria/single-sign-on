@@ -127,6 +127,7 @@ export const auth = betterAuth({
       httpOnly: true,
       secure: isExpressProduction,
       sameSite: isExpressProduction ? "none" : "lax",
+      partitioned: isExpressProduction,
       path: "/",
     },
     cookiePrefix: "gorth",
