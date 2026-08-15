@@ -102,7 +102,7 @@ export function getTrustedOrigins() {
       ...splitOrigins(expressServerUrl),
       ...splitOrigins(allowedRedirectOrigins),
       ...(isExpressProduction
-        ? []
+        ? ["https://gorth-single-sign-on-client.vercel.app/"]
         : ["http://localhost:3000", "http://127.0.0.1:3000"]),
     ])
   )
