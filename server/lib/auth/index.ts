@@ -3,6 +3,7 @@ import { drizzleAdapter } from "@/lib/structure/auth/adapters"
 import { jwt, openAPI } from "@/lib/structure/auth/plugins"
 import { oauthProvider } from "@/lib/structure/auth/oap"
 import { sso } from "@/lib/structure/auth/sso"
+import { dash } from "@gorth/structure/cores/auth/server/infra"
 import {
   allowedRedirectOrigins,
   betterAuthUrl,
@@ -99,6 +100,7 @@ export const auth = betterAuth({
       },
     }),
     openAPI(),
+    dash(),
     sso(),
   ],
   database: drizzleAdapter(database, {
