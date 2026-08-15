@@ -71,8 +71,8 @@ const cachedTrustedClients = await getTrustedOAuthClientIds()
 
 export const auth = betterAuth({
   basePath: "/auth",
-  baseURL: expressServerUrl!,
-  secret: expressJwtSecret!,
+  // baseURL: expressServerUrl!,
+  // secret: expressJwtSecret!,
   disabledPaths: ["/token"],
   trustedOrigins,
   plugins: [
