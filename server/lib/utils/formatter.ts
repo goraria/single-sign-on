@@ -45,6 +45,7 @@ export function getCorsOrigins(): string[] {
   return Array.from(
     new Set(
       [
+        "https://gorth-single-sign-on-client.vercel.app",
         expressClientUrl,
         expressMobileUrl,
         expressLocalUrl,
@@ -101,9 +102,10 @@ export function getTrustedOrigins() {
       ...splitOrigins(expressMobileUrl),
       ...splitOrigins(expressServerUrl),
       ...splitOrigins(allowedRedirectOrigins),
-      ...(isExpressProduction
-        ? ["https://gorth-single-sign-on-client.vercel.app"]
-        : ["http://localhost:3000", "http://127.0.0.1:3000"]),
+      ...getCorsOrigins(),
+      ...(!isExpressProduction
+        ? ["http://localhost:3000", "http://127.0.0.1:3000"]
+        : []),
     ])
   )
 }
