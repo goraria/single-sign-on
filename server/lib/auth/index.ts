@@ -8,6 +8,7 @@ import {
   allowedRedirectOrigins,
   betterAuthUrl,
   expressClientUrl,
+  expressJwtSecret,
   expressLocalUrl,
   expressMobileUrl,
   expressServerUrl,
@@ -70,7 +71,8 @@ const cachedTrustedClients = await getTrustedOAuthClientIds()
 
 export const auth = betterAuth({
   basePath: "/auth",
-  // baseURL: expressServerUrl!,
+  baseURL: expressServerUrl!,
+  secret: expressJwtSecret!,
   disabledPaths: ["/token"],
   trustedOrigins,
   plugins: [
