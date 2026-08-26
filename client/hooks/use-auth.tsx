@@ -1,10 +1,12 @@
-// "use client";
-import { createContext, useContext } from 'react';
-// import { Session, User } from '@supabase/supabase-js'
+"use client"
+
+import { createContext, useContext } from "react"
 
 export interface User {
   id: string
+  name?: string
   email?: string
+  image?: string | null
   app_metadata?: Record<string, unknown>
   user_metadata?: Record<string, unknown>
 }
@@ -14,6 +16,7 @@ export interface AuthUser extends User {}
 export interface AuthContextProps {
   account: AuthUser | null
   loading: boolean
+  error: Error | null
   authenticated: boolean
   refresh: () => Promise<AuthUser | null>
   login: (returnTo?: string) => void
@@ -24,6 +27,7 @@ export interface AuthContextProps {
 export const AuthContext = createContext<AuthContextProps>({
   account: null,
   loading: true,
+  error: null,
   authenticated: false,
   refresh: async () => null,
   login: () => undefined,
@@ -31,4 +35,6 @@ export const AuthContext = createContext<AuthContextProps>({
   logout: async () => undefined,
 })
 
-export const useAuth = () => useContext(AuthContext)
+export function useAuth() {
+  return useContext(AuthContext)
+}

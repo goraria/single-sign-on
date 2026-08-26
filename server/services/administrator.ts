@@ -3,7 +3,7 @@ import { asc, eq } from "drizzle-orm"
 import z from "@/lib/structure/cores/zod"
 
 import { database } from "@/database"
-import { oauthClients, users, type OAuthClientRow } from "@/database/schema"
+import { oauthClients, users, type OAuthClient } from "@/database/schema"
 import { auth } from "@/lib/auth"
 import { fromNodeHeaders } from "@/lib/structure/auth/server"
 import { isExpressProduction } from "@/lib/utils/environment"
@@ -110,7 +110,7 @@ function getPostLogoutRedirectUris(
   return redirectUris.map((redirectUri) => new URL(redirectUri).origin)
 }
 
-function toApplicationResponse(application: OAuthClientRow) {
+function toApplicationResponse(application: OAuthClient) {
   return {
     id: application.id,
     clientId: application.clientId,
@@ -169,7 +169,7 @@ function buildCreateValues(input: unknown) {
   }
 }
 
-function buildUpdateValues(input: unknown, current: OAuthClientRow) {
+function buildUpdateValues(input: unknown, current: OAuthClient) {
   const body = parseAdministratorPatch(input)
 
   if (body.clientId && body.clientId !== current.clientId) {

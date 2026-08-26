@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { auth } from '@/lib/auth'
-import { Button } from '@gorth/primitive/default/button'
+import { Button } from '@gorth/primitive/custom/button'
 
 export function LogoutButton() {
   const router = useRouter()

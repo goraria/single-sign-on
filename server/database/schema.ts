@@ -1,7 +1,8 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -12,30 +13,35 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 
-export const userRoleEnum = pgEnum("user_role_enum", [
+export const userRole = pgEnum("user_role_enum", [
   "user",
   "moderator",
   "administrator",
 ])
 
-export const oauthGrantTypeEnum = pgEnum("oauth_grant_type_enum", [
+export const oauthGrantType = pgEnum("oauth_grant_type_enum", [
   "authorization_code",
   "refresh_token",
   "client_credentials",
 ])
 
-export const oauthResponseTypeEnum = pgEnum("oauth_response_type_enum", [
+export const oauthResponseType = pgEnum("oauth_response_type_enum", [
   "code",
 ])
 
-export const oauthTokenEndpointAuthMethodEnum = pgEnum(
+export const oauthTokenEndpointAuthMethod = pgEnum(
   "oauth_token_endpoint_auth_method_enum",
   ["none", "client_secret_basic", "client_secret_post"]
 )
 
-export const oauthSubjectTypeEnum = pgEnum("oauth_subject_type_enum", [
+export const oauthSubjectType = pgEnum("oauth_subject_type_enum", [
   "public",
   "pairwise",
+])
+
+export const oauthApplicationType = pgEnum("oauth_application_type_enum", [
+  "web",
+  "native",
 ])
 
 export const users = pgTable("users", {
@@ -44,7 +50,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
-  role: userRoleEnum("role").notNull().default("user"),
+  role: userRole("role").notNull().default("user"),
   bannedUntil: timestamp("banned_until", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
@@ -75,6 +81,7 @@ export const accounts = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     accountId: text("account_id").notNull(),
+    issuer: text("issuer").notNull(),
     providerId: text("provider_id").notNull(),
     userId: uuid("user_id")
       .notNull()
@@ -99,6 +106,10 @@ export const accounts = pgTable(
       table.providerId,
       table.accountId
     ),
+    uniqueIndex("accounts_issuer_account_id_key").on(
+      table.issuer,
+      table.accountId
+    ),
   ]
 )
 
@@ -121,6 +132,8 @@ export const jwkss = pgTable("jwkss", {
   privateKey: text("private_key").notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   expiresAt: timestamp("expires_at", { mode: "date" }),
+  alg: text("alg"),
+  crv: text("crv"),
 })
 
 export const oauthClients = pgTable(
@@ -129,11 +142,16 @@ export const oauthClients = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     clientId: text("client_id").notNull().unique(),
     clientSecret: text("client_secret"),
+    clientDiscoveryId: text("client_discovery_id"),
     disabled: boolean("disabled").default(false),
     skipConsent: boolean("skip_consent"),
     enableEndSession: boolean("enable_end_session"),
-    subjectType: oauthSubjectTypeEnum("subject_type"),
+    subjectType: oauthSubjectType("subject_type"),
     scopes: text("scopes").array(),
+    clientCredentialsScopes: text("client_credentials_scopes")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     userId: uuid("user_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -150,18 +168,77 @@ export const oauthClients = pgTable(
     softwareStatement: text("software_statement"),
     redirectUris: text("redirect_uris").array().notNull(),
     postLogoutRedirectUris: text("post_logout_redirect_uris").array(),
-    tokenEndpointAuthMethod: oauthTokenEndpointAuthMethodEnum(
+    backchannelLogoutUri: text("backchannel_logout_uri"),
+    backchannelLogoutSessionRequired: boolean(
+      "backchannel_logout_session_required"
+    ),
+    tokenEndpointAuthMethod: oauthTokenEndpointAuthMethod(
       "token_endpoint_auth_method"
     ),
-    grantTypes: oauthGrantTypeEnum("grant_types").array(),
-    responseTypes: oauthResponseTypeEnum("response_types").array(),
+    grantTypes: oauthGrantType("grant_types").array(),
+    responseTypes: oauthResponseType("response_types").array(),
+    applicationType: oauthApplicationType("application_type"),
+    jwks: text("jwks"),
+    jwksUri: text("jwks_uri"),
     public: boolean("public"),
     type: text("type"),
     requirePKCE: boolean("require_pkce"),
+    dpopBoundAccessTokens: boolean("dpop_bound_access_tokens")
+      .notNull()
+      .default(false),
     referenceId: text("reference_id"),
     metadata: jsonb("metadata"),
   },
   (table) => [index("oauth_clients_user_id_idx").on(table.userId)]
+)
+
+export const oauthResources = pgTable("oauth_resources", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  identifier: text("identifier").notNull().unique(),
+  name: text("name").notNull(),
+  accessTokenTtl: integer("access_token_ttl"),
+  refreshTokenTtl: integer("refresh_token_ttl"),
+  signingAlgorithm: text("signing_algorithm"),
+  signingKeyId: text("signing_key_id"),
+  allowedScopes: text("allowed_scopes").array(),
+  customClaims: jsonb("custom_claims"),
+  dpopBoundAccessTokensRequired: boolean("dpop_bound_access_tokens_required")
+    .notNull()
+    .default(false),
+  disabled: boolean("disabled").notNull().default(false),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  policyVersion: integer("policy_version").notNull().default(1),
+  metadata: jsonb("metadata"),
+})
+
+export const oauthClientResources = pgTable(
+  "oauth_client_resources",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    resourceId: text("resource_id")
+      .notNull()
+      .references(() => oauthResources.identifier, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("oauth_client_resources_client_id_idx").on(table.clientId),
+    index("oauth_client_resources_resource_id_idx").on(table.resourceId),
+    uniqueIndex("oauth_client_resources_client_resource_key").on(
+      table.clientId,
+      table.resourceId
+    ),
+  ]
 )
 
 export const oauthRefreshTokens = pgTable(
@@ -182,10 +259,19 @@ export const oauthRefreshTokens = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     referenceId: text("reference_id"),
+    authorizationCodeId: text("authorization_code_id"),
+    resources: text("resources").array(),
+    requestedUserInfoClaims: text("requested_user_info_claims").array(),
     expiresAt: timestamp("expires_at", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" }),
     revoked: timestamp("revoked", { mode: "date" }),
     authTime: timestamp("auth_time", { mode: "date" }),
+    rotatedAt: timestamp("rotated_at", { mode: "date" }),
+    rotationReplayResponse: text("rotation_replay_response"),
+    rotationReplayExpiresAt: timestamp("rotation_replay_expires_at", {
+      mode: "date",
+    }),
+    confirmation: jsonb("confirmation"),
     scopes: text("scopes").array().notNull(),
   },
   (table) => [
@@ -193,6 +279,9 @@ export const oauthRefreshTokens = pgTable(
     index("oauth_refresh_tokens_client_id_idx").on(table.clientId),
     index("oauth_refresh_tokens_session_id_idx").on(table.sessionId),
     index("oauth_refresh_tokens_user_id_idx").on(table.userId),
+    index("oauth_refresh_tokens_authorization_code_id_idx").on(
+      table.authorizationCodeId
+    ),
   ]
 )
 
@@ -214,11 +303,16 @@ export const oauthAccessTokens = pgTable(
       onDelete: "set null",
     }),
     referenceId: text("reference_id"),
+    authorizationCodeId: text("authorization_code_id"),
+    resources: text("resources").array(),
+    requestedUserInfoClaims: text("requested_user_info_claims").array(),
     refreshId: uuid("refresh_id").references(() => oauthRefreshTokens.id, {
       onDelete: "set null",
     }),
     expiresAt: timestamp("expires_at", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" }),
+    revoked: timestamp("revoked", { mode: "date" }),
+    confirmation: jsonb("confirmation"),
     scopes: text("scopes").array().notNull(),
   },
   (table) => [
@@ -227,6 +321,9 @@ export const oauthAccessTokens = pgTable(
     index("oauth_access_tokens_session_id_idx").on(table.sessionId),
     index("oauth_access_tokens_user_id_idx").on(table.userId),
     index("oauth_access_tokens_refresh_id_idx").on(table.refreshId),
+    index("oauth_access_tokens_authorization_code_id_idx").on(
+      table.authorizationCodeId
+    ),
   ]
 )
 
@@ -244,6 +341,8 @@ export const oauthConsents = pgTable(
       onDelete: "cascade",
     }),
     referenceId: text("reference_id"),
+    resources: text("resources").array(),
+    requestedUserInfoClaims: text("requested_user_info_claims").array(),
     scopes: text("scopes").array().notNull(),
     createdAt: timestamp("created_at", { mode: "date" }),
     updatedAt: timestamp("updated_at", { mode: "date" }),
@@ -253,6 +352,11 @@ export const oauthConsents = pgTable(
     index("oauth_consents_user_id_idx").on(table.userId),
   ]
 )
+
+export const oauthClientAssertions = pgTable("oauth_client_assertions", {
+  id: text("id").primaryKey(),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+})
 
 export const ssoProviders = pgTable(
   "sso_providers",
@@ -294,6 +398,34 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
   }),
 }))
 
+export const oauthClientsRelations = relations(
+  oauthClients,
+  ({ many }) => ({
+    resources: many(oauthClientResources),
+  })
+)
+
+export const oauthResourcesRelations = relations(
+  oauthResources,
+  ({ many }) => ({
+    clients: many(oauthClientResources),
+  })
+)
+
+export const oauthClientResourcesRelations = relations(
+  oauthClientResources,
+  ({ one }) => ({
+    client: one(oauthClients, {
+      fields: [oauthClientResources.clientId],
+      references: [oauthClients.clientId],
+    }),
+    resource: one(oauthResources, {
+      fields: [oauthClientResources.resourceId],
+      references: [oauthResources.identifier],
+    }),
+  })
+)
+
 export const betterAuthSchema = {
   users,
   sessions,
@@ -302,19 +434,34 @@ export const betterAuthSchema = {
   jwks: jwkss,
   jwkss,
   oauthClients,
+  oauthResources,
+  oauthClientResources,
   oauthRefreshTokens,
   oauthAccessTokens,
   oauthConsents,
+  oauthClientAssertions,
   ssoProviders,
 }
 
-export type UserRow = typeof users.$inferSelect
-export type SessionRow = typeof sessions.$inferSelect
-export type AccountRow = typeof accounts.$inferSelect
-export type VerificationRow = typeof verifications.$inferSelect
-export type JwksRow = typeof jwkss.$inferSelect
-export type OAuthClientRow = typeof oauthClients.$inferSelect
-export type OAuthRefreshTokenRow = typeof oauthRefreshTokens.$inferSelect
-export type OAuthAccessTokenRow = typeof oauthAccessTokens.$inferSelect
-export type OAuthConsentRow = typeof oauthConsents.$inferSelect
-export type SsoProviderRow = typeof ssoProviders.$inferSelect
+export type User = typeof users.$inferSelect
+export type Session = typeof sessions.$inferSelect
+export type Account = typeof accounts.$inferSelect
+export type Verification = typeof verifications.$inferSelect
+export type Jwks = typeof jwkss.$inferSelect
+export type OAuthClient = typeof oauthClients.$inferSelect
+export type OAuthResource = typeof oauthResources.$inferSelect
+export type OAuthClientResource = typeof oauthClientResources.$inferSelect
+export type OAuthRefreshToken = typeof oauthRefreshTokens.$inferSelect
+export type OAuthAccessToken = typeof oauthAccessTokens.$inferSelect
+export type OAuthConsent = typeof oauthConsents.$inferSelect
+export type OAuthClientAssertion = typeof oauthClientAssertions.$inferSelect
+export type SsoProvider = typeof ssoProviders.$inferSelect
+
+export type UserRole = (typeof userRole.enumValues)[number]
+export type OAuthGrantType = (typeof oauthGrantType.enumValues)[number]
+export type OAuthResponseType = (typeof oauthResponseType.enumValues)[number]
+export type OAuthTokenEndpointAuthMethod =
+  (typeof oauthTokenEndpointAuthMethod.enumValues)[number]
+export type OAuthSubjectType = (typeof oauthSubjectType.enumValues)[number]
+export type OAuthApplicationType =
+  (typeof oauthApplicationType.enumValues)[number]

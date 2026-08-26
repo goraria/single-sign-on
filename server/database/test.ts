@@ -27,7 +27,7 @@ export const categoryValues = [
 
 export type Category = (typeof categoryValues)[number]
 
-export const categoryEnum = pgEnum("Category", categoryValues)
+export const category = pgEnum("Category", categoryValues)
 
 export const users = pgTable(
   "User",
@@ -206,7 +206,7 @@ export const libraryMangas = pgTable(
     mangaId: varchar("mangaId", { length: 191 })
       .notNull()
       .references(() => mangas.id, { onDelete: "cascade" }),
-    category: categoryEnum("category").notNull(),
+    category: category("category").notNull(),
     createdAt: timestamp("createdAt", { mode: "date", precision: 3 })
       .notNull()
       .defaultNow(),
@@ -445,16 +445,18 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }))
 
-export type UserRow = typeof users.$inferSelect
-export type AccountRow = typeof accounts.$inferSelect
-export type SessionRow = typeof sessions.$inferSelect
-export type LibraryRow = typeof libraries.$inferSelect
-export type MangaRow = typeof mangas.$inferSelect
-export type LibraryMangaRow = typeof libraryMangas.$inferSelect
-export type MangaCommentRow = typeof mangaComments.$inferSelect
-export type ChapterRow = typeof chapters.$inferSelect
-export type ChapterCommentRow = typeof chapterComments.$inferSelect
-export type NotificationRow = typeof notifications.$inferSelect
+export type User = typeof users.$inferSelect
+export type Account = typeof accounts.$inferSelect
+export type Session = typeof sessions.$inferSelect
+export type VerificationToken = typeof verificationTokens.$inferSelect
+export type Verification = typeof verifications.$inferSelect
+export type Library = typeof libraries.$inferSelect
+export type Manga = typeof mangas.$inferSelect
+export type LibraryManga = typeof libraryMangas.$inferSelect
+export type MangaComment = typeof mangaComments.$inferSelect
+export type Chapter = typeof chapters.$inferSelect
+export type ChapterComment = typeof chapterComments.$inferSelect
+export type Notification = typeof notifications.$inferSelect
 
 export type NewLibrary = typeof libraries.$inferInsert
 export type NewManga = typeof mangas.$inferInsert

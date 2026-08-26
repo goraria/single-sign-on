@@ -1,148 +1,140 @@
-'use client'
+"use client"
 
-import React, { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useForm } from "@gorth/primitive/cores/tanstack/form"
+import { Loader2, LogIn } from "@gorth/primitive/cores/lucide"
 
-import { cn } from "@/lib/utils"
-import { auth } from '@/lib/auth'
-import { Button } from '@gorth/primitive/default/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@gorth/primitive/default/card'
-import { Input } from '@gorth/primitive/default/input'
-import { Label } from '@gorth/primitive/default/label'
-import { SocialForm } from '@/components/auth/social-form'
+import { AuthFieldError } from "@/components/auth/auth-field-error"
+import { PasswordInput } from "@/components/auth/password-input"
+import { SocialForm } from "@/components/auth/social-form"
+import { auth } from "@/lib/auth"
+import { signInSchema } from "@/schemas/auth"
 import {
   buildLegacyDisabledPath,
   buildOAuthAuthorizePath,
   hasOAuthQuery,
   isExternalRedirect,
-} from '@/lib/utils/temp'
-import { toast } from "@gorth/primitive/cores/sonner"
+} from "@/lib/utils/temp"
+import { Button } from "@gorth/primitive/custom/button"
+import { Input } from "@gorth/primitive/default/input"
+import { Label } from "@gorth/primitive/default/label"
 
-export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+export function LoginForm() {
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') ?? "/"
+  const redirect = searchParams.get("redirect") ?? "/"
+  const oauthQueryString = searchParams.toString()
   const { data: session } = auth.useSession()
-  const oauthQuery = new URLSearchParams(searchParams.toString())
 
   useEffect(() => {
-    if (!session?.user) {
-      return
-    }
-
-    if (hasOAuthQuery(oauthQuery)) {
+    if (!session?.user) return
+    const oauthQuery = new URLSearchParams(oauthQueryString)
+    if (hasOAuthQuery(oauthQuery))
       window.location.replace(buildOAuthAuthorizePath(oauthQuery))
-      return
-    }
-
-    if (isExternalRedirect(redirect)) {
+    else if (isExternalRedirect(redirect))
       window.location.replace(buildLegacyDisabledPath())
-      return
-    }
+    else router.replace(redirect)
+  }, [oauthQueryString, redirect, router, session?.user])
 
-    router.replace(redirect)
-  }, [redirect, router, session?.user])
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await auth.signIn.email({
-        email,
-        password,
-        rememberMe: true,
-      })
-      if (error) {
-        setError(error.message ?? 'Login failed')
-        return
+  const form = useForm({
+    defaultValues: { email: "", password: "" },
+    validators: { onChange: signInSchema },
+    onSubmit: async ({ value }) => {
+      setSubmitError(null)
+      try {
+        const result = await auth.signIn.email({ ...value, rememberMe: true })
+        if (result.error) {
+          setSubmitError(result.error.message ?? "Login failed")
+          return
+        }
+        const oauthQuery = new URLSearchParams(oauthQueryString)
+        if (hasOAuthQuery(oauthQuery))
+          window.location.assign(buildOAuthAuthorizePath(oauthQuery))
+        else if (isExternalRedirect(redirect))
+          window.location.assign(buildLegacyDisabledPath())
+        else router.push(redirect)
+      } catch (cause) {
+        setSubmitError(
+          cause instanceof Error ? cause.message : "An error occurred"
+        )
       }
-
-      if (hasOAuthQuery(oauthQuery)) {
-        window.location.assign(buildOAuthAuthorizePath(oauthQuery))
-        return
-      }
-
-      if (isExternalRedirect(redirect)) {
-        window.location.assign(buildLegacyDisabledPath())
-        return
-      }
-
-      router.push(redirect)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      toast.message(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+  })
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              {/*{error && <p className="text-sm text-red-500">{error}</p>}*/}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Login'}
-              </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href={`/auth/sign-up?redirect=${encodeURIComponent(redirect ?? '')}`} className="underline underline-offset-4">
-                Sign up
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <form
+      className="grid gap-3"
+      onSubmit={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        void form.handleSubmit()
+      }}
+    >
+      <form.Field name="email">
+        {(field) => (
+          <div className="grid gap-2">
+            <Label htmlFor={field.name}>Email</Label>
+            <Input
+              id={field.name}
+              name={field.name}
+              type="email"
+              autoComplete="email"
+              placeholder="name@example.com"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+            />
+            <AuthFieldError errors={field.state.meta.errors} />
+          </div>
+        )}
+      </form.Field>
+      <form.Field name="password">
+        {(field) => (
+          <div className="relative grid gap-2">
+            <Label htmlFor={field.name}>Password</Label>
+            <PasswordInput
+              id={field.name}
+              name={field.name}
+              autoComplete="current-password"
+              placeholder="********"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+            />
+            <AuthFieldError errors={field.state.meta.errors} />
+            <Link
+              href="/auth/forgot-password"
+              className="text-muted-foreground absolute inset-e-0 -top-0.5 text-sm font-medium hover:opacity-75"
+            >
+              Forgot password?
+            </Link>
+          </div>
+        )}
+      </form.Field>
+      {submitError && <p className="text-destructive text-sm">{submitError}</p>}
+      <form.Subscribe
+        selector={(state) =>
+          [
+            signInSchema.safeParse(state.values).success,
+            state.isSubmitting,
+          ] as const
+        }
+      >
+        {([isValid, isSubmitting]) => (
+          <Button
+            className="mt-2 w-full"
+            type="submit"
+            disabled={!isValid || isSubmitting}
+          >
+            {isSubmitting ? <Loader2 className="animate-spin" /> : <LogIn />}{" "}
+            Sign in
+          </Button>
+        )}
+      </form.Subscribe>
       <SocialForm />
-    </div>
+    </form>
   )
 }

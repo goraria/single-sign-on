@@ -1,4 +1,17 @@
 import type { BetterAuthUser, SsoUser } from "@/lib/utils/interface"
+import type { AuthUser } from "@/hooks/use-auth"
+
+export function toNavigationUser(user: AuthUser) {
+  const metadata = user.user_metadata ?? {}
+
+  return {
+    name:
+      user.name ??
+      String(metadata.full_name ?? metadata.name ?? user.email ?? "User"),
+    email: user.email ?? "",
+    avatar: user.image ?? String(metadata.avatar_url ?? metadata.picture ?? ""),
+  }
+}
 
 export function normalizeOrigin(value: string) {
   try {
@@ -57,7 +70,7 @@ function toIsoString(value: Date | string | null | undefined) {
 export function toSsoUser(user: BetterAuthUser): SsoUser {
   const updatedAt = toIsoString(user.updatedAt)
   const createdAt = toIsoString(user.createdAt)
-  const emailVerifiedAt = user.emailVerified ? updatedAt ?? createdAt : null
+  const emailVerifiedAt = user.emailVerified ? (updatedAt ?? createdAt) : null
 
   return {
     id: user.id,

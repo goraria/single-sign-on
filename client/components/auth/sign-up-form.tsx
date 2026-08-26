@@ -1,96 +1,68 @@
 "use client"
 
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
+import { useForm } from "@gorth/primitive/cores/tanstack/form"
+import { Loader2, UserPlus } from "@gorth/primitive/cores/lucide"
 
-import { cn } from "@/lib/utils"
-import { auth, registrationAuth } from "@/lib/auth"
-import { Button } from "@gorth/primitive/default/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@gorth/primitive/default/card"
-import { Input } from "@gorth/primitive/default/input"
-import { Label } from "@gorth/primitive/default/label"
+import { AuthFieldError } from "@/components/auth/auth-field-error"
+import { PasswordInput } from "@/components/auth/password-input"
 import { SocialForm } from "@/components/auth/social-form"
+import { auth, registrationAuth } from "@/lib/auth"
+import { signUpSchema } from "@/schemas/auth"
 import {
   buildLegacyDisabledPath,
   hasOAuthQuery,
   isExternalRedirect,
 } from "@/lib/utils/temp"
+import { Button } from "@gorth/primitive/custom/button"
+import { Input } from "@gorth/primitive/default/input"
+import { Label } from "@gorth/primitive/default/label"
 
 async function continueOAuthRegistration(oauthQuery: string) {
   const result = await auth.oauth2.continue({
     created: true,
     oauth_query: oauthQuery,
   })
-
-  if (result.error) {
+  if (result.error)
     throw new Error(result.error.message ?? "Unable to continue OAuth sign up")
-  }
-
-  const data = result.data as {
-    redirect?: boolean
-    redirect_uri?: string
-    url?: string
-  } | null
+  const data = result.data as { redirect_uri?: string; url?: string } | null
   const redirectUrl = data?.url ?? data?.redirect_uri
-
-  if (!redirectUrl) {
+  if (!redirectUrl)
     throw new Error("OAuth sign up did not return a redirect URL")
-  }
-
   window.location.assign(redirectUrl)
 }
 
-function sessionWasCreatedForOAuthSignUp(
+function isOAuthSession(
   createdAt: Date | string | undefined,
   issuedAt: string | null
 ) {
   if (!createdAt || !issuedAt) return false
-
-  const sessionCreatedAt = new Date(createdAt).getTime()
-  const oauthIssuedAt = Number(issuedAt)
-
+  const created = new Date(createdAt).getTime()
+  const issued = Number(issuedAt)
   return (
-    Number.isFinite(sessionCreatedAt) &&
-    Number.isFinite(oauthIssuedAt) &&
-    sessionCreatedAt >= oauthIssuedAt
+    Number.isFinite(created) && Number.isFinite(issued) && created >= issued
   )
 }
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [repeatPassword, setRepeatPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+export function SignUpForm() {
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get("redirect") as string
-  const { data: session } = auth.useSession()
+  const redirect = searchParams.get("redirect") ?? "/"
   const oauthQueryString = searchParams.toString()
   const oauthQuery = new URLSearchParams(oauthQueryString)
   const isOAuthFlow = hasOAuthQuery(oauthQuery)
-  const canResumeOAuthSignUp = sessionWasCreatedForOAuthSignUp(
+  const { data: session } = auth.useSession()
+  const canResume = isOAuthSession(
     session?.session.createdAt,
     oauthQuery.get("ba_iat")
   )
   const continueInFlight = useRef(false)
 
-  const continueOAuthSignUp = useCallback(async () => {
+  const continueOAuth = useCallback(async () => {
     if (!isOAuthFlow || continueInFlight.current) return
-
     continueInFlight.current = true
-
     try {
       await continueOAuthRegistration(oauthQueryString)
     } catch (cause) {
@@ -100,156 +72,139 @@ export function SignUpForm({
   }, [isOAuthFlow, oauthQueryString])
 
   useEffect(() => {
-    if (!session?.user) {
-      return
-    }
-
+    if (!session?.user) return
     if (isOAuthFlow) {
-      if (canResumeOAuthSignUp) {
-        void continueOAuthSignUp().catch((cause: unknown) => {
-          setIsLoading(false)
-          setError(
+      if (canResume)
+        void continueOAuth().catch((cause) =>
+          setSubmitError(
             cause instanceof Error
               ? cause.message
               : "Unable to continue OAuth sign up"
           )
-        })
-      }
+        )
       return
     }
-
-    if (isExternalRedirect(next)) {
+    if (isExternalRedirect(redirect))
       window.location.replace(buildLegacyDisabledPath())
-      return
-    }
+    else router.replace("/")
+  }, [canResume, continueOAuth, isOAuthFlow, redirect, router, session?.user])
 
-    router.replace("/")
-  }, [
-    canResumeOAuthSignUp,
-    continueOAuthSignUp,
-    isOAuthFlow,
-    next,
-    router,
-    session?.user,
-  ])
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    if (password !== repeatPassword) {
-      setError("Passwords do not match")
-      setIsLoading(false)
-      return
-    }
-
-    try {
-      const { error } = await registrationAuth.signUp.email({
-        name: name.trim() || email.split("@")[0],
-        email,
-        password,
-        ...(isOAuthFlow
-          ? {}
-          : {
-              callbackURL: isExternalRedirect(next)
-                ? buildLegacyDisabledPath()
-                : "/",
-            }),
-      })
-      if (error) {
-        setError(error.message ?? "Sign up failed")
-        return
+  const form = useForm({
+    defaultValues: { email: "", password: "", confirmPassword: "" },
+    validators: { onChange: signUpSchema },
+    onSubmit: async ({ value }) => {
+      setSubmitError(null)
+      try {
+        const result = await registrationAuth.signUp.email({
+          name: value.email.split("@")[0],
+          email: value.email,
+          password: value.password,
+          ...(isOAuthFlow
+            ? {}
+            : {
+                callbackURL: isExternalRedirect(redirect)
+                  ? buildLegacyDisabledPath()
+                  : "/",
+              }),
+        })
+        if (result.error) {
+          setSubmitError(result.error.message ?? "Sign up failed")
+          return
+        }
+        if (isOAuthFlow) await continueOAuth()
+        else
+          router.push(
+            isExternalRedirect(redirect)
+              ? buildLegacyDisabledPath()
+              : "/auth/success"
+          )
+      } catch (cause) {
+        setSubmitError(
+          cause instanceof Error ? cause.message : "An error occurred"
+        )
       }
-
-      if (isOAuthFlow) {
-        await continueOAuthSignUp()
-        return
-      }
-
-      router.push(
-        isExternalRedirect(next) ? buildLegacyDisabledPath() : "/auth/success"
-      )
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+  })
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating an account..." : "Sign up"}
-              </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link
-                href={`/auth/sign-in?redirect=${encodeURIComponent(next)}`}
-                className="underline underline-offset-4"
-              >
-                Sign in
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <form
+      className="grid gap-3"
+      onSubmit={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        void form.handleSubmit()
+      }}
+    >
+      <form.Field name="email">
+        {(field) => (
+          <div className="grid gap-2">
+            <Label htmlFor={field.name}>Email</Label>
+            <Input
+              id={field.name}
+              type="email"
+              autoComplete="email"
+              placeholder="name@example.com"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+            />
+            <AuthFieldError errors={field.state.meta.errors} />
+          </div>
+        )}
+      </form.Field>
+      <form.Field name="password">
+        {(field) => (
+          <div className="grid gap-2">
+            <Label htmlFor={field.name}>Password</Label>
+            <PasswordInput
+              id={field.name}
+              autoComplete="new-password"
+              placeholder="********"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+            />
+            <AuthFieldError errors={field.state.meta.errors} />
+          </div>
+        )}
+      </form.Field>
+      <form.Field name="confirmPassword">
+        {(field) => (
+          <div className="grid gap-2">
+            <Label htmlFor={field.name}>Confirm Password</Label>
+            <PasswordInput
+              id={field.name}
+              autoComplete="new-password"
+              placeholder="********"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+            />
+            <AuthFieldError errors={field.state.meta.errors} />
+          </div>
+        )}
+      </form.Field>
+      {submitError && <p className="text-destructive text-sm">{submitError}</p>}
+      <form.Subscribe
+        selector={(state) =>
+          [
+            signUpSchema.safeParse(state.values).success,
+            state.isSubmitting,
+          ] as const
+        }
+      >
+        {([isValid, isSubmitting]) => (
+          <Button
+            className="mt-2 w-full"
+            type="submit"
+            disabled={!isValid || isSubmitting}
+          >
+            {isSubmitting ? <Loader2 className="animate-spin" /> : <UserPlus />}{" "}
+            Create Account
+          </Button>
+        )}
+      </form.Subscribe>
       <SocialForm />
-    </div>
+    </form>
   )
 }

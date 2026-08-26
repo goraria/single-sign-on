@@ -1,24 +1,20 @@
-'use client'
+"use client"
 
-import React, { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import React, { useState } from "react"
+import { useSearchParams } from "next/navigation"
 
-import { cn } from '@/lib/utils'
-import { auth } from '@/lib/auth'
-import { Button } from '@gorth/primitive/default/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@gorth/primitive/default/card'
+import { cn } from "@gorth/primitive/lib/utils"
+import { auth } from "@/lib/auth"
+import { Button } from "@gorth/primitive/default/button"
 
-export function SocialForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+export function SocialForm({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const searchParams = useSearchParams()
-  const next = searchParams.get('redirect') ?? '/'
+  const next = searchParams.get("redirect") ?? "/"
   const oauthQuery = new URLSearchParams(searchParams.toString())
   const isOAuthFlow = Boolean(
     oauthQuery.get("client_id") &&
@@ -45,47 +41,71 @@ export function SocialForm({ className, ...props }: React.ComponentPropsWithoutR
     return `${window.location.origin}/auth/oauth?next=${encodeURIComponent(next)}`
   }
 
-  const handleSocialLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSocialLogin = async () => {
     setIsLoading(true)
     setError(null)
 
     try {
       const { error } = await auth.signIn.social({
-        provider: 'google',
+        provider: "google",
         callbackURL: getCallbackURL(),
         errorCallbackURL: `${window.location.origin}/auth/error`,
       })
 
       if (error) {
-        setError(error.message ?? 'Google sign in failed')
+        setError(error.message ?? "Google sign in failed")
         setIsLoading(false)
         return
       }
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      setError(error instanceof Error ? error.message : "An error occurred")
       setIsLoading(false)
     }
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Continue with Google</CardTitle>
-          <CardDescription>Use your Google account to continue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSocialLogin}>
-            <div className="flex flex-col gap-6">
-              {error && <p className="text-sm text-destructive-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Redirecting...' : 'Sign in with Google'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <div className={cn("grid gap-3", className)} {...props}>
+      <div className="relative my-2">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card text-muted-foreground px-2">
+            Or continue with
+          </span>
+        </div>
+      </div>
+      {error && <p className="text-destructive text-sm">{error}</p>}
+      <div className="flex flex-col gap-6">
+        <Button
+          type="button"
+          className="w-full"
+          disabled={isLoading}
+          onClick={() => void handleSocialLogin()}
+        >
+          {isLoading ? "Redirecting..." : "Google"}
+        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            type="button"
+          // disabled={loadingProvider !== null}
+          // onClick={() => void signIn("github")}
+          >
+            {/* <IconGithub /> */}
+            GitHub
+          </Button>
+          <Button
+            variant="outline"
+            type="button"
+          // disabled={loadingProvider !== null}
+          // onClick={() => void signIn("facebook")}
+          >
+            {/* <IconFacebook /> */}
+            Facebook
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

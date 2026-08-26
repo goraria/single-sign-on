@@ -5,9 +5,6 @@ import {
   LifeBuoy,
   Send,
   Music,
-  Rocket,
-  Newspaper,
-  SportShoe,
   LogIn,
   KeySquare,
   BadgeCheck,
@@ -15,31 +12,66 @@ import {
   LayoutDashboard,
   ListTodo,
   AppWindow,
-} from "@gorth/primitive/cores/lucide";
+} from "@gorth/primitive/cores/lucide"
+
+export const appGlobal = {
+  name: "Gorth",
+  // name: "Waddles",
+  description: "Design by Japtor Gorthenburg",
+  title: "Comprehensive Restaurant Management System",
+  address: "208 Main St, Hai Bà Trưng, Hà Nội, Việt Nam",
+  times: "06:00 - 22:00 (Hằng ngày)",
+  opening: "06:00 - 22:00 (GMT+7) (Thứ Hai - Chủ Nhật)",
+  phone: "(+84) 123 456 789",
+  hotline: "(028) 1876 5439",
+  email: "info@gorth.org",
+  website: "www.gorth.org",
+  currency: "VND",
+  locales: "vi-VN",
+  zalo: "https://zalo.me/0123456789",
+  facebook: "https://www.facebook.com/gorth.org",
+  instagram: "https://www.instagram.com/gorth.org",
+  twitter: "https://www.twitter.com/gorth.org",
+  youtube: "https://www.youtube.com/gorth.org",
+  github: "https://www.github.com/gorth.org",
+  twitch: "https://www.twitch.tv/gorth.org",
+  copyright: "Copyright © &copy; 2020 - " + new Date().getFullYear() + " Gorth Inc. All rights reserved.",
+  pro: "Bản quyền © Gorth Inc. 2020 - " + (new Date().getFullYear()) + " Bảo lưu mọi quyền.",
+  copyleft: "Copyright © 2020 - " + new Date().getFullYear() + " Waddles Corp. Powered by Gorth Inc.",
+  noob: "Bản quyền © Waddles Corp. 2020 - " + new Date().getFullYear() + " Cung cấp bởi Gorth Inc.",
+}
+
+export const visitor = {
+  name: "Visitor",
+  email: "visitor@gorth.org",
+  avatar: "",
+}
 
 export const administratorSidebar = {
-  user: {
-    name: "japtor",
-    email: "japtor@gorth.org",
-    avatar: "/avatar/waddles.jpeg",
-  },
+  user: visitor,
   route: "/",
   role: "main",
   brand: {
-    name: "Gortheia",
+    name: "Gorth",
     logo: "/favicon.ico",
   },
   navMain: [
     {
       title: "Administrator",
-      url: "/administrator",
+      url: "/admin",
       icon: BadgeCheck,
       isActive: true,
     },
     {
-      title: "SSO Applications",
-      url: "/administrator",
+      title: "Users",
+      url: "/admin/users",
       icon: Users,
+      isActive: true,
+    },
+    {
+      title: "Applications",
+      url: "/admin/apps",
+      icon: AppWindow,
       isActive: true,
     },
     {
@@ -77,14 +109,10 @@ export const administratorSidebar = {
       icon: KeySquare,
     },
   ],
-};
+}
 
 export const settingSidebar = {
-  user: {
-    name: "japtor",
-    email: "japtor@gorth.org",
-    avatar: "/avatar/waddles.jpeg",
-  },
+  user: visitor,
   route: "/",
   role: "main",
   brand: {
@@ -171,7 +199,7 @@ export const settingSidebar = {
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: Bolt,
     },
   ],
@@ -187,20 +215,27 @@ export const settingSidebar = {
       icon: KeySquare,
     },
   ],
-};
+}
 
 export const mainDashbar = {
+  user: visitor,
   navMain: [
     {
       title: "Administrator",
-      url: "/administrator",
+      url: "/admin",
       icon: BadgeCheck,
       isActive: true,
     },
     {
-      title: "SSO Applications",
-      url: "/administrator",
+      title: "Users",
+      url: "/admin/users",
       icon: Users,
+      isActive: true,
+    },
+    {
+      title: "Applications",
+      url: "/admin/apps",
+      icon: AppWindow,
       isActive: true,
     },
     {
@@ -221,25 +256,25 @@ export const mainDashbar = {
   navDropdown: [
     {
       title: "Account",
-      url: "#",
+      url: "/admin",
       icon: BadgeCheck,
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: Bolt,
     },
   ],
   navSignal: [
     {
       title: "Sign In",
-      url: "/sign-in",
+      url: "/auth/sign-in",
       icon: LogIn,
     },
     {
       title: "Sign Up",
-      url: "/sign-up",
+      url: "/auth/sign-up",
       icon: KeySquare,
     },
   ],
-};
+}

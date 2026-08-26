@@ -1,26 +1,85 @@
-import { NextResponse, type NextRequest } from 'next/server'
-import { getSessionCookie } from "@gorth/structure/cores/auth/cookies/index"
+import { NextResponse, type NextRequest } from "next/server"
 
-const protectedRoutes = ['x'] // ['/dashboard', '/account']
-const publicRoutes = ['/sign-in', '/sign-up', '/', '/dashboard', '/account']
+const sessionCookieName = "gorth.session_token"
+const sharedRoutes = new Set(["/", "/demo"])
+const authenticationPageRoutes = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/forgot-password",
+  "/auth/otp",
+  "/auth/change-password",
+]
+const ssoServerUrl =
+  process.env.SSO_SERVER_INTERNAL_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://127.0.0.1:8080"
+
+interface SessionResponse {
+  user?: {
+    role?: string
+  }
+}
+
+function isSharedRoute(path: string) {
+  return (
+    sharedRoutes.has(path) ||
+    path.startsWith("/auth/") ||
+    path.startsWith("/.well-known/")
+  )
+}
+
+function isAuthenticationPageRoute(path: string) {
+  return authenticationPageRoutes.some(
+    (route) => path === route || path.startsWith(`${route}/`)
+  )
+}
+
+function isAdministratorRoute(path: string) {
+  return path === "/admin" || path.startsWith("/admin/")
+}
+
+async function getSession(request: NextRequest) {
+  try {
+    const response = await fetch(new URL("/auth/get-session", ssoServerUrl), {
+      headers: {
+        cookie: request.headers.get("cookie") ?? "",
+      },
+      cache: "no-store",
+    })
+
+    if (!response.ok) return null
+    return (await response.json()) as SessionResponse | null
+  } catch {
+    return null
+  }
+}
 
 export async function proxy(request: NextRequest) {
-  // if (!sessionCookie) {
-  //   return NextResponse.redirect(new URL("/", request.url))
-  // }
-
   const path = request.nextUrl.pathname
-  const isProtected = protectedRoutes.some(r => path.startsWith(r))
-  const isPublic = publicRoutes.includes(path)
+  const hasSession = Boolean(request.cookies.get(sessionCookieName)?.value)
 
-  const sessionCookie = getSessionCookie(request)
-
-  if (isProtected && !sessionCookie) {
-    return NextResponse.redirect(new URL('/auth/sign-in', request.url))
+  if (!hasSession && !isSharedRoute(path)) {
+    return NextResponse.redirect(new URL("/", request.url))
   }
 
-  if (isPublic && sessionCookie && path !== '/') {
-    return NextResponse.redirect(new URL('/setting', request.url))
+  if (hasSession && isAdministratorRoute(path)) {
+    const session = await getSession(request)
+
+    if (!session?.user) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+
+    if (session.user.role !== "administrator") {
+      return NextResponse.redirect(new URL("/settings", request.url))
+    }
+  }
+
+  if (hasSession && isAuthenticationPageRoute(path)) {
+    const session = await getSession(request)
+
+    if (session?.user) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
   }
 
   return NextResponse.next()
@@ -28,34 +87,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
-    // "/setting/:path*", "/account/:path*",
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }
-
-// import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-
-// const isPublicRoute = createRouteMatcher(['/sign-in(.*)'])
-
-// export default clerkMiddleware(async (auth, req) => {
-//   if (!isPublicRoute(req)) {
-//     await auth.protect()
-//   }
-// })
-
-// export const config = {
-//   matcher: [
-//     // Skip Next.js internals and all static files, unless found in search params
-//     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-//     // Always run for API routes
-//     '/(api|trpc)(.*)',
-//   ],
-// }

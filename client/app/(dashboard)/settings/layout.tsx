@@ -1,13 +1,14 @@
-"use client";
+"use client"
 
-import type { ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { SidebarInset, SidebarProvider } from "@gorth/primitive/custom/sidebar";
-import { AppSidebar } from "@gorth/primitive/dashboard/app-sidebar";
-import { SettingsShell } from "@/components/settings/settings-shell";
-import { Dashbar } from "@/layouts/dashbar";
-import { auth } from "@/lib/auth";
-import { settingSidebar } from "@/lib/utils/constant";
+import type { ReactNode } from "react"
+import { usePathname } from "next/navigation"
+import { SidebarInset, SidebarProvider } from "@gorth/primitive/custom/sidebar"
+import { AppSidebar } from "@gorth/primitive/dashboard/app-sidebar"
+import { SettingsShell } from "@/components/preference/settings-shell"
+import { Dashbar } from "@/layouts/dashbar"
+import { settingSidebar } from "@/lib/utils/constant"
+import { useAuth } from "@/hooks/use-auth"
+import { toNavigationUser } from "@/lib/utils/formatter"
 
 const preferencePaths = new Set([
   "/settings/profile",
@@ -15,37 +16,24 @@ const preferencePaths = new Set([
   "/settings/appearance",
   "/settings/notifications",
   "/settings/display",
-]);
+])
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const authControls = {
-    loading: false,
-    authenticated: true,
-    login: (returnTo?: string) => {
-      router.push(
-        `/auth/sign-in${returnTo ? `?redirect=${encodeURIComponent(returnTo)}` : ""}`,
-      );
-    },
-    register: (returnTo?: string) => {
-      router.push(
-        `/auth/sign-up${returnTo ? `?redirect=${encodeURIComponent(returnTo)}` : ""}`,
-      );
-    },
-    logout: async (returnTo?: string) => {
-      await auth.signOut();
-      router.push(returnTo ?? "/auth/sign-in");
-    },
-  };
+  const pathname = usePathname()
+  const auth = useAuth()
+  const user = auth.account ? toNavigationUser(auth.account) : null
+  const sidebar = {
+    ...settingSidebar,
+    user: user ?? settingSidebar.user,
+  }
 
   return (
     <SidebarProvider>
-      <AppSidebar data={settingSidebar} auth={authControls} />
+      <AppSidebar data={sidebar} auth={auth} />
       <SidebarInset>
-        <Dashbar />
+        <Dashbar auth={auth} />
         <main className="flex flex-1 flex-col">
-          <div className="container mx-auto flex flex-1 flex-col p-6">
+          <div className="container mx-auto p-6">
             {preferencePaths.has(pathname) ? (
               <SettingsShell>{children}</SettingsShell>
             ) : (
@@ -55,5 +43,5 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
         </main>
       </SidebarInset>
     </SidebarProvider>
-  );
+  )
 }

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 
 import { database } from "@/database"
-import { oauthClients, type OAuthClientRow } from "@/database/schema"
+import { oauthClients, type OAuthClient } from "@/database/schema"
 import { isExpressProduction } from "@/lib/utils/environment"
 
 export interface SsoApplicationContext {
@@ -18,12 +18,12 @@ interface DevelopmentOAuthClient {
   redirectUris: string[]
   postLogoutRedirectUris: string[]
   scopes: string[]
-  grantTypes: NonNullable<OAuthClientRow["grantTypes"]>
-  responseTypes: NonNullable<OAuthClientRow["responseTypes"]>
+  grantTypes: NonNullable<OAuthClient["grantTypes"]>
+  responseTypes: NonNullable<OAuthClient["responseTypes"]>
   public: boolean
   requirePKCE: boolean
   tokenEndpointAuthMethod: NonNullable<
-    OAuthClientRow["tokenEndpointAuthMethod"]
+    OAuthClient["tokenEndpointAuthMethod"]
   >
   skipConsent: boolean
   disabled: boolean
@@ -47,6 +47,54 @@ const developmentOAuthClients: DevelopmentOAuthClient[] = [
       "http://localhost:8082/auth/exchange",
     ],
     postLogoutRedirectUris: ["http://localhost:3030", "http://localhost:8082"],
+    scopes: defaultScopes,
+    grantTypes: defaultGrantTypes,
+    responseTypes: defaultResponseTypes,
+    public: true,
+    requirePKCE: true,
+    tokenEndpointAuthMethod: "none",
+    skipConsent: true,
+    disabled: false,
+  },
+  {
+    clientId: "gorth-video-streaming-platform",
+    name: "Gorth Video Streaming Platform",
+    description: "Default video streaming platform client for local SSO.",
+    uri: "http://localhost:3031",
+    redirectUris: ["http://localhost:3031/auth/exchange"],
+    postLogoutRedirectUris: ["http://localhost:3031"],
+    scopes: defaultScopes,
+    grantTypes: defaultGrantTypes,
+    responseTypes: defaultResponseTypes,
+    public: true,
+    requirePKCE: true,
+    tokenEndpointAuthMethod: "none",
+    skipConsent: true,
+    disabled: false,
+  },
+  {
+    clientId: "gorth-content-reader-platform",
+    name: "Gorth Content Reader Platform",
+    description: "Default content reader platform client for local SSO.",
+    uri: "http://localhost:3032",
+    redirectUris: ["http://localhost:3032/auth/exchange"],
+    postLogoutRedirectUris: ["http://localhost:3032"],
+    scopes: defaultScopes,
+    grantTypes: defaultGrantTypes,
+    responseTypes: defaultResponseTypes,
+    public: true,
+    requirePKCE: true,
+    tokenEndpointAuthMethod: "none",
+    skipConsent: true,
+    disabled: false,
+  },
+  {
+    clientId: "gorth-social-networking-portal",
+    name: "Gorth Social Networking Portal",
+    description: "Default social networking portal client for local SSO.",
+    uri: "http://localhost:3033",
+    redirectUris: ["http://localhost:3033/auth/exchange"],
+    postLogoutRedirectUris: ["http://localhost:3033"],
     scopes: defaultScopes,
     grantTypes: defaultGrantTypes,
     responseTypes: defaultResponseTypes,

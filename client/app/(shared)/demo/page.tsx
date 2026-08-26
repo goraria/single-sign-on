@@ -1,18 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@gorth/primitive/default/button"
 import { Badge } from "@gorth/primitive/default/badge"
 import { Input } from "@gorth/primitive/default/input"
 import { cn } from "@/lib/utils"
 import { toast } from "@gorth/primitive/cores/sonner"
-import { health, param, query } from "@/services/api"
+import { useHealthQuery, useParamQuery, useSearchQuery } from "@/services/demo"
 import { auth } from "@/lib/auth"
 import { IconDefault } from "@/assets/icon/brand/icon-default"
 
-export default function Page() {
+export default function DemoPage() {
   const router = useRouter()
   const { data: session } = auth.useSession()
 
@@ -22,10 +21,9 @@ export default function Page() {
     refetch: refetchHealth,
     isLoading: isHealthLoading,
     isFetching: isHealthFetching,
-    isUninitialized: isHealthUninitialized,
     isSuccess: isHealthSuccess,
     isError: isHealthError,
-  } = health()
+  } = useHealthQuery(undefined)
 
   const [paramId, setParamId] = useState("123")
   const [queryText, setQueryText] = useState("abc")
@@ -36,7 +34,7 @@ export default function Page() {
     refetch: refetchParam,
     isLoading: isParamLoading,
     isFetching: isParamFetching,
-  } = param({ id: paramId })
+  } = useParamQuery({ id: paramId })
 
   const {
     data: queryData = null,
@@ -44,7 +42,7 @@ export default function Page() {
     refetch: refetchQuery,
     isLoading: isQueryLoading,
     isFetching: isQueryFetching,
-  } = query({ q: queryText })
+  } = useSearchQuery({ q: queryText })
 
   const fetchParam = async () => {
     await refetchParam()
@@ -70,14 +68,21 @@ export default function Page() {
             <h1 className="font-medium">Project ready!</h1>
             <p>You may now add components and start building.</p>
             <p>We&apos;ve already added the button component for you.</p>
-            <Button variant="default" className="" onClick={() => {
-              router.push("/administrator")
-            }}>
+            <Button
+              variant="default"
+              className=""
+              onClick={() => {
+                router.push("/admin")
+              }}
+            >
               Button X
             </Button>
-            <Button variant="default" onClick={() => {
-              router.push("/settings")
-            }}>
+            <Button
+              variant="default"
+              onClick={() => {
+                router.push("/settings")
+              }}
+            >
               Dashboard
             </Button>
             {session?.user ? (
@@ -86,10 +91,16 @@ export default function Page() {
               </Button>
             ) : (
               <>
-                <Button variant="default" onClick={() => router.push("/auth/sign-in")}>
+                <Button
+                  variant="default"
+                  onClick={() => router.push("/auth/sign-in")}
+                >
                   Sign in
                 </Button>
-                <Button variant="default" onClick={() => router.push("/auth/sign-up")}>
+                <Button
+                  variant="default"
+                  onClick={() => router.push("/auth/sign-up")}
+                >
                   Sign up
                 </Button>
               </>
@@ -108,14 +119,13 @@ export default function Page() {
                 <Button
                   variant="outline"
                   onClick={() => void refetchHealth()}
-                  disabled={isHealthFetching || isHealthUninitialized}
+                  disabled={isHealthFetching}
                 >
                   refetch
                 </Button>
               </div>
 
-              <div className="font-mono text-xs leading-6 text-muted-foreground">
-                <div>isUninitialized: {String(isHealthUninitialized)}</div>
+              <div className="text-muted-foreground font-mono text-xs leading-6">
                 <div>isLoading: {String(isHealthLoading)}</div>
                 <div>isFetching: {String(isHealthFetching)}</div>
                 <div>isSuccess: {String(isHealthSuccess)}</div>
@@ -140,11 +150,15 @@ export default function Page() {
                 <Button variant="default" onClick={fetchParam}>
                   /param/:id
                 </Button>
-                <div className="font-mono text-xs leading-6 text-muted-foreground">
+                <div className="text-muted-foreground font-mono text-xs leading-6">
                   <div>isLoading: {String(isParamLoading)}</div>
                   <div>isFetching: {String(isParamFetching)}</div>
-                  <div>data: {paramData ? JSON.stringify(paramData) : "null"}</div>
-                  <div>error: {paramError ? JSON.stringify(paramError) : "null"}</div>
+                  <div>
+                    data: {paramData ? JSON.stringify(paramData) : "null"}
+                  </div>
+                  <div>
+                    error: {paramError ? JSON.stringify(paramError) : "null"}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col gap-2">
@@ -156,22 +170,26 @@ export default function Page() {
                 <Button variant="default" onClick={fetchQuery}>
                   /query?q=abc
                 </Button>
-                <div className="font-mono text-xs leading-6 text-muted-foreground">
+                <div className="text-muted-foreground font-mono text-xs leading-6">
                   <div>isLoading: {String(isQueryLoading)}</div>
                   <div>isFetching: {String(isQueryFetching)}</div>
-                  <div>data: {queryData ? JSON.stringify(queryData) : "null"}</div>
-                  <div>error: {queryError ? JSON.stringify(queryError) : "null"}</div>
+                  <div>
+                    data: {queryData ? JSON.stringify(queryData) : "null"}
+                  </div>
+                  <div>
+                    error: {queryError ? JSON.stringify(queryError) : "null"}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="font-mono text-xs text-muted-foreground">
+          <div className="text-muted-foreground font-mono text-xs">
             (Press <kbd>d</kbd> to toggle dark mode)
           </div>
         </div>
       </div>
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-transparent dark:bg-black sm:items-start">
+        <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between bg-transparent px-16 py-32 sm:items-start dark:bg-black">
           {/*<Image*/}
           {/*  className="dark:invert"*/}
           {/*  src="/next.svg"*/}
@@ -180,18 +198,17 @@ export default function Page() {
           {/*  height={20}*/}
           {/*  priority*/}
           {/*/>*/}
-          <IconDefault/>
+          <IconDefault />
 
-          <Button variant="default" size="lg" onClick={() => {
-          }}>
+          <Button variant="default" size="lg" onClick={() => {}}>
             Hello world Japtor
           </Button>
-          <Badge variant="default">
-            Hello world Japtor
-          </Badge>
-          <div className={cn("w-9 h-9 bg-professional-main", "rounded-full")}></div>
+          <Badge variant="default">Hello world Japtor</Badge>
+          <div
+            className={cn("bg-professional-main h-9 w-9", "rounded-full")}
+          ></div>
           <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-            <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+            <h1 className="max-w-xs text-3xl leading-10 font-semibold tracking-tight text-black dark:text-zinc-50">
               To get started, edit the page.tsx file.
             </h1>
             {/*<p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">*/}

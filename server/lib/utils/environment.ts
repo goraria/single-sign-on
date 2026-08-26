@@ -20,8 +20,9 @@ export const expressApiBaseUrl = process.env.EXPRESS_API_BASE_URL
 export const expressAuthUrl = process.env.EXPRESS_AUTH_URL
 export const allowedRedirectOrigins =
   process.env.EXPRESS_ALLOWED_REDIRECT_ORIGINS
-export const betterAuthUrl = process.env.BETTER_AUTH_API_KEY
-export const betterAuthSecret = process.env.BETTER_AUTH_URL
+export const betterAuthUrl = process.env.BETTER_AUTH_URL
+export const betterAuthSecret =
+  process.env.BETTER_AUTH_SECRET ?? process.env.BETTER_AUTH_API_KEY
 export const ssoServerUrl = process.env.EXPRESS_SSO_SERVER_URL
 export const ssoInternalSecret = process.env.EXPRESS_SSO_INTERNAL_SECRET
 export const ssoClientInternalSecret =

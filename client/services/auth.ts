@@ -1,17 +1,21 @@
 "use server"
 
-import { auth } from "@/lib/auth"; //import the auth client
-
 import { headers } from "next/headers"
-// import { auth } from "@/lib/auth" // Auth từ Express server
+
+const ssoServerUrl =
+  process.env.SSO_SERVER_INTERNAL_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://127.0.0.1:8080"
 
 export async function getSession() {
-  const response = await fetch("http://localhost:8080/auth/get-session", {
+  const response = await fetch(new URL("/auth/get-session", ssoServerUrl), {
     headers: {
       cookie: (await headers()).get("cookie") || "",
     },
+    cache: "no-store",
   })
 
+  if (!response.ok) return null
   return response.json()
 }
 
