@@ -67,7 +67,12 @@ export const auth = betterAuth({
   disabledPaths: ["/token"],
   trustedOrigins,
   plugins: [
-    jwt(),
+    jwt({
+      // Session reads do not need a freshly signed JWT response header.
+      // OAuth endpoints still use the JWT/JWKS plugin normally, while
+      // /get-session remains independent from legacy encrypted JWKS rows.
+      disableSettingJwtHeader: true,
+    }),
     oauthProvider({
       loginPage: "/auth/sign-in",
       consentPage: "/auth/consent",
@@ -127,8 +132,8 @@ export const auth = betterAuth({
       // A partitioned cookie created while SSO is top-level is not available
       // when another Vercel app calls SSO cross-site. SameSite=None + Secure
       // already provides the credentialed CORS behavior used by this system.
-      partitioned: isExpressProduction,
-      // path: "/",
+      partitioned: false,
+      path: "/",
     },
 
     cookiePrefix: "gorth",

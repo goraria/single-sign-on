@@ -1,12 +1,13 @@
 import { createAuthClient } from "@gorth/structure/cores/auth/client/index"
 import { oauthProviderClient } from "@gorth/structure/cores/auth/client/oap"
 import { ssoClient } from "@gorth/structure/cores/auth/client/sso"
-import { apiBaseUrl } from "@/lib/utils/environment"
 
 function getAuthClientOptions() {
   return {
     basePath: "/auth",
-    baseURL: apiBaseUrl || "http://localhost:8080",
+    // Keep browser auth requests on the SSO client origin. The Next route at
+    // /auth/[...all] forwards them to the server and returns Set-Cookie on the
+    // same origin used by layouts, proxy guards, and server components.
     fetchOptions: {
       credentials: "include" as const,
       headers: {
