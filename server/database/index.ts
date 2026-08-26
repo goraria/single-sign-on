@@ -9,7 +9,9 @@ const defaultPoolMax = 5
 const poolMax = Number.parseInt(pgPoolMax ?? `${defaultPoolMax}`, 10)
 
 if (!connectionString) {
-  throw new Error("EXPRESS_DATABASE_URL is required")
+  throw new Error(
+    "Database URL is required (DATABASE_URL, VITE_DATABASE_URL, or VITE_PUBLIC_DATABASE_URL)"
+  )
 }
 
 const globalForDatabase = globalThis as typeof globalThis & {
