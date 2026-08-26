@@ -1,11 +1,11 @@
 import { AuthProvider } from "@/lib/utils/interface"
 import {
-  expressClientUrl,
-  expressLocalUrl,
-  expressMobileUrl,
+  clientUrl,
+  localUrl,
+  mobileUrl,
   allowedRedirectOrigins,
   betterAuthUrl,
-  expressServerUrl,
+  serverUrl,
   googleClientId,
   googleClientSecret,
   isExpressProduction,
@@ -46,9 +46,9 @@ export function getCorsOrigins(): string[] {
     new Set(
       [
         "https://gorth-single-sign-on-client.vercel.app",
-        expressClientUrl,
-        expressMobileUrl,
-        expressLocalUrl,
+        clientUrl,
+        mobileUrl,
+        localUrl,
         allowedRedirectOrigins,
       ].flatMap(splitOrigins)
     )
@@ -97,10 +97,10 @@ export function getTrustedOrigins() {
   return Array.from(
     new Set([
       ...splitOrigins(betterAuthUrl),
-      ...splitOrigins(expressClientUrl),
-      ...splitOrigins(expressLocalUrl),
-      ...splitOrigins(expressMobileUrl),
-      ...splitOrigins(expressServerUrl),
+      ...splitOrigins(clientUrl),
+      ...splitOrigins(localUrl),
+      ...splitOrigins(mobileUrl),
+      ...splitOrigins(serverUrl),
       ...splitOrigins(allowedRedirectOrigins),
       ...getCorsOrigins(),
       ...(!isExpressProduction

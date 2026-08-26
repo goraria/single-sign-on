@@ -8,7 +8,7 @@ import {
   accessTokenSecret,
   betterAuthSecret,
   betterAuthUrl,
-  expressJwtSecret,
+  jwtSecret,
   refreshTokenExpiresIn,
   refreshTokenSecret,
   ssoClientInternalSecret,
@@ -206,11 +206,11 @@ function getTokenSecrets() {
   return {
     accessTokenSecret: getRequiredSecret(
       "EXPRESS_GORTH_ACCESS_TOKEN_SECRET",
-      accessTokenSecret ?? betterAuthSecret ?? expressJwtSecret
+      accessTokenSecret ?? betterAuthSecret ?? jwtSecret
     ),
     refreshTokenSecret: getRequiredSecret(
       "EXPRESS_GORTH_REFRESH_TOKEN_SECRET",
-      refreshTokenSecret ?? betterAuthSecret ?? expressJwtSecret
+      refreshTokenSecret ?? betterAuthSecret ?? jwtSecret
     ),
   }
 }

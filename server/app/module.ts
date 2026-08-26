@@ -4,8 +4,10 @@ import session from "express-session"
 import { createServer } from "http"
 import { Logger } from "@gorth/mechanism/lib/logger"
 import {
-  expressJwtSecret,
-  expressPort,
+  betterAuthSecret,
+  jwtSecret,
+  port,
+  expressSessionSecret,
   isExpressProduction,
 } from "@/lib/utils/environment"
 import { getCorsOrigins } from "@/lib/utils/formatter"
@@ -80,7 +82,7 @@ export default async function AppModule() {
   app.use(cookieParserConfig())
   app.use(
     session({
-      secret: expressJwtSecret!,
+      secret: expressSessionSecret ?? jwtSecret ?? betterAuthSecret!,
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -172,7 +174,7 @@ export async function AppModuleX(): Promise<{
   app.use(cookieParserConfig())
   app.use(
     session({
-      secret: expressJwtSecret!,
+      secret: expressSessionSecret ?? jwtSecret ?? betterAuthSecret!,
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -225,7 +227,7 @@ export async function AppModuleX(): Promise<{
   })
 
   const server = createServer(app)
-  const defaultPort = Number(expressPort || 8080)
+  const defaultPort = Number(port || 8080)
   // app.use(createRealtime);
 
   const start = async (port: number = defaultPort) => {

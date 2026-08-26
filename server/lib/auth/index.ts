@@ -62,12 +62,17 @@ const cachedTrustedClients = await getTrustedOAuthClientIds()
 
 export const auth = betterAuth({
   basePath: "/auth",
-  baseURL: betterAuthUrl!,
-  secret: betterAuthSecret!,
+  baseURL: betterAuthUrl,
+  secret: betterAuthSecret,
   disabledPaths: ["/token"],
   trustedOrigins,
   plugins: [
-    jwt(),
+    jwt({
+      // The SSO client reads the database-backed session directly. OAuth token
+      // endpoints still use this plugin and the shared JWKS, but get-session
+      // no longer performs an unnecessary signing operation on every request.
+      disableSettingJwtHeader: true,
+    }),
     oauthProvider({
       loginPage: "/auth/sign-in",
       consentPage: "/auth/consent",
@@ -124,7 +129,10 @@ export const auth = betterAuth({
       httpOnly: true,
       secure: isExpressProduction,
       sameSite: isExpressProduction ? "none" : "lax",
-      partitioned: isExpressProduction,
+      // A partitioned cookie created while SSO is top-level is not available
+      // when another Vercel app calls SSO cross-site. SameSite=None + Secure
+      // already provides the credentialed CORS behavior used by this system.
+      partitioned: false,
       path: "/",
     },
 

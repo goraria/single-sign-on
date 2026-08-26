@@ -113,6 +113,13 @@
       "when": 1787255141789,
       "tag": "0015_add_jwks_algorithm",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1787783000000,
+      "tag": "0016_rotate_jwks_after_secret_alignment",
+      "breakpoints": true
     }
   ]
 }
