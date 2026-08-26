@@ -1,6 +1,16 @@
 import express from "express"
+import { corsConfig } from "@/lib/mechanism/config"
+import { getCorsOrigins } from "@/lib/utils/formatter"
 
 const bootstrap = express()
+
+// CORS must run before the standalone health check and before the lazily
+// initialized application. Otherwise /health bypasses AppModule's CORS layer.
+bootstrap.use(
+  corsConfig({
+    origin: getCorsOrigins(),
+  })
+)
 
 let applicationPromise: ReturnType<
   typeof import("@/app/module")["default"]
