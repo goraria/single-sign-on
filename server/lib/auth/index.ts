@@ -137,25 +137,11 @@ export const auth = betterAuth({
     },
 
     cookiePrefix: "gorth",
-
-    cookies: {
-      session_token: {
-        attributes: {},
-      },
-
-      session_data: {
-        attributes: {},
-      },
-    },
   },
 
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    // password: {
-    //   hash: (password: string) => {},
-    //   verify: ({ password, hash }) => {}
-    // }
   },
   socialProviders: {
     google: {

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
+import { getSessionCookie } from "@gorth/structure/cores/auth/cookies/index"
 
-const sessionCookieName = "gorth.session_token"
 const sharedRoutes = new Set(["/", "/demo"])
 const authenticationPageRoutes = [
   "/auth/sign-in",
@@ -56,7 +56,9 @@ async function getSession(request: NextRequest) {
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
-  const hasSession = Boolean(request.cookies.get(sessionCookieName)?.value)
+  const hasSession = Boolean(
+    getSessionCookie(request, { cookiePrefix: "gorth" })
+  )
 
   if (!hasSession && !isSharedRoute(path)) {
     return NextResponse.redirect(new URL("/", request.url))

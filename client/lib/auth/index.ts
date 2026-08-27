@@ -2,7 +2,7 @@ import { createAuthClient } from "@gorth/structure/cores/auth/client/index"
 import { oauthProviderClient } from "@gorth/structure/cores/auth/client/oap"
 import { ssoClient } from "@gorth/structure/cores/auth/client/sso"
 
-function getOAuthProviderClient() {
+function getOAuthProviderClientWithoutEmailSignUpQuery() {
   const plugin = oauthProviderClient()
 
   for (const fetchPlugin of plugin.fetchPlugins) {
@@ -40,5 +40,5 @@ function getAuthClientOptions() {
 
 export const auth = createAuthClient({
   ...getAuthClientOptions(),
-  plugins: [getOAuthProviderClient(), ssoClient()],
+  plugins: [getOAuthProviderClientWithoutEmailSignUpQuery(), ssoClient()],
 })
