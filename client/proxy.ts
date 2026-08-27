@@ -23,6 +23,8 @@ interface SessionResponse {
 function isSharedRoute(path: string) {
   return (
     sharedRoutes.has(path) ||
+    path === "/api/auth" ||
+    path.startsWith("/api/auth/") ||
     path.startsWith("/auth/") ||
     path.startsWith("/.well-known/")
   )

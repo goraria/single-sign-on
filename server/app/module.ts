@@ -1,15 +1,8 @@
 import express from "express"
 import type { NextFunction, Request, Response } from "express"
-import session from "express-session"
 import { createServer } from "http"
 import { Logger } from "@gorth/mechanism/lib/logger"
-import {
-  betterAuthSecret,
-  jwtSecret,
-  port,
-  expressSessionSecret,
-  isExpressProduction,
-} from "@/lib/utils/environment"
+import { port, isExpressProduction } from "@/lib/utils/environment"
 import { getCorsOrigins } from "@/lib/utils/formatter"
 import jwksRoutes from "@/routes/jwks"
 import authRoutes from "@/routes/auth"
@@ -80,23 +73,6 @@ export default async function AppModule() {
 
   app.use(bodyParserConfig())
   app.use(cookieParserConfig())
-  app.use(
-    session({
-      secret: expressSessionSecret ?? jwtSecret ?? betterAuthSecret!,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: isExpressProduction,
-        httpOnly: true,
-        maxAge: 30 * 60 * 60 * 24,
-        sameSite: isExpressProduction ? "none" : "lax",
-        // expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // Thời gian hết hạn cookie
-        // secure: true, // Chỉ gửi cookie qua HTTPS
-        // sameSite: 'Lax' // Hoặc 'Strict'. 'None' cần secure: true
-        // path: '/', // Phạm vi cookie (thường là gốc)
-      },
-    })
-  )
 
   /* ROUTES */
   await ensureOAuthClients()
@@ -172,23 +148,6 @@ export async function AppModuleX(): Promise<{
 
   app.use(bodyParserConfig())
   app.use(cookieParserConfig())
-  app.use(
-    session({
-      secret: expressSessionSecret ?? jwtSecret ?? betterAuthSecret!,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: isExpressProduction,
-        httpOnly: true,
-        maxAge: 30 * 60 * 60 * 24,
-        sameSite: isExpressProduction ? "none" : "lax",
-        // expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // Thời gian hết hạn cookie
-        // secure: true, // Chỉ gửi cookie qua HTTPS
-        // sameSite: 'Lax' // Hoặc 'Strict'. 'None' cần secure: true
-        // path: '/', // Phạm vi cookie (thường là gốc)
-      },
-    })
-  )
 
   app.use(
     corsConfig({
