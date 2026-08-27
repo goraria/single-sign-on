@@ -8,7 +8,7 @@ import { Loader2, UserPlus } from "@gorth/primitive/cores/lucide"
 import { AuthFieldError } from "@/components/auth/auth-field-error"
 import { PasswordInput } from "@/components/auth/password-input"
 import { SocialForm } from "@/components/auth/social-form"
-import { auth, registrationAuth } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { signUpSchema } from "@/schemas/auth"
 import {
   buildLegacyDisabledPath,
@@ -95,7 +95,7 @@ export function SignUpForm() {
     onSubmit: async ({ value }) => {
       setSubmitError(null)
       try {
-        const result = await registrationAuth.signUp.email({
+        const result = await auth.signUp.email({
           name: value.email.split("@")[0],
           email: value.email,
           password: value.password,

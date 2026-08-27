@@ -23,6 +23,9 @@ function copyRequestHeaders(request: Request) {
 
   headers.delete("host")
   headers.delete("content-length")
+  headers.delete("accept-encoding")
+  headers.delete("connection")
+  headers.delete("transfer-encoding")
 
   if (process.env.SSO_CLIENT_INTERNAL_SECRET) {
     headers.set("x-sso-client-secret", process.env.SSO_CLIENT_INTERNAL_SECRET)
@@ -32,8 +35,18 @@ function copyRequestHeaders(request: Request) {
 }
 
 function appendResponseHeaders(target: Headers, source: Response) {
+  const omittedHeaders = new Set([
+    "connection",
+    "content-encoding",
+    "content-length",
+    "keep-alive",
+    "transfer-encoding",
+  ])
+
   source.headers.forEach((value, key) => {
-    if (key.toLowerCase() !== "set-cookie") {
+    const normalizedKey = key.toLowerCase()
+
+    if (normalizedKey !== "set-cookie" && !omittedHeaders.has(normalizedKey)) {
       target.set(key, value)
     }
   })
@@ -43,10 +56,38 @@ function appendResponseHeaders(target: Headers, source: Response) {
   }
   const cookies = headers.getSetCookie?.() ?? []
   const fallback = source.headers.get("set-cookie")
+  const responseCookies =
+    cookies.length > 0 ? cookies : fallback ? [fallback] : []
 
-  for (const cookie of cookies.length > 0 ? cookies : fallback ? [fallback] : []) {
-    target.append("set-cookie", cookie)
+  for (const cookie of responseCookies) {
+    let clientCookie = cookie
+      .replace(/;\s*Domain=[^;]*/gi, "")
+      .replace(/;\s*Partitioned/gi, "")
+
+    if (!/;\s*Path=/i.test(clientCookie)) clientCookie += "; Path=/"
+
+    target.append("set-cookie", clientCookie)
   }
+
+  target.set("x-gorth-auth-set-cookie-count", String(responseCookies.length))
+}
+
+function logProxyResponse(
+  request: Request,
+  path: string,
+  response: Response,
+) {
+  console.info("[auth-proxy]", {
+    method: request.method,
+    path: `/auth/${path}`,
+    status: response.status,
+    requestHasCookie: request.headers.has("cookie"),
+    setCookieCount: Number(
+      response.headers.get("x-gorth-auth-set-cookie-count") ?? 0,
+    ),
+  })
+
+  return response
 }
 
 function resolveRedirectUrl(request: Request, value: string | undefined) {
@@ -142,17 +183,21 @@ async function proxyAuth(
   const redirectResponse = await createRedirectResponse(request, response)
 
   if (redirectResponse) {
-    return redirectResponse
+    return logProxyResponse(request, path, redirectResponse)
   }
 
   const headers = new Headers()
   appendResponseHeaders(headers, response)
 
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  })
+  return logProxyResponse(
+    request,
+    path,
+    new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    }),
+  )
 }
 
 export const GET = proxyAuth
