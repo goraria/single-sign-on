@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "pnpm run build:server",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",

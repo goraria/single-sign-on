@@ -1,6 +1,4 @@
-import nodemailer, {
-  type Transporter,
-} from "@gorth/mechanism/cores/nodemailer"
+import nodemailer from "@gorth/mechanism/cores/nodemailer"
 
 import {
   emailFrom,
@@ -17,7 +15,9 @@ import {
 export type EmailOtpType =
   "email-verification" | "forget-password" | "sign-in" | "change-email"
 
-let transporter: Transporter | null = null
+type MailTransporter = ReturnType<typeof nodemailer.createTransport>
+
+let transporter: MailTransporter | null = null
 
 function isGmailTransport() {
   return (
