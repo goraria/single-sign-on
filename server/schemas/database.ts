@@ -1,6 +1,6 @@
 import z from "@/lib/structure/cores/zod"
 
-export const userRoleSchema = z.enum(["user", "moderator", "administrator"])
+export const userRoleSchema = z.enum(["user", "admin", "vice", "master"])
 
 export const oauthScopeSchema = z.enum([
   "openid",

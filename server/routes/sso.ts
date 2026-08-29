@@ -14,17 +14,11 @@ import {
   ssoClientInternalSecret,
 } from "@/lib/utils/environment"
 import { fromNodeHeaders } from "@/lib/structure/auth/server"
-
-interface BetterAuthUser {
-  id: string
-  email: string
-  name: string
-  image?: string | null
-  role?: string | null
-  emailVerified?: boolean
-  updatedAt?: Date | string | null
-  createdAt?: Date | string | null
-}
+import {
+  toSsoUser,
+  toSsoUserFromClaims,
+  type SsoUser,
+} from "@/services/user"
 
 interface SsoAppContext {
   id: string
@@ -52,21 +46,12 @@ interface GorthTokenPayload extends JwtPayloadLike {
   app?: string
   app_origin?: string
   role?: string
+  name?: string
+  preferred_username?: string | null
+  given_name?: string | null
+  family_name?: string | null
+  picture?: string | null
   typ?: "access" | "refresh"
-}
-
-type SsoUser = {
-  id: string
-  aud: string
-  email: string
-  email_confirmed_at: string | null
-  confirmed_at: string | null
-  phone: null
-  role: string
-  updated_at: string | null
-  created_at: string | null
-  app_metadata: Record<string, unknown>
-  user_metadata: Record<string, unknown>
 }
 
 function normalizeOrigin(value: string | undefined | null) {
@@ -81,62 +66,17 @@ function normalizeOrigin(value: string | undefined | null) {
   }
 }
 
-function toIsoString(value: Date | string | null | undefined) {
-  if (value instanceof Date) {
-    return value.toISOString()
-  }
-
-  return typeof value === "string" ? value : null
-}
-
-function toSsoUser(user: BetterAuthUser): SsoUser {
-  const updatedAt = toIsoString(user.updatedAt)
-  const createdAt = toIsoString(user.createdAt)
-  const emailVerifiedAt = user.emailVerified ? (updatedAt ?? createdAt) : null
-  const role = user.role ?? "user"
-
-  return {
-    id: user.id,
-    aud: "authenticated",
-    email: user.email,
-    email_confirmed_at: emailVerifiedAt,
-    confirmed_at: emailVerifiedAt,
-    phone: null,
-    role,
-    updated_at: updatedAt,
-    created_at: createdAt,
-    app_metadata: {
-      provider: "better-auth",
-      role,
-    },
-    user_metadata: {
-      name: user.name,
-      full_name: user.name,
-      avatar_url: user.image ?? null,
-      picture: user.image ?? null,
-    },
-  }
-}
-
 function toSsoUserFromToken(payload: GorthTokenPayload): SsoUser {
-  const role = payload.role ?? "user"
-
-  return {
+  return toSsoUserFromClaims({
     id: payload.sub,
-    aud: "authenticated",
     email: payload.email,
-    email_confirmed_at: null,
-    confirmed_at: null,
-    phone: null,
-    role,
-    updated_at: null,
-    created_at: null,
-    app_metadata: {
-      provider: "better-auth",
-      role,
-    },
-    user_metadata: {},
-  }
+    role: payload.role,
+    name: payload.name,
+    preferredUsername: payload.preferred_username,
+    givenName: payload.given_name,
+    familyName: payload.family_name,
+    picture: payload.picture,
+  })
 }
 
 function getRequiredSecret(name: string, value: string | undefined) {
@@ -265,6 +205,11 @@ function signTokenPair(
     sub: user.id,
     email: user.email,
     role: user.role,
+    name: user.user_metadata.name,
+    preferred_username: user.user_metadata.username,
+    given_name: user.user_metadata.first_name,
+    family_name: user.user_metadata.last_name,
+    picture: user.user_metadata.picture,
     sid: sessionId,
     app: appContext.id,
     app_origin: appContext.origin,

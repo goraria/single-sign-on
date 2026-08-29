@@ -1,59 +1,39 @@
 import Link from "next/link"
 import { Suspense } from "react"
+import type { Metadata } from "next"
 
-import { AuthLayout } from "@/components/auth/auth-layout"
+import { LegalNotice } from "@/components/auth/legal-notice"
+import { AuthLayout } from "@/layouts/auth"
 import { LoginForm } from "@/components/auth/sign-in-form"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@gorth/primitive/default/card"
+import { LoadingScreen } from "@/features/shared/loading"
+
+export const metadata: Metadata = {
+  title: "Sign In",
+}
 
 export default function Page() {
   return (
-    <AuthLayout>
-      <Suspense>
-        <Card className="max-w-sm gap-4">
-          <CardHeader>
-            <CardTitle className="text-lg tracking-tight">Sign in</CardTitle>
-            <CardDescription>
-              Enter your email and password below to log into your account.
+    <Suspense fallback={<LoadingScreen />}>
+      <AuthLayout
+        title="Sign in"
+        description="Sign in to your Gorth account."
+        footer={
+          <div className="flex flex-col gap-3">
+            <p>
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/sign-up"
-                className="hover:text-primary underline underline-offset-4"
+                className="text-foreground font-medium underline-offset-4 hover:underline"
               >
-                Sign Up
+                Sign up
               </Link>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <LoginForm />
-          </CardContent>
-          <CardFooter>
-            <p className="text-muted-foreground px-8 text-center text-sm">
-              By clicking sign in, you agree to our{" "}
-              <Link
-                href="#"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="#"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                Privacy Policy
-              </Link>
-              .
             </p>
-          </CardFooter>
-        </Card>
-      </Suspense>
-    </AuthLayout>
+            <LegalNotice action="signing in" />
+          </div>
+        }
+      >
+        <LoginForm />
+      </AuthLayout>
+    </Suspense>
   )
 }

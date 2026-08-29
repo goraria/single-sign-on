@@ -1,30 +1,30 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@gorth/primitive/default/card'
+import Link from "next/link"
+import type { Metadata } from "next"
+
+import { AuthLayout } from "@/layouts/auth"
+
+export const metadata: Metadata = {
+  title: "Account Created",
+}
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
-              <CardDescription>Check your email to confirm</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                You&apos;ve successfully signed up. Please check your email to confirm your account
-                before signing in.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+    <AuthLayout
+      title="Check your email"
+      description="Your account has been created successfully."
+      footer={
+        <Link
+          href="/auth/sign-in"
+          className="text-foreground font-medium underline-offset-4 hover:underline"
+        >
+          Back to sign in
+        </Link>
+      }
+    >
+      <p className="text-muted-foreground text-center text-sm leading-6">
+        We sent a confirmation message to your email address. Confirm your
+        account before signing in.
+      </p>
+    </AuthLayout>
   )
 }

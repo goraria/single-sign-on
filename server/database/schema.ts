@@ -15,8 +15,9 @@ import {
 
 export const userRole = pgEnum("user_role_enum", [
   "user",
-  "moderator",
-  "administrator",
+  "admin",
+  "vice",
+  "master",
 ])
 
 export const oauthGrantType = pgEnum("oauth_grant_type_enum", [
@@ -25,9 +26,7 @@ export const oauthGrantType = pgEnum("oauth_grant_type_enum", [
   "client_credentials",
 ])
 
-export const oauthResponseType = pgEnum("oauth_response_type_enum", [
-  "code",
-])
+export const oauthResponseType = pgEnum("oauth_response_type_enum", ["code"])
 
 export const oauthTokenEndpointAuthMethod = pgEnum(
   "oauth_token_endpoint_auth_method_enum",
@@ -44,17 +43,26 @@ export const oauthApplicationType = pgEnum("oauth_application_type_enum", [
   "native",
 ])
 
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull().default(""),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  image: text("image"),
-  role: userRole("role").notNull().default("user"),
-  bannedUntil: timestamp("banned_until", { mode: "date" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull().default(""),
+    username: varchar("username", { length: 64 }),
+    firstName: varchar("first_name", { length: 128 }),
+    lastName: varchar("last_name", { length: 128 }),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    emailVerified: boolean("email_verified").notNull().default(false),
+    image: text("image"),
+    role: userRole("role").notNull().default("user"),
+    bannedUntil: timestamp("banned_until", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("users_username_key").on(sql`lower(${table.username})`),
+  ]
+)
 
 export const sessions = pgTable(
   "sessions",
@@ -398,12 +406,9 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
   }),
 }))
 
-export const oauthClientsRelations = relations(
-  oauthClients,
-  ({ many }) => ({
-    resources: many(oauthClientResources),
-  })
-)
+export const oauthClientsRelations = relations(oauthClients, ({ many }) => ({
+  resources: many(oauthClientResources),
+}))
 
 export const oauthResourcesRelations = relations(
   oauthResources,

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { getNoStoreHeaders } from "@/lib/utils/formatter"
 
 export const runtime = "nodejs"
 
@@ -10,12 +11,11 @@ function legacyDisabledResponse() {
     },
     {
       status: 410,
-      headers: {
-        "Cache-Control": "no-store",
-        "Deprecation": "true",
-        "Link": '</auth/oauth2/authorize>; rel="successor-version"',
-      },
-    },
+      headers: getNoStoreHeaders({
+        Deprecation: "true",
+        Link: '</auth/oauth2/authorize>; rel="successor-version"',
+      }),
+    }
   )
 }
 

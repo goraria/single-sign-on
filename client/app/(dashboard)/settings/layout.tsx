@@ -8,23 +8,22 @@ import { SettingsShell } from "@/components/preference/settings-shell"
 import { Dashbar } from "@/layouts/dashbar"
 import { settingSidebar } from "@/lib/utils/constant"
 import { useAuth } from "@/hooks/use-auth"
-import { toNavigationUser } from "@/lib/utils/formatter"
+import { useUser } from "@/hooks/use-user"
 
 const preferencePaths = new Set([
   "/settings/profile",
   "/settings/account",
   "/settings/appearance",
-  "/settings/notifications",
   "/settings/display",
 ])
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const auth = useAuth()
-  const user = auth.account ? toNavigationUser(auth.account) : null
+  const user = useUser()
   const sidebar = {
     ...settingSidebar,
-    user: user ?? settingSidebar.user,
+    user,
   }
 
   return (

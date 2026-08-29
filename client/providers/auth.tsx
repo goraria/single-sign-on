@@ -8,14 +8,7 @@ import {
   type AuthUser,
 } from "@/hooks/use-auth"
 import { auth } from "@/lib/auth"
-
-function resolveInternalPath(value: unknown, fallback: string) {
-  return typeof value === "string" &&
-    value.startsWith("/") &&
-    !value.startsWith("//")
-    ? value
-    : fallback
-}
+import { resolveInternalPath } from "@/lib/utils/formatter"
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const router = useRouter()

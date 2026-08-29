@@ -1,4 +1,5 @@
 import Link from "next/link"
+import type { Metadata } from "next"
 import {
   ArrowRight,
   Check,
@@ -36,6 +37,10 @@ const features = [
 
 const apps = ["Notion", "Linear", "Slack", "GitHub", "Figma"]
 
+export const metadata: Metadata = {
+  title: "Home",
+}
+
 export default function Page() {
   return (
     <div className="w-full overflow-hidden">
@@ -46,10 +51,7 @@ export default function Page() {
             "radial-gradient(ellipse 36% 36% at center, color-mix(in oklab, var(--primary) 55%, transparent) 0%, color-mix(in oklab, var(--primary) 22%, transparent) 45%, transparent 100%)",
         }}
       >
-        <section
-          id="top"
-          className="relative px-6 py-12"
-        >
+        <section id="top" className="relative px-6 py-12">
           <div className="relative grid items-center gap-14 lg:grid-cols-[1.05fr_.95fr] lg:gap-16 xl:gap-20">
             <div>
               <Badge
@@ -71,7 +73,7 @@ export default function Page() {
                 <Button
                   nativeButton={false}
                   render={<Link href="/auth/sign-up" />}
-                // size="lg"
+                  // size="lg"
                 >
                   Get started free
                   <ArrowRight data-icon="inline-end" />
@@ -80,7 +82,7 @@ export default function Page() {
                   nativeButton={false}
                   render={<Link href="#how-it-works" />}
                   variant="outline"
-                // size="lg"
+                  // size="lg"
                 >
                   See how it works
                   <ChevronRight data-icon="inline-end" />
@@ -117,7 +119,7 @@ export default function Page() {
                   </p>
                   <Card
                     size="sm"
-                    className="h-14 order-border mt-4 flex-row items-center gap-2.5 rounded-lg border p-2.5 ring-0"
+                    className="order-border mt-4 h-14 flex-row items-center gap-2.5 rounded-lg border p-2.5 ring-0"
                   >
                     <Avatar>
                       <AvatarFallback className="bg-muted-foreground text-primary-foreground">
@@ -222,7 +224,7 @@ export default function Page() {
             nativeButton={false}
             render={<Link href="mailto:hello@gorth.app" />}
             variant="secondary"
-          // size="lg"
+            // size="lg"
           >
             Talk to Gorth
             <ArrowRight data-icon="inline-end" />

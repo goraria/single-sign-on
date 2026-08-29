@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, type ComponentPropsWithoutRef } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { KeyRound, Loader2 } from "@gorth/primitive/cores/lucide"
+import { KeyRound } from "@gorth/primitive/cores/lucide"
 import { Button } from "@gorth/primitive/custom/button"
 import {
   Card,
@@ -13,115 +11,158 @@ import {
   CardTitle,
 } from "@gorth/primitive/default/card"
 import { Label } from "@gorth/primitive/default/label"
-import { cn } from "@gorth/primitive/lib/utils"
+import { toast } from "@gorth/primitive/default/toast"
+import { Spinner } from "@gorth/primitive/pattern/spinner"
 
-import { AuthFieldError } from "@/components/auth/auth-field-error"
 import { PasswordInput } from "@/components/auth/password-input"
 import { auth } from "@/lib/auth"
-import { changePasswordSchema } from "@/schemas/auth"
+import { accountPasswordSchema } from "@/schemas/auth"
 
-export function UpdatePasswordForm({
-  className,
-  ...props
-}: ComponentPropsWithoutRef<"div">) {
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirect = searchParams.get("redirect")
-  const token = searchParams.get("token")
+export function ChangePasswordForm() {
   const form = useForm({
-    defaultValues: { password: "" },
-    validators: { onChange: changePasswordSchema },
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+    validators: { onChange: accountPasswordSchema },
     onSubmit: async ({ value }) => {
-      setSubmitError(null)
-
-      if (!token) {
-        setSubmitError("Missing password reset token")
-        return
-      }
-
       try {
-        const result = await auth.resetPassword({
-          newPassword: value.password,
-          token,
+        const result = await auth.changePassword({
+          currentPassword: value.currentPassword,
+          newPassword: value.newPassword,
+          revokeOtherSessions: true,
         })
 
         if (result.error) {
-          setSubmitError(result.error.message ?? "Could not reset password")
+          toast.add({
+            type: "error",
+            description: result.error.message ?? "Unable to change password.",
+            priority: "high",
+          })
           return
         }
 
-        router.push(redirect ?? "/auth/sign-in")
+        form.reset()
+        toast.add({
+          type: "success",
+          description: "Your password has been changed.",
+        })
       } catch (cause) {
-        setSubmitError(
-          cause instanceof Error ? cause.message : "An error occurred",
-        )
+        toast.add({
+          type: "error",
+          description:
+            cause instanceof Error
+              ? cause.message
+              : "Unable to change password.",
+          priority: "high",
+        })
       }
     },
   })
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>Please enter your new password below.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="grid gap-6"
-            onSubmit={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              void form.handleSubmit()
-            }}
-          >
-            <form.Field name="password">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor={field.name}>New password</Label>
-                  <PasswordInput
-                    id={field.name}
-                    name={field.name}
-                    autoComplete="new-password"
-                    placeholder="New password"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  />
-                  <AuthFieldError errors={field.state.meta.errors} />
-                </div>
-              )}
-            </form.Field>
-            {submitError ? (
-              <p className="text-destructive text-sm">{submitError}</p>
-            ) : null}
+    <Card>
+      <CardHeader>
+        <CardTitle>Change password</CardTitle>
+        <CardDescription>
+          Use a strong password that you do not reuse elsewhere.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            void form.handleSubmit()
+          }}
+        >
+          <form.Field name="currentPassword">
+            {(field) => (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor={field.name}>Current password</Label>
+                <PasswordInput
+                  autoComplete="current-password"
+                  id={field.name}
+                  name={field.name}
+                  placeholder="Enter your current password"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="newPassword">
+            {(field) => (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor={field.name}>New password</Label>
+                <PasswordInput
+                  autoComplete="new-password"
+                  id={field.name}
+                  name={field.name}
+                  placeholder="At least 8 characters"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="confirmPassword">
+            {(field) => (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor={field.name}>Confirm new password</Label>
+                <PasswordInput
+                  autoComplete="new-password"
+                  id={field.name}
+                  name={field.name}
+                  placeholder="Enter your new password again"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <div className="flex flex-wrap gap-2">
             <form.Subscribe
               selector={(state) =>
                 [
-                  changePasswordSchema.safeParse(state.values).success,
+                  state.isDirty,
                   state.isSubmitting,
+                  accountPasswordSchema.safeParse(state.values).success,
                 ] as const
               }
             >
-              {([isValid, isSubmitting]) => (
+              {([isDirty, isSubmitting, isValid]) => (
                 <Button
+                  disabled={!isDirty || isSubmitting || !isValid}
                   type="submit"
-                  className="w-full"
-                  disabled={!isValid || isSubmitting}
                 >
                   {isSubmitting ? (
-                    <Loader2 className="size-4 animate-spin" />
+                    <Spinner variant="infinite" size={16} />
                   ) : (
                     <KeyRound className="size-4" />
                   )}
-                  Save new password
+                  {isSubmitting ? "Saving..." : "Save changes"}
                 </Button>
               )}
             </form.Subscribe>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            <Button
+              onClick={() => form.reset()}
+              type="button"
+              variant="secondary"
+            >
+              Reset
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

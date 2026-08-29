@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
+
+import { AuthLayout } from "@/layouts/auth"
 import { auth } from "@/lib/auth"
+import { parseSpaceSeparatedValues } from "@/lib/utils/formatter"
+import { Button } from "@gorth/primitive/custom/button"
 
 export default function ConsentPage() {
   const searchParams = useSearchParams()
@@ -11,10 +15,7 @@ export default function ConsentPage() {
 
   const clientId = searchParams.get("client_id") ?? "application"
   const scope = searchParams.get("scope") ?? "openid profile email"
-  const scopes = useMemo(
-    () => scope.split(" ").map((item) => item.trim()).filter(Boolean),
-    [scope],
-  )
+  const scopes = useMemo(() => parseSpaceSeparatedValues(scope), [scope])
 
   async function submitConsent(accept: boolean) {
     setLoading(true)
@@ -38,56 +39,53 @@ export default function ConsentPage() {
         window.location.assign(data.redirect_uri)
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to complete OAuth consent")
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Unable to complete OAuth consent"
+      )
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
-      <section className="space-y-6 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-neutral-950">Authorize access</h1>
-          <p className="text-sm text-neutral-600">
-            {clientId} is requesting access to your Gorth account.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-neutral-900">Requested scopes</p>
-          <ul className="space-y-1 text-sm text-neutral-700">
+    <AuthLayout
+      title="Authorize access"
+      description={`${clientId} is requesting access to your Gorth account.`}
+    >
+      <div className="grid gap-6">
+        <div className="grid gap-2">
+          <p className="text-sm font-medium">Requested permissions</p>
+          <ul className="grid gap-2 text-sm">
             {scopes.map((item) => (
-              <li key={item} className="rounded-md bg-neutral-100 px-3 py-2">
+              <li key={item} className="bg-muted rounded-md px-3 py-2">
                 {item}
               </li>
             ))}
           </ul>
         </div>
 
-        {error ? (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-        ) : null}
+        {error ? <p className="text-destructive text-sm">{error}</p> : null}
 
-        <div className="flex gap-3">
-          <button
+        <div className="grid grid-cols-2 gap-3">
+          <Button
             type="button"
             disabled={loading}
             onClick={() => submitConsent(false)}
-            className="flex-1 rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+            variant="outline"
           >
             Deny
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={loading}
             onClick={() => submitConsent(true)}
-            className="flex-1 rounded-md bg-neutral-950 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Allow
-          </button>
+            {loading ? "Authorizing..." : "Allow"}
+          </Button>
         </div>
-      </section>
-    </main>
+      </div>
+    </AuthLayout>
   )
 }

@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react"
 import {
-  Bell,
   Monitor,
   Palette,
   UserCog,
@@ -15,7 +14,6 @@ const preferenceItems: PreferenceNavItem[] = [
   { title: "Profile", href: "/settings/profile", icon: UserCog },
   { title: "Account", href: "/settings/account", icon: Wrench },
   { title: "Appearance", href: "/settings/appearance", icon: Palette },
-  { title: "Notifications", href: "/settings/notifications", icon: Bell },
   { title: "Display", href: "/settings/display", icon: Monitor },
 ]
 
@@ -31,8 +29,8 @@ export function SettingsShell({ children }: { children: ReactNode }) {
         </p>
       </div>
       <Separator className="my-4 flex-none lg:my-6" />
-      <div className="flex min-h-0 flex-1 flex-col space-y-2 overflow-hidden lg:flex-row lg:space-y-0 lg:space-x-12">
-        <aside className="top-0 flex-none lg:sticky lg:w-1/5">
+      <div className="flex min-h-0 flex-1 flex-col space-y-2 overflow-hidden md:flex-row md:space-y-0 md:space-x-12">
+        <aside className="top-0 flex-none md:sticky md:w-1/5">
           <SidebarNav items={preferenceItems} />
         </aside>
         <div className="flex min-h-0 w-full min-w-0 flex-1 overflow-hidden p-1">

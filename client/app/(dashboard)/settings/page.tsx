@@ -1,13 +1,18 @@
-import { DashboardOverview } from "@/components/dashboard-overview";
-import { getSession } from "@/services/auth";
-import { redirect } from "next/navigation";
+import { DashboardOverview } from "@/features/dashboard"
+import { getSession } from "@/services/auth"
+import { redirect } from "next/navigation"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Settings",
+}
 
 export default async function DashboardPage() {
-  const session = await getSession();
+  const session = await getSession()
 
   if (!session?.user) {
-    redirect("/");
+    redirect("/")
   }
 
-  return <DashboardOverview />;
+  return <DashboardOverview />
 }

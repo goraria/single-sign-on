@@ -3,10 +3,11 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { ArrowRight, Loader2 } from "@gorth/primitive/cores/lucide"
+import { Loader2, Send } from "@gorth/primitive/cores/lucide"
 
-import { AuthFieldError } from "@/components/auth/auth-field-error"
+import { FieldError } from "@/components/auth/field-error"
 import { auth } from "@/lib/auth"
+import { setPendingVerification } from "@/lib/auth/pending-verification"
 import { forgotPasswordSchema } from "@/schemas/auth"
 import { Button } from "@gorth/primitive/custom/button"
 import { Input } from "@gorth/primitive/default/input"
@@ -21,15 +22,23 @@ export function ForgotPasswordForm() {
     onSubmit: async ({ value }) => {
       setSubmitError(null)
       try {
-        const result = await auth.requestPasswordReset({
-          email: value.email,
-          redirectTo: `${window.location.origin}/auth/change-password`,
+        const email = value.email.trim()
+        const result = await auth.emailOtp.requestPasswordReset({
+          email,
         })
         if (result.error) {
-          setSubmitError(result.error.message ?? "Could not send reset email")
+          setSubmitError(result.error.message ?? "Could not send reset code")
           return
         }
-        router.push(`/auth/otp?email=${encodeURIComponent(value.email)}`)
+
+        setPendingVerification({
+          email,
+          type: "forget-password",
+          source: "forgot-password",
+          redirect: "/auth/reset-password",
+          oauthQuery: "",
+        })
+        router.replace("/auth/verify")
       } catch (cause) {
         setSubmitError(
           cause instanceof Error ? cause.message : "An error occurred"
@@ -40,7 +49,7 @@ export function ForgotPasswordForm() {
 
   return (
     <form
-      className="grid gap-2"
+      className="grid gap-4"
       onSubmit={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -61,7 +70,7 @@ export function ForgotPasswordForm() {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <AuthFieldError errors={field.state.meta.errors} />
+            <FieldError errors={field.state.meta.errors} />
           </div>
         )}
       </form.Field>
@@ -76,16 +85,12 @@ export function ForgotPasswordForm() {
       >
         {([isValid, isSubmitting]) => (
           <Button
-            className="mt-2 w-full"
+            className="mt-1 w-full"
             type="submit"
             disabled={!isValid || isSubmitting}
           >
-            Continue{" "}
-            {isSubmitting ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <ArrowRight />
-            )}
+            {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
+            {isSubmitting ? "Sending..." : "Send verification code"}
           </Button>
         )}
       </form.Subscribe>

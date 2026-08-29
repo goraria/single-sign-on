@@ -214,14 +214,10 @@ export enum UserActivityStatus {
 }
 
 export enum UserRole {
-  customer = "customer",
-  staff = "staff",
-  manager = "manager",
+  user = "user",
   admin = "admin",
+  vice = "vice",
   master = "master",
-  delivery = "delivery",
-  supplier = "supplier",
-  warehouse = "warehouse",
 }
 
 export enum OrganizationRole {

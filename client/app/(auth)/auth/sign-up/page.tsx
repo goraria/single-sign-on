@@ -1,61 +1,39 @@
 import Link from "next/link"
 import { Suspense } from "react"
+import type { Metadata } from "next"
 
-import { AuthLayout } from "@/components/auth/auth-layout"
+import { LegalNotice } from "@/components/auth/legal-notice"
+import { AuthLayout } from "@/layouts/auth"
 import { SignUpForm } from "@/components/auth/sign-up-form"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@gorth/primitive/default/card"
+import { LoadingScreen } from "@/features/shared/loading"
+
+export const metadata: Metadata = {
+  title: "Sign Up",
+}
 
 export default function Page() {
   return (
-    <AuthLayout>
-      <Suspense>
-        <Card className="max-w-sm gap-4">
-          <CardHeader>
-            <CardTitle className="text-lg tracking-tight">
-              Create an account
-            </CardTitle>
-            <CardDescription>
-              Enter your email and password to create an account. Already have
-              one?{" "}
+    <Suspense fallback={<LoadingScreen />}>
+      <AuthLayout
+        title="Create an account"
+        description="Create your Gorth account with your email address."
+        footer={
+          <div className="flex flex-col gap-3">
+            <p>
+              Already have an account?{" "}
               <Link
                 href="/auth/sign-in"
-                className="hover:text-primary underline underline-offset-4"
+                className="text-foreground font-medium underline-offset-4 hover:underline"
               >
-                Sign In
+                Sign in
               </Link>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SignUpForm />
-          </CardContent>
-          <CardFooter>
-            <p className="text-muted-foreground px-8 text-center text-sm">
-              By creating an account, you agree to our{" "}
-              <Link
-                href="#"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="#"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                Privacy Policy
-              </Link>
-              .
             </p>
-          </CardFooter>
-        </Card>
-      </Suspense>
-    </AuthLayout>
+            <LegalNotice action="creating an account" />
+          </div>
+        }
+      >
+        <SignUpForm />
+      </AuthLayout>
+    </Suspense>
   )
 }

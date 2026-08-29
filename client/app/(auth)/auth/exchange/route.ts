@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server"
 import { consumeAuthorizationCode } from "@/lib/auth/code"
+import {
+  getNoStoreHeaders,
+  getStringProperty,
+  readJsonObject,
+} from "@/lib/utils/formatter"
 
 export const runtime = "nodejs"
 
-export async function POST(req: Request) {
-  let payload: unknown
-
-  try {
-    payload = await req.json()
-  } catch {
+export async function POST(request: Request) {
+  const payload = await readJsonObject(request)
+  if (!payload) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 })
   }
 
-  const code =
-    typeof (payload as { code?: unknown }).code === "string"
-      ? (payload as { code: string }).code.trim()
-      : ""
+  const code = getStringProperty(payload, "code", true)
 
   if (!code) {
     return NextResponse.json({ error: "missing_code" }, { status: 400 })
@@ -28,9 +27,6 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json(exchangePayload, {
-    headers: {
-      "Cache-Control": "no-store",
-      "Referrer-Policy": "no-referrer",
-    },
+    headers: getNoStoreHeaders(),
   })
 }

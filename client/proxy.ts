@@ -1,25 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getSessionCookie } from "@gorth/structure/cores/auth/cookies/index"
+import { isAdminRole, isRouteMatch } from "@/lib/utils/formatter"
+import { getRouteSession } from "@/services/route"
 
-const sharedRoutes = new Set(["/", "/demo"])
+const sharedRoutes = new Set(["/", "/demo", "/terms", "/privacy-policy"])
 const authenticationPageRoutes = [
   "/auth/sign-in",
   "/auth/sign-up",
   "/auth/forgot-password",
-  "/auth/otp",
+  "/auth/verify",
+  "/auth/reset-password",
   "/auth/change-password",
 ]
-const ssoServerUrl =
-  process.env.SSO_SERVER_INTERNAL_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://127.0.0.1:8080"
-
-interface SessionResponse {
-  user?: {
-    role?: string
-  }
-}
-
 function isSharedRoute(path: string) {
   return (
     sharedRoutes.has(path) ||
@@ -29,26 +21,16 @@ function isSharedRoute(path: string) {
 }
 
 function isAuthenticationPageRoute(path: string) {
-  return authenticationPageRoutes.some(
-    (route) => path === route || path.startsWith(`${route}/`)
-  )
+  return authenticationPageRoutes.some((route) => isRouteMatch(path, route))
 }
 
-function isAdministratorRoute(path: string) {
-  return path === "/admin" || path.startsWith("/admin/")
+function isAdminRoute(path: string) {
+  return isRouteMatch(path, "/admin")
 }
 
 async function getSession(request: NextRequest) {
   try {
-    const response = await fetch(new URL("/auth/get-session", ssoServerUrl), {
-      headers: {
-        cookie: request.headers.get("cookie") ?? "",
-      },
-      cache: "no-store",
-    })
-
-    if (!response.ok) return null
-    return (await response.json()) as SessionResponse | null
+    return await getRouteSession(request.headers.get("cookie") ?? "")
   } catch {
     return null
   }
@@ -64,14 +46,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url))
   }
 
-  if (hasSession && isAdministratorRoute(path)) {
+  if (hasSession && isAdminRoute(path)) {
     const session = await getSession(request)
 
     if (!session?.user) {
       return NextResponse.redirect(new URL("/", request.url))
     }
 
-    if (session.user.role !== "administrator") {
+    if (!isAdminRole(session.user.role)) {
       return NextResponse.redirect(new URL("/settings", request.url))
     }
   }

@@ -3,8 +3,8 @@
 import { useState, type ComponentProps } from "react"
 import { Eye, EyeOff } from "@gorth/primitive/cores/lucide"
 import { Button } from "@gorth/primitive/custom/button"
+import { ButtonGroup } from "@gorth/primitive/default/button-group"
 import { Input } from "@gorth/primitive/default/input"
-import { cn } from "@gorth/primitive/lib/utils"
 
 export interface PasswordInputProps extends ComponentProps<"input"> {
   showPasswordLabel?: string
@@ -20,23 +20,23 @@ export function PasswordInput({
   const [visible, setVisible] = useState(false)
 
   return (
-    <div className="relative">
+    <ButtonGroup className="w-full">
       <Input
         {...props}
         type={visible ? "text" : "password"}
-        className={cn("pr-10", className)}
+        className={className}
       />
       <Button
         type="button"
-        variant="ghost"
+        variant="outline"
         size="icon"
-        className="absolute inset-y-0 right-0"
+        tabIndex={-1}
         aria-label={visible ? hidePasswordLabel : showPasswordLabel}
         aria-pressed={visible}
         onClick={() => setVisible((current) => !current)}
       >
         {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
       </Button>
-    </div>
+    </ButtonGroup>
   )
 }

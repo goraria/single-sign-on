@@ -1,6 +1,16 @@
 import { defineConfig } from "vite"
 import { corsOptions } from "@gorth/mechanism/configs/cors"
 import { developmentServerPlugin } from "./configs/vite.ts"
+import { clientUrl } from "./lib/utils/environment.ts"
+
+const developmentOrigins = Array.from(
+  new Set(
+    ["http://localhost:3000", "http://127.0.0.1:3000", clientUrl]
+      .flatMap((value) => value?.split(",") ?? [])
+      .map((value) => value.trim().replace(/\/$/, ""))
+      .filter(Boolean)
+  )
+)
 
 export default defineConfig({
   appType: "custom",
@@ -10,7 +20,10 @@ export default defineConfig({
   server: {
     host: true,
     strictPort: true,
-    // cors: corsOptions,
+    cors: {
+      ...corsOptions,
+      origin: developmentOrigins,
+    },
   },
 
   resolve: {

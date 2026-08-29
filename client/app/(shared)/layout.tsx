@@ -6,12 +6,12 @@ import { Button } from "@gorth/primitive/custom/button"
 import { SidebarProvider } from "@gorth/primitive/custom/sidebar"
 import { Navbar } from "@gorth/primitive/layouts/navbar"
 import { useAuth } from "@/hooks/use-auth"
+import { useUser } from "@/hooks/use-user"
 import { mainDashbar } from "@/lib/utils/constant"
-import { toNavigationUser } from "@/lib/utils/formatter"
 
 export default function SharedLayout({ children }: { children: ReactNode }) {
   const auth = useAuth()
-  const user = auth.account ? toNavigationUser(auth.account) : mainDashbar.user
+  const user = useUser()
 
   return (
     <SidebarProvider>
@@ -92,10 +92,13 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
                   >
                     Contact
                   </a>
-                  <Link href="/#security" className="hover:text-foreground">
+                  <Link
+                    href="/privacy-policy"
+                    className="hover:text-foreground"
+                  >
                     Privacy
                   </Link>
-                  <Link href="/#security" className="hover:text-foreground">
+                  <Link href="/terms" className="hover:text-foreground">
                     Terms
                   </Link>
                 </div>

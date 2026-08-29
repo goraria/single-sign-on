@@ -1,26 +1,37 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@gorth/primitive/default/card'
+import Link from "next/link"
+import type { Metadata } from "next"
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ error: string }> }) {
+import { AuthLayout } from "@/layouts/auth"
+
+export const metadata: Metadata = {
+  title: "Authentication Error",
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ error: string }>
+}) {
   const params = await searchParams
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Sorry, something went wrong.</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {params?.error ? (
-                <p className="text-sm text-muted-foreground">Code error: {params.error}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground">An unspecified error occurred.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+    <AuthLayout
+      title="Something went wrong"
+      description="We could not complete your authentication request."
+      footer={
+        <Link
+          href="/auth/sign-in"
+          className="text-foreground font-medium underline-offset-4 hover:underline"
+        >
+          Try signing in again
+        </Link>
+      }
+    >
+      <p className="text-muted-foreground text-center text-sm">
+        {params?.error
+          ? `Error code: ${params.error}`
+          : "An unspecified authentication error occurred."}
+      </p>
+    </AuthLayout>
   )
 }

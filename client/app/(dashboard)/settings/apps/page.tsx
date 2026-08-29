@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation"
-import { Apps } from "@/components/preference/apps"
+import type { Metadata } from "next"
+import { Apps } from "@/features/settings/apps"
 import { getSession } from "@/services/auth"
+
+export const metadata: Metadata = {
+  title: "Applications",
+}
 
 export default async function AppsPage() {
   const session = await getSession()

@@ -8,12 +8,15 @@ dotenv.config({
 })
 
 function readEnvironment(...keys: string[]) {
+  const viteEnvironment = import.meta.env as
+    Record<string, string | undefined> | undefined
+
   for (const key of keys) {
     const runtimeValue = process.env[key]
 
     if (runtimeValue?.trim()) return runtimeValue.trim()
 
-    const viteValue = import.meta.env[key]
+    const viteValue = viteEnvironment?.[key]
 
     if (typeof viteValue === "string" && viteValue.trim()) {
       return viteValue.trim()
@@ -45,8 +48,9 @@ export const jwtSecret = readEnvironment("VITE_JWT_SECRET")
 export const expressSessionSecret = readEnvironment("VITE_SESSION_SECRET")
 export const apiBaseUrl = readEnvironment("VITE_API_BASE_URL")
 export const authUrl = readEnvironment("VITE_AUTH_URL")
-export const allowedRedirectOrigins =
-  readEnvironment("VITE_ALLOWED_REDIRECT_ORIGINS")
+export const allowedRedirectOrigins = readEnvironment(
+  "VITE_ALLOWED_REDIRECT_ORIGINS"
+)
 export const betterAuthUrl =
   normalizeUrl(
     readEnvironment(
@@ -59,11 +63,11 @@ export const betterAuthUrl =
   ) ?? vercelDeploymentUrl
 export const betterAuthSecret = readEnvironment(
   "BETTER_AUTH_SECRET",
-  "BETTER_AUTH_API_KEY",
   "VITE_BETTER_AUTH_SECRET",
+  "VITE_JWT_SECRET",
+  "BETTER_AUTH_API_KEY",
   "VITE_BETTER_AUTH_API_KEY",
-  "VITE_SESSION_SECRET",
-  "VITE_JWT_SECRET"
+  "VITE_SESSION_SECRET"
 )
 export const ssoServerUrl = readEnvironment("VITE_SSO_SERVER_URL")
 export const ssoInternalSecret = readEnvironment("VITE_SSO_INTERNAL_SECRET")
@@ -87,8 +91,9 @@ export const notificationCenterUrl = readEnvironment(
 )
 export const paymentGatewayUrl = readEnvironment("VITE_PAYMENT_GATEWAY_URL")
 export const searchEngineUrl = readEnvironment("VITE_SEARCH_ENGINE_URL")
-export const billingSubscriptionUrl =
-  readEnvironment("VITE_BILLING_SUBSCRIPTION_URL")
+export const billingSubscriptionUrl = readEnvironment(
+  "VITE_BILLING_SUBSCRIPTION_URL"
+)
 export const databaseUrl = readEnvironment(
   "DATABASE_URL",
   "BETTER_AUTH_DATABASE_URL",
@@ -121,6 +126,22 @@ export const googleClientSecret = readEnvironment(
   "GOOGLE_CLIENT_SECRET",
   "VITE_GOOGLE_CLIENT_SECRET"
 )
+export const smtpService = readEnvironment("VITE_SMTP_SERVICE", "SMTP_SERVICE")
+export const smtpHost = readEnvironment("VITE_SMTP_HOST", "SMTP_HOST")
+export const smtpPort = Number(
+  readEnvironment("VITE_SMTP_PORT", "SMTP_PORT") ?? "587"
+)
+export const smtpSecure =
+  readEnvironment("VITE_SMTP_SECURE", "SMTP_SECURE") === "true"
+export const smtpUser = readEnvironment("VITE_SMTP_USER", "SMTP_USER")
+export const smtpPassword = readEnvironment("VITE_SMTP_PASS", "SMTP_PASS")
+export const emailFrom = readEnvironment("VITE_EMAIL_FROM", "EMAIL_FROM")
+export const emailFromName =
+  readEnvironment("VITE_EMAIL_FROM_NAME", "EMAIL_FROM_NAME") ?? "Gorth"
+export const emailReplyTo = readEnvironment(
+  "VITE_EMAIL_REPLY_TO",
+  "EMAIL_REPLY_TO"
+)
 export const clientUrl = readEnvironment(
   "VITE_CLIENT_URL",
   "VITE_PUBLIC_CLIENT_URL"
@@ -128,6 +149,5 @@ export const clientUrl = readEnvironment(
 export const mobileUrl = readEnvironment("VITE_MOBILE_URL")
 export const localUrl = readEnvironment("VITE_LOCAL_URL")
 export const serverUrl =
-  normalizeUrl(
-    readEnvironment("VITE_SERVER_URL", "VITE_PUBLIC_SERVER_URL")
-  ) ?? vercelDeploymentUrl
+  normalizeUrl(readEnvironment("VITE_SERVER_URL", "VITE_PUBLIC_SERVER_URL")) ??
+  vercelDeploymentUrl

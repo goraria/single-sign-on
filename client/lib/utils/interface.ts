@@ -17,6 +17,9 @@ export interface SsoUser {
   created_at?: string | null
   app_metadata: Record<string, unknown>
   user_metadata: {
+    username?: string | null
+    first_name?: string | null
+    last_name?: string | null
     name?: string | null
     full_name?: string | null
     avatar_url?: string | null
@@ -48,6 +51,9 @@ export interface BetterAuthUser {
   id: string
   email: string
   name: string
+  username?: string | null
+  firstName?: string | null
+  lastName?: string | null
   image?: string | null
   emailVerified?: boolean
   updatedAt?: Date | string | null

@@ -12,6 +12,8 @@ import {
   LayoutDashboard,
   ListTodo,
   AppWindow,
+  Bell,
+  LockKeyhole,
 } from "@gorth/primitive/cores/lucide"
 
 export const appGlobal = {
@@ -35,19 +37,32 @@ export const appGlobal = {
   youtube: "https://www.youtube.com/gorth.org",
   github: "https://www.github.com/gorth.org",
   twitch: "https://www.twitch.tv/gorth.org",
-  copyright: "Copyright © &copy; 2020 - " + new Date().getFullYear() + " Gorth Inc. All rights reserved.",
-  pro: "Bản quyền © Gorth Inc. 2020 - " + (new Date().getFullYear()) + " Bảo lưu mọi quyền.",
-  copyleft: "Copyright © 2020 - " + new Date().getFullYear() + " Waddles Corp. Powered by Gorth Inc.",
-  noob: "Bản quyền © Waddles Corp. 2020 - " + new Date().getFullYear() + " Cung cấp bởi Gorth Inc.",
+  copyright:
+    "Copyright © &copy; 2020 - " +
+    new Date().getFullYear() +
+    " Gorth Inc. All rights reserved.",
+  pro:
+    "Bản quyền © Gorth Inc. 2020 - " +
+    new Date().getFullYear() +
+    " Bảo lưu mọi quyền.",
+  copyleft:
+    "Copyright © 2020 - " +
+    new Date().getFullYear() +
+    " Waddles Corp. Powered by Gorth Inc.",
+  noob:
+    "Bản quyền © Waddles Corp. 2020 - " +
+    new Date().getFullYear() +
+    " Cung cấp bởi Gorth Inc.",
 }
 
 export const visitor = {
   name: "Visitor",
   email: "visitor@gorth.org",
   avatar: "",
+  role: "user" as const,
 }
 
-export const administratorSidebar = {
+export const adminSidebar = {
   user: visitor,
   route: "/",
   role: "main",
@@ -57,7 +72,7 @@ export const administratorSidebar = {
   },
   navMain: [
     {
-      title: "Administrator",
+      title: "Admin",
       url: "/admin",
       icon: BadgeCheck,
       isActive: true,
@@ -74,14 +89,14 @@ export const administratorSidebar = {
       icon: AppWindow,
       isActive: true,
     },
+  ],
+  navSecondary: [
     {
       title: "Settings",
       url: "/settings",
       icon: Bolt,
       isActive: true,
     },
-  ],
-  navSecondary: [
     {
       title: "Home",
       url: "/",
@@ -155,33 +170,54 @@ export const settingSidebar = {
       icon: AppWindow,
       isActive: true,
     },
+    {
+      title: "Notification",
+      url: "/settings/notification",
+      icon: Bell,
+      isActive: true,
+    },
+    {
+      title: "Security",
+      url: "/settings/security",
+      icon: LockKeyhole,
+      isActive: true,
+    },
+    {
+      title: "Options",
+      url: "#",
+      icon: LockKeyhole,
+      isActive: true,
+      items: [
+        {
+          title: "Profile",
+          url: "/settings/profile",
+          icon: SquareUser,
+          // isActive: true,
+        },
+        {
+          title: "Account",
+          url: "/settings/account",
+          icon: LifeBuoy,
+        },
+        {
+          title: "Appearance",
+          url: "/settings/appearance",
+          icon: Send,
+        },
+        {
+          title: "Display",
+          url: "/settings/display",
+          icon: Send,
+        },
+      ],
+    },
   ],
   navSecondary: [
     {
-      title: "Profile",
-      url: "/settings/profile",
+      title: "Account",
+      url: "/settings",
       icon: SquareUser,
       // isActive: true,
-    },
-    {
-      title: "Account",
-      url: "/settings/account",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Appearance",
-      url: "/settings/appearance",
-      icon: Send,
-    },
-    {
-      title: "Notification",
-      url: "/settings/notifications",
-      icon: Send,
-    },
-    {
-      title: "Display",
-      url: "/settings/display",
-      icon: Send,
     },
   ],
   projects: [
@@ -221,7 +257,7 @@ export const mainDashbar = {
   user: visitor,
   navMain: [
     {
-      title: "Administrator",
+      title: "Admin",
       url: "/admin",
       icon: BadgeCheck,
       isActive: true,

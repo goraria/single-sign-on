@@ -1,11 +1,16 @@
-import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
+import {
+  isExpressProduction,
+  supabaseAnonKey,
+  supabaseServiceRoleKey,
+  supabaseUrl,
+} from "@/lib/utils/environment"
 import {
   createClient as createServerClient,
   type SupabaseClient,
   type User,
   type Session,
 } from "@/lib/structure/cores/supabase/index"
-import type { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from "express"
 
 // Extend Express Request type to include Supabase properties
 declare global {
@@ -13,7 +18,7 @@ declare global {
     interface Request {
       supabase?: SupabaseClient
       user?: User | null
-      authSession?: Session | null  // Use authSession to avoid conflict with express-session
+      authSession?: Session | null // Use authSession to avoid conflict with express-session
     }
   }
 }
@@ -21,7 +26,7 @@ declare global {
 /**
  * Express middleware to manage Supabase session with cookies
  * This replaces Next.js updateSession middleware
- * 
+ *
  * Usage:
  * import { supabaseSessionMiddleware } from '@/lib/supabase/middleware'
  * app.use(supabaseSessionMiddleware)
@@ -33,27 +38,25 @@ export async function supabaseSessionMiddleware(
 ) {
   try {
     // Always create a new client on each request (similar to Next.js approach)
-    const supabase = createServerClient(
-      supabaseUrl!,
-      supabaseAnonKey!,
-      {
-        auth: {
-          flowType: 'pkce',
-          autoRefreshToken: true,
-          persistSession: false,
-          detectSessionInUrl: false,
+    const supabase = createServerClient(supabaseUrl!, supabaseAnonKey!, {
+      auth: {
+        flowType: "pkce",
+        autoRefreshToken: true,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
+      global: {
+        headers: {
+          "User-Agent": "Express-Server",
         },
-        global: {
-          headers: {
-            'User-Agent': 'Express-Server',
-          },
-        },
-      }
-    )
+      },
+    })
 
     // Get cookies from request
-    const accessToken = req.cookies?.['access_token'] || req.cookies?.['sb-access-token']
-    const refreshToken = req.cookies?.['refresh_token'] || req.cookies?.['sb-refresh-token']
+    const accessToken =
+      req.cookies?.["access_token"] || req.cookies?.["sb-access-token"]
+    const refreshToken =
+      req.cookies?.["refresh_token"] || req.cookies?.["sb-refresh-token"]
 
     let user: User | null = null
     let session: Session | null = null
@@ -61,33 +64,34 @@ export async function supabaseSessionMiddleware(
     // Try to get user with access token
     if (accessToken) {
       const { data, error } = await supabase.auth.getUser(accessToken)
-      
+
       if (!error && data.user) {
         user = data.user
-        session = null  // We don't have full session info from getUser
+        session = null // We don't have full session info from getUser
       } else if (refreshToken) {
         // Access token expired, try to refresh
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession({
-          refresh_token: refreshToken
-        })
+        const { data: refreshData, error: refreshError } =
+          await supabase.auth.refreshSession({
+            refresh_token: refreshToken,
+          })
 
         if (!refreshError && refreshData.session) {
           user = refreshData.user
           session = refreshData.session
 
           // Update cookies with new tokens
-          res.cookie('access_token', refreshData.session.access_token, {
+          res.cookie("access_token", refreshData.session.access_token, {
             httpOnly: true,
             secure: isExpressProduction,
-            sameSite: isExpressProduction ? 'none' : 'lax',
+            sameSite: isExpressProduction ? "none" : "lax",
             maxAge: 55 * 60 * 1000, // 55 minutes
           })
 
           if (refreshData.session.refresh_token) {
-            res.cookie('refresh_token', refreshData.session.refresh_token, {
+            res.cookie("refresh_token", refreshData.session.refresh_token, {
               httpOnly: true,
               secure: isExpressProduction,
-              sameSite: isExpressProduction ? 'none' : 'lax',
+              sameSite: isExpressProduction ? "none" : "lax",
               maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             })
           }
@@ -102,7 +106,7 @@ export async function supabaseSessionMiddleware(
 
     next()
   } catch (error) {
-    console.error('Supabase session middleware error:', error)
+    console.error("Supabase session middleware error:", error)
     next()
   }
 }
@@ -110,22 +114,18 @@ export async function supabaseSessionMiddleware(
 /**
  * Express middleware to require authentication
  * Use this on protected routes
- * 
+ *
  * Usage:
  * import { requireAuth } from '@/lib/supabase/middleware'
  * router.get('/protected', requireAuth, (req, res) => { ... })
  */
-export function requireAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const user = (req as any).user
 
   if (!user) {
     return res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Authentication required'
+      error: "Unauthorized",
+      message: "Authentication required",
     })
   }
 
@@ -135,18 +135,14 @@ export function requireAuth(
 /**
  * Express middleware to optionally check authentication
  * Similar to Next.js middleware but for specific routes
- * 
+ *
  * Usage:
  * import { optionalAuth } from '@/lib/supabase/middleware'
  * router.get('/api/data', optionalAuth, (req, res) => {
  *   const user = req.user // may be null
  * })
  */
-export function optionalAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export function optionalAuth(req: Request, res: Response, next: NextFunction) {
   // Just continue - user will be attached if available
   next()
 }
@@ -154,12 +150,12 @@ export function optionalAuth(
 /**
  * Express middleware to redirect if not authenticated
  * Similar to Next.js middleware redirect behavior
- * 
+ *
  * Usage:
  * import { redirectIfNotAuth } from '@/lib/supabase/middleware'
  * router.get('/dashboard', redirectIfNotAuth('/login'), (req, res) => { ... })
  */
-export function redirectIfNotAuth(redirectTo: string = '/sign-in') {
+export function redirectIfNotAuth(redirectTo: string = "/sign-in") {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user
 
@@ -173,10 +169,10 @@ export function redirectIfNotAuth(redirectTo: string = '/sign-in') {
 
 /**
  * Express middleware to check user role
- * 
+ *
  * Usage:
  * import { requireRole } from '@/lib/supabase/middleware'
- * router.post('/administrator/action', requireRole(['administrator']), (req, res) => { ... })
+ * router.post('/admin/action', requireRole(['admin', 'master']), (req, res) => { ... })
  */
 export function requireRole(allowedRoles: string[]) {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -184,8 +180,8 @@ export function requireRole(allowedRoles: string[]) {
 
     if (!user) {
       return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
+        error: "Unauthorized",
+        message: "Authentication required",
       })
     }
 
@@ -194,8 +190,8 @@ export function requireRole(allowedRoles: string[]) {
 
     if (!userRole || !allowedRoles.includes(userRole)) {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Insufficient permissions'
+        error: "Forbidden",
+        message: "Insufficient permissions",
       })
     }
 

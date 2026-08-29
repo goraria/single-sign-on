@@ -1,14 +1,20 @@
 "use client"
 
 import { createContext, useContext } from "react"
+import type { UserRole } from "@/lib/utils/formatter"
 
 export interface User {
   id: string
-  name?: string
-  email?: string
+  name: string
+  username?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  email: string
   image?: string | null
-  app_metadata?: Record<string, unknown>
-  user_metadata?: Record<string, unknown>
+  role: UserRole
+  emailVerified?: boolean
+  createdAt?: Date | string | null
+  updatedAt?: Date | string | null
 }
 
 export interface AuthUser extends User {}

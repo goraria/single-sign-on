@@ -1,19 +1,20 @@
 "use client"
 
-import { type FormEvent, useEffect, useState } from "react"
+import { type FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@gorth/primitive/custom/button"
 import { Checkbox } from "@gorth/primitive/default/checkbox"
 import { Input } from "@gorth/primitive/default/input"
 import { Label } from "@gorth/primitive/default/label"
 import { Textarea } from "@gorth/primitive/default/textarea"
+import { LoadingScreen } from "@/features/shared/loading"
 import {
-  createSsoApplication,
-  deleteSsoApplication,
-  listSsoApplications,
-  updateSsoApplication,
   type SsoApplication,
-} from "@/services/administrator"
+  useCreateSsoApplicationMutation,
+  useDeleteSsoApplicationMutation,
+  useSsoApplicationsQuery,
+  useUpdateSsoApplicationMutation,
+} from "@/services/admin"
 import {
   toSsoApplicationFormState,
   toSsoApplicationPayload,
@@ -40,41 +41,11 @@ const emptyApplication: SsoApplicationFormState = {
 }
 
 export function ApplicationEditor({ id }: { id: string }) {
-  const [application, setApplication] = useState<SsoApplication | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const applicationsQuery = useSsoApplicationsQuery(undefined)
+  const application = applicationsQuery.data?.find((item) => item.id === id)
+  const error = applicationsQuery.error?.message
 
-  useEffect(() => {
-    let active = true
-    listSsoApplications()
-      .then((items) => {
-        if (!active) return
-        const selected = items.find((item) => item.id === id)
-        if (selected) setApplication(selected)
-        else setError("Application not found")
-      })
-      .catch((cause: unknown) => {
-        if (active)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Unable to load application"
-          )
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-    return () => {
-      active = false
-    }
-  }, [id])
-
-  if (loading)
-    return (
-      <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
-        Loading application...
-      </div>
-    )
+  if (applicationsQuery.isLoading) return <LoadingScreen />
   if (error || !application)
     return (
       <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
@@ -94,26 +65,25 @@ export function ApplicationForm({
   const [form, setForm] = useState(() =>
     application ? toSsoApplicationFormState(application) : emptyApplication
   )
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [createApplication, createResult] = useCreateSsoApplicationMutation()
+  const [updateApplication, updateResult] = useUpdateSsoApplicationMutation()
+  const [deleteApplication, deleteResult] = useDeleteSsoApplicationMutation()
+  const saving =
+    createResult.isLoading || updateResult.isLoading || deleteResult.isLoading
+  const error = createResult.error ?? updateResult.error ?? deleteResult.error
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setSaving(true)
-    setError(null)
+
     try {
       const payload = toSsoApplicationPayload(form)
       const saved = application
-        ? await updateSsoApplication(application.id, payload)
-        : await createSsoApplication(payload)
+        ? await updateApplication({ id: application.id, payload }).unwrap()
+        : await createApplication(payload).unwrap()
       router.replace(`/admin/apps/edit/${saved.id}`)
       router.refresh()
-    } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Unable to save application"
-      )
-    } finally {
-      setSaving(false)
+    } catch {
+      // Caller exposes the normalized error through the mutation result.
     }
   }
 
@@ -125,17 +95,12 @@ export function ApplicationForm({
       )
     )
       return
-    setSaving(true)
-    setError(null)
     try {
-      await deleteSsoApplication(application.id)
+      await deleteApplication(application.id).unwrap()
       router.replace("/admin/apps")
       router.refresh()
-    } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Unable to delete application"
-      )
-      setSaving(false)
+    } catch {
+      // Caller exposes the normalized error through the mutation result.
     }
   }
 
@@ -158,7 +123,7 @@ export function ApplicationForm({
       </div>
       {error ? (
         <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
-          {error}
+          {error.message}
         </div>
       ) : null}
       <form

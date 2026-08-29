@@ -1,10 +1,17 @@
-import { Suspense } from 'react';
-import ConsentPage from './';
+import { Suspense } from "react"
+import type { Metadata } from "next"
+
+import { LoadingScreen } from "@/features/shared/loading"
+import ConsentPage from "./"
+
+export const metadata: Metadata = {
+  title: "Consent",
+}
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingScreen />}>
       <ConsentPage />
     </Suspense>
-  );
+  )
 }

@@ -1,5 +1,5 @@
 import { redirectUrl } from "@/lib/utils/environment"
-import { normalizeOrigin } from "@/lib/utils/formatter"
+import { normalizeOrigin, parseHttpUrl } from "@/lib/utils/formatter"
 
 const allowedRedirectOrigins = redirectUrl ?? ""
 
@@ -22,27 +22,17 @@ function isLocalDevelopmentOrigin(target: URL) {
 }
 
 export function resolveRedirect(value: string | null) {
-  if (!value) {
+  const target = parseHttpUrl(value)
+  if (!target) return null
+
+  if (
+    !getAllowedOrigins().includes(target.origin) &&
+    !isLocalDevelopmentOrigin(target)
+  ) {
     return null
   }
 
-  try {
-    const target = new URL(value)
-    if (!["http:", "https:"].includes(target.protocol)) {
-      return null
-    }
-
-    if (
-      !getAllowedOrigins().includes(target.origin) &&
-      !isLocalDevelopmentOrigin(target)
-    ) {
-      return null
-    }
-
-    return target.toString()
-  } catch {
-    return null
-  }
+  return target.toString()
 }
 
 export function getCorsHeaders(request: Request): HeadersInit {

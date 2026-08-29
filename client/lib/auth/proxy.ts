@@ -1,12 +1,14 @@
-const ssoServerUrl =
-  process.env.SSO_SERVER_INTERNAL_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://127.0.0.1:8080"
-
-interface BetterAuthRedirectPayload {
-  redirect?: boolean
-  url?: string
-}
+import { ssoServerUrl } from "@/lib/utils/environment"
+import {
+  appendResponseCookies,
+  copyUrlSearch,
+  getNoStoreHeaders,
+  getRequestParameter,
+  parseHttpUrl,
+  readJsonObject,
+  requireUrl,
+} from "@/lib/utils/formatter"
+import { forwardAuthRoute } from "@/services/route"
 
 export interface AuthProxyContext {
   params: Promise<{ all?: string[] }>
@@ -21,8 +23,7 @@ const omittedResponseHeaders = new Set([
 ])
 
 function getServerBaseUrl() {
-  if (!ssoServerUrl) throw new Error("Missing SSO_SERVER_INTERNAL_URL")
-  return ssoServerUrl
+  return requireUrl(ssoServerUrl, "SSO_SERVER_INTERNAL_URL")
 }
 
 function copyRequestHeaders(request: Request) {
@@ -44,25 +45,6 @@ function copyRequestHeaders(request: Request) {
   return headers
 }
 
-function getSetCookies(response: Response) {
-  const headers = response.headers as Headers & {
-    getSetCookie?: () => string[]
-  }
-  const cookies = headers.getSetCookie?.() ?? []
-  const fallback = response.headers.get("set-cookie")
-
-  return cookies.length > 0 ? cookies : fallback ? [fallback] : []
-}
-
-function normalizeClientCookie(cookie: string) {
-  let value = cookie
-    .replace(/;\s*Domain=[^;]*/gi, "")
-    .replace(/;\s*Partitioned/gi, "")
-
-  if (!/;\s*Path=/i.test(value)) value += "; Path=/"
-  return value
-}
-
 function copyResponseHeaders(source: Response) {
   const headers = new Headers()
 
@@ -76,41 +58,9 @@ function copyResponseHeaders(source: Response) {
     }
   })
 
-  const cookies = getSetCookies(source)
-  for (const cookie of cookies) {
-    headers.append("set-cookie", normalizeClientCookie(cookie))
-  }
-
-  headers.set("x-gorth-auth-set-cookie-count", String(cookies.length))
+  const cookieCount = appendResponseCookies(headers, source, true)
+  headers.set("x-gorth-auth-set-cookie-count", String(cookieCount))
   return headers
-}
-
-function resolveRedirectUrl(request: Request, value?: string) {
-  if (!value) return null
-
-  try {
-    const target = new URL(value, new URL(request.url).origin)
-    return target.protocol === "http:" || target.protocol === "https:"
-      ? target
-      : null
-  } catch {
-    return null
-  }
-}
-
-async function getRedirectUrl(request: Request, response: Response) {
-  if (
-    !(response.headers.get("content-type") ?? "").includes("application/json")
-  ) {
-    return null
-  }
-
-  try {
-    const payload = (await response.clone().json()) as BetterAuthRedirectPayload
-    return payload.redirect ? resolveRedirectUrl(request, payload.url) : null
-  } catch {
-    return null
-  }
 }
 
 function logProxyResponse(request: Request, path: string, response: Response) {
@@ -133,8 +83,99 @@ function unavailableResponse() {
       error: "sso_server_unavailable",
       message: `Cannot connect to SSO server at ${getServerBaseUrl()}`,
     },
-    { status: 503, headers: { "Cache-Control": "no-store" } }
+    { status: 503, headers: getNoStoreHeaders() }
   )
+}
+
+interface BrowserRedirectRoute {
+  methods: readonly string[]
+  parameter?: "redirect_uri" | "post_logout_redirect_uri"
+  trustsServerRedirect?: boolean
+}
+
+const browserRedirectRoutes: Record<string, BrowserRedirectRoute> = {
+  "oauth2/authorize": {
+    methods: ["GET", "POST"],
+    parameter: "redirect_uri",
+  },
+  "oauth2/end-session": {
+    methods: ["GET", "POST"],
+    parameter: "post_logout_redirect_uri",
+  },
+  "oauth2/end-session/confirm": {
+    methods: ["POST"],
+    trustsServerRedirect: true,
+  },
+}
+
+async function getAuthRedirect(
+  request: Request,
+  path: string,
+  requestBody: string | undefined,
+  upstream: Response
+) {
+  const route = browserRedirectRoutes[path]
+
+  if (
+    !route?.methods.includes(request.method) ||
+    !upstream.ok ||
+    !upstream.headers.get("content-type")?.includes("application/json")
+  ) {
+    return null
+  }
+
+  const payload = await readJsonObject(upstream.clone())
+
+  if (
+    !payload ||
+    !("redirect" in payload) ||
+    payload.redirect !== true ||
+    !("url" in payload) ||
+    typeof payload.url !== "string"
+  ) {
+    return null
+  }
+
+  const requestUrl = new URL(request.url)
+  const redirectUrl = parseHttpUrl(payload.url, requestUrl.origin)
+  if (!redirectUrl) return null
+
+  const serverOrigin = getServerBaseUrl().origin
+
+  if (redirectUrl.origin === serverOrigin) {
+    redirectUrl.protocol = requestUrl.protocol
+    redirectUrl.host = requestUrl.host
+  }
+
+  const callbackValue = route.parameter
+    ? getRequestParameter(request, requestBody, route.parameter)
+    : null
+  let isRegisteredCallback = false
+
+  if (callbackValue) {
+    const callbackUrl = parseHttpUrl(callbackValue)
+
+    if (callbackUrl) {
+      isRegisteredCallback =
+        redirectUrl.origin === callbackUrl.origin &&
+        redirectUrl.pathname === callbackUrl.pathname
+    }
+  }
+
+  if (
+    redirectUrl.origin !== requestUrl.origin &&
+    !isRegisteredCallback &&
+    !route.trustsServerRedirect
+  ) {
+    return null
+  }
+
+  const headers = copyResponseHeaders(upstream)
+  headers.set("Location", redirectUrl.toString())
+  headers.set("Cache-Control", "no-store")
+  headers.delete("Content-Type")
+
+  return new Response(null, { status: 302, headers })
 }
 
 export async function handleAuthProxy(
@@ -144,41 +185,44 @@ export async function handleAuthProxy(
   const { all = [] } = await context.params
   const path = all.join("/")
   const requestUrl = new URL(request.url)
-  const targetUrl = new URL(`/auth/${path}`, getServerBaseUrl())
-  targetUrl.search = requestUrl.search
+  const targetUrl = copyUrlSearch(
+    requestUrl,
+    new URL(`/auth/${path}`, getServerBaseUrl())
+  )
+  const requestBody = ["GET", "HEAD"].includes(request.method)
+    ? undefined
+    : await request.text()
 
   let upstream: Response
 
   try {
-    upstream = await fetch(targetUrl, {
+    upstream = await forwardAuthRoute({
+      url: targetUrl,
       method: request.method,
       headers: copyRequestHeaders(request),
-      body: ["GET", "HEAD"].includes(request.method)
-        ? undefined
-        : await request.text(),
-      redirect: "manual",
-      cache: "no-store",
+      body: requestBody,
     })
   } catch {
     return unavailableResponse()
   }
 
-  const redirectUrl = await getRedirectUrl(request, upstream)
-  const headers = copyResponseHeaders(upstream)
-  let response: Response
+  const authRedirect = await getAuthRedirect(
+    request,
+    path,
+    requestBody,
+    upstream
+  )
 
-  if (redirectUrl) {
-    headers.set("Location", redirectUrl.toString())
-    headers.set("Cache-Control", "no-store")
-    headers.delete("content-type")
-    response = new Response(null, { status: 302, headers })
-  } else {
-    response = new Response(upstream.body, {
-      status: upstream.status,
-      statusText: upstream.statusText,
-      headers,
-    })
+  if (authRedirect) {
+    return logProxyResponse(request, path, authRedirect)
   }
+
+  const headers = copyResponseHeaders(upstream)
+  const response = new Response(upstream.body, {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    headers,
+  })
 
   return logProxyResponse(request, path, response)
 }

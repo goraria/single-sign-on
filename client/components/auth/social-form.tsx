@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation"
 
 import { cn } from "@gorth/primitive/lib/utils"
 import { auth } from "@/lib/auth"
-import { Button } from "@gorth/primitive/default/button"
+import { Button } from "@gorth/primitive/custom/button"
 
 export function SocialForm({
   className,
@@ -76,35 +76,16 @@ export function SocialForm({
         </div>
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
         <Button
           type="button"
           className="w-full"
+          variant="outline"
           disabled={isLoading}
           onClick={() => void handleSocialLogin()}
         >
-          {isLoading ? "Redirecting..." : "Google"}
+          {isLoading ? "Redirecting..." : "Continue with Google"}
         </Button>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            type="button"
-          // disabled={loadingProvider !== null}
-          // onClick={() => void signIn("github")}
-          >
-            {/* <IconGithub /> */}
-            GitHub
-          </Button>
-          <Button
-            variant="outline"
-            type="button"
-          // disabled={loadingProvider !== null}
-          // onClick={() => void signIn("facebook")}
-          >
-            {/* <IconFacebook /> */}
-            Facebook
-          </Button>
-        </div>
       </div>
     </div>
   )

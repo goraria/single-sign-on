@@ -1,7 +1,4 @@
-import type {
-  SsoApplication,
-  SsoApplicationPayload,
-} from "@/services/administrator"
+import type { SsoApplication, SsoApplicationPayload } from "@/services/admin"
 
 export interface SsoApplicationFormState {
   id: string
@@ -63,7 +60,7 @@ export function splitLines(value: string) {
 }
 
 export function toSsoApplicationFormState(
-  application: SsoApplication,
+  application: SsoApplication
 ): SsoApplicationFormState {
   return {
     id: application.id,
@@ -86,7 +83,7 @@ export function toSsoApplicationFormState(
 }
 
 export function toSsoApplicationPayload(
-  form: SsoApplicationFormState,
+  form: SsoApplicationFormState
 ): SsoApplicationPayload {
   return {
     clientId: form.clientId.trim(),

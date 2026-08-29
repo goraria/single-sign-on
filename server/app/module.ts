@@ -5,7 +5,7 @@ import { isExpressProduction } from "@/lib/utils/environment"
 import { getCorsOrigins } from "@/lib/utils/formatter"
 import jwksRoutes from "@/routes/jwks"
 import authRoutes from "@/routes/auth"
-import administratorRoutes from "@/routes/administrator"
+import adminRoutes from "@/routes/admin"
 import sharedRoutes from "@/routes/shared"
 import { registerSsoRoutes } from "@/routes/sso"
 import {
@@ -46,7 +46,7 @@ export default async function AppModule() {
 
   registerSsoRoutes(app)
   app.use("/.well-known", jwksRoutes)
-  app.use("/administrator", administratorRoutes)
+  app.use("/admin", adminRoutes)
   app.use("/", sharedRoutes)
 
   app.use((req: Request, res: Response) => {

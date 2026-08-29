@@ -120,6 +120,27 @@
       "when": 1787783000000,
       "tag": "0016_rotate_jwks_after_secret_alignment",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1787884348351,
+      "tag": "0017_add-user-profile-fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1787897053175,
+      "tag": "0018_enforce-unique-username",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1787937784708,
+      "tag": "0019_update-user-roles",
+      "breakpoints": true
     }
   ]
 }

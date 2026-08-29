@@ -1,6 +1,7 @@
 import { createAuthClient } from "@gorth/structure/cores/auth/client/index"
 import { oauthProviderClient } from "@gorth/structure/cores/auth/client/oap"
 import { ssoClient } from "@gorth/structure/cores/auth/client/sso"
+import { emailOTPClient } from "better-auth/client/plugins"
 
 function getOAuthProviderClientWithoutEmailSignUpQuery() {
   const plugin = oauthProviderClient()
@@ -40,5 +41,9 @@ function getAuthClientOptions() {
 
 export const auth = createAuthClient({
   ...getAuthClientOptions(),
-  plugins: [getOAuthProviderClientWithoutEmailSignUpQuery(), ssoClient()],
+  plugins: [
+    emailOTPClient(),
+    getOAuthProviderClientWithoutEmailSignUpQuery(),
+    ssoClient(),
+  ],
 })
