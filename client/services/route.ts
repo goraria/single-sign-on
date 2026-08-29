@@ -40,6 +40,14 @@ export interface ForwardAuthRouteRequest {
   body?: string
 }
 
+export interface ForwardAdminRouteRequest {
+  path: readonly string[]
+  requestUrl: URL
+  method: string
+  headers: Headers
+  body?: string
+}
+
 function getSsoServerBaseUrl() {
   return requireUrl(ssoServerUrl, "SSO_SERVER_INTERNAL_URL")
 }
@@ -141,6 +149,45 @@ export async function forwardAuthRoute({
     body,
     headers: Object.fromEntries(headers),
     redirect: "manual",
+    cache: "no-store",
+    responseType: "arraybuffer",
+    validateStatus: () => true,
+  })
+
+  return toWebResponse(response)
+}
+
+export async function forwardAdminRoute({
+  path,
+  requestUrl,
+  method,
+  headers,
+  body,
+}: ForwardAdminRouteRequest) {
+  const encodedPath = path.map(encodeURIComponent).join("/")
+  const url = new URL(`/admin/${encodedPath}`, getSsoServerBaseUrl())
+  url.search = requestUrl.search
+
+  const forwardedHeaders = Object.fromEntries(headers)
+
+  for (const name of [
+    "host",
+    "content-length",
+    "accept-encoding",
+    "connection",
+    "transfer-encoding",
+  ]) {
+    delete forwardedHeaders[name]
+  }
+
+  const response = await fetcher<ArrayBuffer, string | undefined>({
+    url,
+    method: method as FetcherOptions["method"],
+    body,
+    headers: {
+      ...forwardedHeaders,
+      ...getInternalHeaders(),
+    },
     cache: "no-store",
     responseType: "arraybuffer",
     validateStatus: () => true,

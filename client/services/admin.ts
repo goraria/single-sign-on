@@ -8,10 +8,7 @@ import {
   useMutation,
   useQuery,
 } from "@/lib/utils/caller"
-import { apiBaseUrl } from "@/lib/utils/environment"
 import type { User } from "@/schemas/users"
-
-const fallbackApiBaseUrl = "http://localhost:8080"
 
 export interface SsoApplication {
   id: string
@@ -57,25 +54,26 @@ export interface UpdateSsoApplicationRequest {
   payload: SsoApplicationPayload
 }
 
-const adminBaseUrl = apiBaseUrl ?? fallbackApiBaseUrl
 export const ssoApplicationsQueryKey = ["admin", "sso-applications"] as const
 export const usersQueryKey = ["admin", "users"] as const
 
 const applicationsService = useQuery<SsoApplication[], undefined>({
   queryKey: ssoApplicationsQueryKey,
   query: {
-    url: "/admin/sso-applications",
+    url: "/admin/gateway/sso-applications",
     method: "GET",
-    baseURL: adminBaseUrl,
+    baseURL: null,
+    credentials: "include",
   },
 })
 
 const usersService = useQuery<User[], undefined>({
   queryKey: usersQueryKey,
   query: {
-    url: "/admin/users",
+    url: "/admin/gateway/users",
     method: "GET",
-    baseURL: adminBaseUrl,
+    baseURL: null,
+    credentials: "include",
   },
 })
 
@@ -84,9 +82,10 @@ const createApplicationService = useMutation<
   SsoApplicationPayload
 >({
   query: (body) => ({
-    url: "/admin/sso-applications",
+    url: "/admin/gateway/sso-applications",
     method: "POST",
-    baseURL: adminBaseUrl,
+    baseURL: null,
+    credentials: "include",
     body,
   }),
   invalidates: [ssoApplicationsQueryKey],
@@ -97,9 +96,10 @@ const updateApplicationService = useMutation<
   UpdateSsoApplicationRequest
 >({
   query: ({ id, payload }) => ({
-    url: `/admin/sso-applications/${encodeURIComponent(id)}`,
+    url: `/admin/gateway/sso-applications/${encodeURIComponent(id)}`,
     method: "PATCH",
-    baseURL: adminBaseUrl,
+    baseURL: null,
+    credentials: "include",
     body: payload,
   }),
   invalidates: [ssoApplicationsQueryKey],
@@ -107,15 +107,20 @@ const updateApplicationService = useMutation<
 
 const deleteApplicationService = useMutation<{ id: string }, string>({
   query: (id) => ({
-    url: `/admin/sso-applications/${encodeURIComponent(id)}`,
+    url: `/admin/gateway/sso-applications/${encodeURIComponent(id)}`,
     method: "DELETE",
-    baseURL: adminBaseUrl,
+    baseURL: null,
+    credentials: "include",
   }),
   invalidates: [ssoApplicationsQueryKey],
 })
 
-export const useSsoApplicationsQuery = createQueryService(applicationsService)
-export const useUsersQuery = createQueryService(usersService)
+export const useSsoApplicationsQuery = createQueryService(
+  applicationsService
+)
+export const useUsersQuery = createQueryService(
+  usersService
+)
 export const useCreateSsoApplicationMutation = createMutationService(
   createApplicationService
 )
