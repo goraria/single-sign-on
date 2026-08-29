@@ -1,4 +1,4 @@
-import type { Express, NextFunction, Request, Response } from "express"
+import { Router, type NextFunction, type Request, type Response } from "express"
 import { randomUUID } from "node:crypto"
 import jwt from "@gorth/mechanism/cores/jsonwebtoken"
 
@@ -14,11 +14,7 @@ import {
   ssoClientInternalSecret,
 } from "@/lib/utils/environment"
 import { fromNodeHeaders } from "@/lib/structure/auth/server"
-import {
-  toSsoUser,
-  toSsoUserFromClaims,
-  type SsoUser,
-} from "@/services/user"
+import { toSsoUser, toSsoUserFromClaims, type SsoUser } from "@/services/user"
 
 interface SsoAppContext {
   id: string
@@ -305,105 +301,100 @@ function getSessionId(session: unknown) {
   return null
 }
 
-export function registerSsoRoutes(app: Express) {
-  app.post(
-    "/internal/sso/token-bundle",
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        assertSsoClient(req)
-        assertLegacySsoIssueEnabled(req)
-        setLegacySsoDeprecationHeaders(res)
+const router = Router()
 
-        const session = await auth.api.getSession({
-          headers: fromNodeHeaders(req.headers),
-        })
+router.post(
+  "/sso/token-bundle",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      assertSsoClient(req)
+      assertLegacySsoIssueEnabled(req)
+      setLegacySsoDeprecationHeaders(res)
 
-        if (!session?.user?.email) {
-          res.status(401).json({ error: "unauthorized" })
-          return
-        }
+      const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers),
+      })
 
-        const appContext = getAppContext(req)
-        const user = toSsoUser(session.user)
-
-        res
-          .status(200)
-          .json(
-            createTokenResponse(req, user, appContext, getSessionId(session))
-          )
-      } catch (error) {
-        next(error)
+      if (!session?.user?.email) {
+        res.status(401).json({ error: "unauthorized" })
+        return
       }
+
+      const appContext = getAppContext(req)
+      const user = toSsoUser(session.user)
+
+      res
+        .status(200)
+        .json(createTokenResponse(req, user, appContext, getSessionId(session)))
+    } catch (error) {
+      next(error)
     }
-  )
+  }
+)
 
-  app.post(
-    "/internal/sso/verify-token",
-    async (req: Request, res: Response, next: NextFunction) => {
+router.post(
+  "/sso/verify-token",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      assertSsoClient(req)
+      setLegacySsoDeprecationHeaders(res)
+
+      const body = req.body as TokenVerifyRequest
+      const accessToken =
+        typeof body.access_token === "string" ? body.access_token : ""
+      const refreshToken =
+        typeof body.refresh_token === "string" ? body.refresh_token : ""
+      const { accessTokenSecret, refreshTokenSecret } = getTokenSecrets()
+
+      if (!accessToken && !refreshToken) {
+        res.status(401).json({ error: "missing_token" })
+        return
+      }
+
       try {
-        assertSsoClient(req)
-        setLegacySsoDeprecationHeaders(res)
-
-        const body = req.body as TokenVerifyRequest
-        const accessToken =
-          typeof body.access_token === "string" ? body.access_token : ""
-        const refreshToken =
-          typeof body.refresh_token === "string" ? body.refresh_token : ""
-        const { accessTokenSecret, refreshTokenSecret } = getTokenSecrets()
-
-        if (!accessToken && !refreshToken) {
-          res.status(401).json({ error: "missing_token" })
-          return
-        }
-
-        try {
-          const accessPayload = verifyToken(
-            accessToken,
-            accessTokenSecret,
-            "access"
-          )
-          const appContext = getAppContextFromToken(req, accessPayload)
-          const user = toSsoUserFromToken(accessPayload)
-
-          res.status(200).json({
-            user,
-            sso_sub: user.id,
-            email: user.email,
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            gorth_app: {
-              ...appContext,
-              issued_at: Date.now(),
-            },
-          })
-          return
-        } catch (error) {
-          if (!(error instanceof jwt.TokenExpiredError) || !refreshToken) {
-            throw error
-          }
-        }
-
-        const refreshPayload = verifyToken(
-          refreshToken,
-          refreshTokenSecret,
-          "refresh"
+        const accessPayload = verifyToken(
+          accessToken,
+          accessTokenSecret,
+          "access"
         )
-        const appContext = getAppContextFromToken(req, refreshPayload)
-        const user = toSsoUserFromToken(refreshPayload)
+        const appContext = getAppContextFromToken(req, accessPayload)
+        const user = toSsoUserFromToken(accessPayload)
 
-        res
-          .status(200)
-          .json(
-            createTokenResponse(
-              req,
-              user,
-              appContext,
-              refreshPayload.sid ?? null
-            )
-          )
+        res.status(200).json({
+          user,
+          sso_sub: user.id,
+          email: user.email,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          gorth_app: {
+            ...appContext,
+            issued_at: Date.now(),
+          },
+        })
+        return
       } catch (error) {
-        next(error)
+        if (!(error instanceof jwt.TokenExpiredError) || !refreshToken) {
+          throw error
+        }
       }
+
+      const refreshPayload = verifyToken(
+        refreshToken,
+        refreshTokenSecret,
+        "refresh"
+      )
+      const appContext = getAppContextFromToken(req, refreshPayload)
+      const user = toSsoUserFromToken(refreshPayload)
+
+      res
+        .status(200)
+        .json(
+          createTokenResponse(req, user, appContext, refreshPayload.sid ?? null)
+        )
+    } catch (error) {
+      next(error)
     }
-  )
-}
+  }
+)
+
+export default router

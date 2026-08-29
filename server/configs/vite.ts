@@ -26,7 +26,7 @@ const runtimeState = (runtime.development ??= {
 const configLoadedAt = performance.now()
 const rootPath = resolve(import.meta.dirname, "..")
 const indexPath = resolve(rootPath, "assets", "index.html")
-const serverEntry = "/app/main.ts"
+const serverEntry = "/app/index.ts"
 
 function environmentFiles(mode: string): string {
   return [".env", ".env.local", `.env.${mode}`, `.env.${mode}.local`]

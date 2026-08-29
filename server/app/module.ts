@@ -7,7 +7,7 @@ import jwksRoutes from "@/routes/jwks"
 import authRoutes from "@/routes/auth"
 import adminRoutes from "@/routes/admin"
 import sharedRoutes from "@/routes/shared"
-import { registerSsoRoutes } from "@/routes/sso"
+import ssoRoutes from "@/routes/sso"
 import {
   corsConfig,
   helmetConfig,
@@ -44,7 +44,7 @@ export default async function AppModule() {
   app.use(bodyParserConfig())
   app.use(cookieParserConfig())
 
-  registerSsoRoutes(app)
+  app.use("/internal", ssoRoutes)
   app.use("/.well-known", jwksRoutes)
   app.use("/admin", adminRoutes)
   app.use("/", sharedRoutes)
