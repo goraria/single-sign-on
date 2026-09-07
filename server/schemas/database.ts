@@ -1,6 +1,49 @@
 import z from "@/lib/structure/cores/zod"
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-orm/zod"
 
-export const userRoleSchema = z.enum(["user", "admin", "vice", "master"])
+import {
+  accounts,
+  invitations,
+  jwkss,
+  members,
+  oauthAccessTokens,
+  oauthApplicationType,
+  oauthClientAssertions,
+  oauthClientResources,
+  oauthClients,
+  oauthConsents,
+  oauthGrantType,
+  oauthRefreshTokens,
+  oauthResources,
+  oauthResponseType,
+  oauthSubjectType,
+  oauthTokenEndpointAuthMethod,
+  organizations,
+  sessions,
+  ssoProviders,
+  teamMembers,
+  teams,
+  userRole,
+  userStatus,
+  users,
+  verifications,
+} from "@/database/schema"
+
+export const userRoleSchema = createSelectSchema(userRole)
+export const userStatusSchema = createSelectSchema(userStatus)
+export const oauthGrantTypeSchema = createSelectSchema(oauthGrantType)
+export const oauthResponseTypeSchema = createSelectSchema(oauthResponseType)
+export const oauthTokenEndpointAuthMethodSchema = createSelectSchema(
+  oauthTokenEndpointAuthMethod
+)
+export const oauthSubjectTypeSchema = createSelectSchema(oauthSubjectType)
+export const oauthApplicationTypeSchema = createSelectSchema(
+  oauthApplicationType
+)
 
 export const oauthScopeSchema = z.enum([
   "openid",
@@ -9,184 +52,209 @@ export const oauthScopeSchema = z.enum([
   "offline_access",
 ])
 
-export const oauthGrantTypeSchema = z.enum([
-  "authorization_code",
-  "refresh_token",
-  "client_credentials",
-])
-
-export const oauthResponseTypeSchema = z.enum(["code"])
-
-export const oauthTokenEndpointAuthMethodSchema = z.enum([
-  "none",
-  "client_secret_basic",
-  "client_secret_post",
-])
-
-export const oauthSubjectTypeSchema = z.enum(["public", "pairwise"])
-
-export const nullableDateSchema = z.coerce.date().nullable()
-export const dateSchema = z.coerce.date()
-export const jsonObjectSchema = z.record(z.string(), z.unknown())
 export const oauthClientMetadataSchema = z
   .object({
     description: z.string().nullable().optional(),
   })
   .catchall(z.unknown())
 
-export const userSchema = z.object({
-  id: z.uuid(),
-  name: z.string(),
-  email: z.email(),
-  emailVerified: z.boolean(),
-  image: z.string().nullable(),
-  role: userRoleSchema,
-  bannedUntil: nullableDateSchema,
-  createdAt: dateSchema,
-  updatedAt: dateSchema,
+export const userSelectSchema = createSelectSchema(users)
+export const userInsertSchema = createInsertSchema(users, {
+  name: (schema) => schema.min(1).max(255),
+  username: (schema) =>
+    schema
+      .min(3)
+      .max(64)
+      .regex(/^[a-zA-Z0-9._-]+$/),
+  email: (schema) => schema.max(255).email(),
+  firstName: (schema) => schema.max(128),
+  lastName: (schema) => schema.max(128),
+})
+export const userUpdateSchema = createUpdateSchema(users, {
+  name: (schema) => schema.min(1).max(255),
+  username: (schema) =>
+    schema
+      .min(3)
+      .max(64)
+      .regex(/^[a-zA-Z0-9._-]+$/),
+  email: (schema) => schema.max(255).email(),
+  firstName: (schema) => schema.max(128),
+  lastName: (schema) => schema.max(128),
 })
 
-export const sessionSchema = z.object({
-  id: z.uuid(),
-  expiresAt: dateSchema,
-  token: z.string(),
-  createdAt: dateSchema,
-  updatedAt: dateSchema,
-  ipAddress: z.string().nullable(),
-  userAgent: z.string().nullable(),
-  userId: z.uuid(),
-})
+export const sessionSelectSchema = createSelectSchema(sessions)
+export const sessionInsertSchema = createInsertSchema(sessions)
+export const sessionUpdateSchema = createUpdateSchema(sessions)
 
-export const accountSchema = z.object({
-  id: z.uuid(),
-  accountId: z.string(),
-  providerId: z.string(),
-  userId: z.uuid(),
-  accessToken: z.string().nullable(),
-  refreshToken: z.string().nullable(),
-  idToken: z.string().nullable(),
-  accessTokenExpiresAt: nullableDateSchema,
-  refreshTokenExpiresAt: nullableDateSchema,
-  scope: z.string().nullable(),
-  password: z.string().nullable(),
-  createdAt: dateSchema,
-  updatedAt: dateSchema,
-})
+export const accountSelectSchema = createSelectSchema(accounts)
+export const accountInsertSchema = createInsertSchema(accounts)
+export const accountUpdateSchema = createUpdateSchema(accounts)
 
-export const verificationSchema = z.object({
-  id: z.uuid(),
-  identifier: z.string(),
-  value: z.string(),
-  expiresAt: dateSchema,
-  createdAt: dateSchema,
-  updatedAt: dateSchema,
-})
+export const verificationSelectSchema = createSelectSchema(verifications)
+export const verificationInsertSchema = createInsertSchema(verifications)
+export const verificationUpdateSchema = createUpdateSchema(verifications)
 
-export const jwksSchema = z.object({
-  id: z.uuid(),
-  publicKey: z.string(),
-  privateKey: z.string(),
-  createdAt: dateSchema,
-  expiresAt: nullableDateSchema,
-})
+export const jwksSelectSchema = createSelectSchema(jwkss)
+export const jwksInsertSchema = createInsertSchema(jwkss)
+export const jwksUpdateSchema = createUpdateSchema(jwkss)
 
-export const oauthClientSchema = z.object({
-  id: z.uuid(),
-  clientId: z.string(),
-  clientSecret: z.string().nullable(),
-  disabled: z.boolean().nullable(),
-  skipConsent: z.boolean().nullable(),
-  enableEndSession: z.boolean().nullable(),
-  subjectType: oauthSubjectTypeSchema.nullable(),
-  scopes: z.array(oauthScopeSchema).nullable(),
-  userId: z.uuid().nullable(),
-  createdAt: nullableDateSchema,
-  updatedAt: nullableDateSchema,
-  name: z.string().nullable(),
-  uri: z.string().nullable(),
-  icon: z.string().nullable(),
-  contacts: z.array(z.string()).nullable(),
-  tos: z.string().nullable(),
-  policy: z.string().nullable(),
-  softwareId: z.string().nullable(),
-  softwareVersion: z.string().nullable(),
-  softwareStatement: z.string().nullable(),
-  redirectUris: z.array(z.string()),
-  postLogoutRedirectUris: z.array(z.string()).nullable(),
-  tokenEndpointAuthMethod: oauthTokenEndpointAuthMethodSchema.nullable(),
-  grantTypes: z.array(oauthGrantTypeSchema).nullable(),
-  responseTypes: z.array(oauthResponseTypeSchema).nullable(),
-  public: z.boolean().nullable(),
-  type: z.string().nullable(),
-  requirePKCE: z.boolean().nullable(),
-  referenceId: z.string().nullable(),
-  metadata: oauthClientMetadataSchema.nullable(),
-})
+export const oauthClientSelectSchema = createSelectSchema(oauthClients)
+export const oauthClientInsertSchema = createInsertSchema(oauthClients)
+export const oauthClientUpdateSchema = createUpdateSchema(oauthClients)
 
-export const oauthRefreshTokenSchema = z.object({
-  id: z.uuid(),
-  token: z.string(),
-  clientId: z.string(),
-  sessionId: z.uuid().nullable(),
-  userId: z.uuid(),
-  referenceId: z.string().nullable(),
-  expiresAt: nullableDateSchema,
-  createdAt: nullableDateSchema,
-  revoked: nullableDateSchema,
-  authTime: nullableDateSchema,
-  scopes: z.array(oauthScopeSchema),
-})
+export const oauthResourceSelectSchema = createSelectSchema(oauthResources)
+export const oauthResourceInsertSchema = createInsertSchema(oauthResources)
+export const oauthResourceUpdateSchema = createUpdateSchema(oauthResources)
 
-export const oauthAccessTokenSchema = z.object({
-  id: z.uuid(),
-  token: z.string().nullable(),
-  clientId: z.string(),
-  sessionId: z.uuid().nullable(),
-  userId: z.uuid().nullable(),
-  referenceId: z.string().nullable(),
-  refreshId: z.uuid().nullable(),
-  expiresAt: nullableDateSchema,
-  createdAt: nullableDateSchema,
-  scopes: z.array(oauthScopeSchema),
-})
+export const oauthClientResourceSelectSchema =
+  createSelectSchema(oauthClientResources)
+export const oauthClientResourceInsertSchema =
+  createInsertSchema(oauthClientResources)
+export const oauthClientResourceUpdateSchema =
+  createUpdateSchema(oauthClientResources)
 
-export const oauthConsentSchema = z.object({
-  id: z.uuid(),
-  clientId: z.string(),
-  userId: z.uuid().nullable(),
-  referenceId: z.string().nullable(),
-  scopes: z.array(oauthScopeSchema),
-  createdAt: nullableDateSchema,
-  updatedAt: nullableDateSchema,
-})
+export const oauthRefreshTokenSelectSchema =
+  createSelectSchema(oauthRefreshTokens)
+export const oauthRefreshTokenInsertSchema =
+  createInsertSchema(oauthRefreshTokens)
+export const oauthRefreshTokenUpdateSchema =
+  createUpdateSchema(oauthRefreshTokens)
 
-export const ssoProviderSchema = z.object({
-  id: z.uuid(),
-  issuer: z.string(),
-  oidcConfig: z.string().nullable(),
-  samlConfig: z.string().nullable(),
-  userId: z.uuid().nullable(),
-  providerId: z.string(),
-  organizationId: z.string().nullable(),
-  domain: z.string(),
-  domainVerified: z.boolean().nullable(),
-})
+export const oauthAccessTokenSelectSchema = createSelectSchema(oauthAccessTokens)
+export const oauthAccessTokenInsertSchema = createInsertSchema(oauthAccessTokens)
+export const oauthAccessTokenUpdateSchema = createUpdateSchema(oauthAccessTokens)
+
+export const oauthConsentSelectSchema = createSelectSchema(oauthConsents)
+export const oauthConsentInsertSchema = createInsertSchema(oauthConsents)
+export const oauthConsentUpdateSchema = createUpdateSchema(oauthConsents)
+
+export const oauthClientAssertionSelectSchema =
+  createSelectSchema(oauthClientAssertions)
+export const oauthClientAssertionInsertSchema =
+  createInsertSchema(oauthClientAssertions)
+export const oauthClientAssertionUpdateSchema =
+  createUpdateSchema(oauthClientAssertions)
+
+export const ssoProviderSelectSchema = createSelectSchema(ssoProviders)
+export const ssoProviderInsertSchema = createInsertSchema(ssoProviders)
+export const ssoProviderUpdateSchema = createUpdateSchema(ssoProviders)
+
+export const organizationSelectSchema = createSelectSchema(organizations)
+export const organizationInsertSchema = createInsertSchema(organizations)
+export const organizationUpdateSchema = createUpdateSchema(organizations)
+
+export const memberSelectSchema = createSelectSchema(members)
+export const memberInsertSchema = createInsertSchema(members)
+export const memberUpdateSchema = createUpdateSchema(members)
+
+export const teamSelectSchema = createSelectSchema(teams)
+export const teamInsertSchema = createInsertSchema(teams)
+export const teamUpdateSchema = createUpdateSchema(teams)
+
+export const teamMemberSelectSchema = createSelectSchema(teamMembers)
+export const teamMemberInsertSchema = createInsertSchema(teamMembers)
+export const teamMemberUpdateSchema = createUpdateSchema(teamMembers)
+
+export const invitationSelectSchema = createSelectSchema(invitations)
+export const invitationInsertSchema = createInsertSchema(invitations)
+export const invitationUpdateSchema = createUpdateSchema(invitations)
 
 export const databaseSchemas = {
-  users: userSchema,
-  sessions: sessionSchema,
-  accounts: accountSchema,
-  verifications: verificationSchema,
-  jwkss: jwksSchema,
-  oauthClients: oauthClientSchema,
-  oauthRefreshTokens: oauthRefreshTokenSchema,
-  oauthAccessTokens: oauthAccessTokenSchema,
-  oauthConsents: oauthConsentSchema,
-  ssoProviders: ssoProviderSchema,
+  users: {
+    select: userSelectSchema,
+    insert: userInsertSchema,
+    update: userUpdateSchema,
+  },
+  sessions: {
+    select: sessionSelectSchema,
+    insert: sessionInsertSchema,
+    update: sessionUpdateSchema,
+  },
+  accounts: {
+    select: accountSelectSchema,
+    insert: accountInsertSchema,
+    update: accountUpdateSchema,
+  },
+  verifications: {
+    select: verificationSelectSchema,
+    insert: verificationInsertSchema,
+    update: verificationUpdateSchema,
+  },
+  jwkss: {
+    select: jwksSelectSchema,
+    insert: jwksInsertSchema,
+    update: jwksUpdateSchema,
+  },
+  oauthClients: {
+    select: oauthClientSelectSchema,
+    insert: oauthClientInsertSchema,
+    update: oauthClientUpdateSchema,
+  },
+  oauthResources: {
+    select: oauthResourceSelectSchema,
+    insert: oauthResourceInsertSchema,
+    update: oauthResourceUpdateSchema,
+  },
+  oauthClientResources: {
+    select: oauthClientResourceSelectSchema,
+    insert: oauthClientResourceInsertSchema,
+    update: oauthClientResourceUpdateSchema,
+  },
+  oauthRefreshTokens: {
+    select: oauthRefreshTokenSelectSchema,
+    insert: oauthRefreshTokenInsertSchema,
+    update: oauthRefreshTokenUpdateSchema,
+  },
+  oauthAccessTokens: {
+    select: oauthAccessTokenSelectSchema,
+    insert: oauthAccessTokenInsertSchema,
+    update: oauthAccessTokenUpdateSchema,
+  },
+  oauthConsents: {
+    select: oauthConsentSelectSchema,
+    insert: oauthConsentInsertSchema,
+    update: oauthConsentUpdateSchema,
+  },
+  oauthClientAssertions: {
+    select: oauthClientAssertionSelectSchema,
+    insert: oauthClientAssertionInsertSchema,
+    update: oauthClientAssertionUpdateSchema,
+  },
+  ssoProviders: {
+    select: ssoProviderSelectSchema,
+    insert: ssoProviderInsertSchema,
+    update: ssoProviderUpdateSchema,
+  },
+  organizations: {
+    select: organizationSelectSchema,
+    insert: organizationInsertSchema,
+    update: organizationUpdateSchema,
+  },
+  members: {
+    select: memberSelectSchema,
+    insert: memberInsertSchema,
+    update: memberUpdateSchema,
+  },
+  teams: {
+    select: teamSelectSchema,
+    insert: teamInsertSchema,
+    update: teamUpdateSchema,
+  },
+  teamMembers: {
+    select: teamMemberSelectSchema,
+    insert: teamMemberInsertSchema,
+    update: teamMemberUpdateSchema,
+  },
+  invitations: {
+    select: invitationSelectSchema,
+    insert: invitationInsertSchema,
+    update: invitationUpdateSchema,
+  },
 }
 
-export type UserData = z.infer<typeof userSchema>
+export type UserData = z.infer<typeof userSelectSchema>
 export type UserRoleData = z.infer<typeof userRoleSchema>
+export type UserStatusData = z.infer<typeof userStatusSchema>
 export type OAuthScopeData = z.infer<typeof oauthScopeSchema>
 export type OAuthGrantTypeData = z.infer<typeof oauthGrantTypeSchema>
 export type OAuthResponseTypeData = z.infer<typeof oauthResponseTypeSchema>
@@ -194,13 +262,32 @@ export type OAuthTokenEndpointAuthMethodData = z.infer<
   typeof oauthTokenEndpointAuthMethodSchema
 >
 export type OAuthSubjectTypeData = z.infer<typeof oauthSubjectTypeSchema>
-export type SessionData = z.infer<typeof sessionSchema>
-export type AccountData = z.infer<typeof accountSchema>
-export type VerificationData = z.infer<typeof verificationSchema>
-export type JwksData = z.infer<typeof jwksSchema>
-export type OAuthClientData = z.infer<typeof oauthClientSchema>
-export type OAuthClientMetadataData = z.infer<typeof oauthClientMetadataSchema>
-export type OAuthRefreshTokenData = z.infer<typeof oauthRefreshTokenSchema>
-export type OAuthAccessTokenData = z.infer<typeof oauthAccessTokenSchema>
-export type OAuthConsentData = z.infer<typeof oauthConsentSchema>
-export type SsoProviderData = z.infer<typeof ssoProviderSchema>
+export type OAuthApplicationTypeData = z.infer<
+  typeof oauthApplicationTypeSchema
+>
+export type SessionData = z.infer<typeof sessionSelectSchema>
+export type AccountData = z.infer<typeof accountSelectSchema>
+export type VerificationData = z.infer<typeof verificationSelectSchema>
+export type JwksData = z.infer<typeof jwksSelectSchema>
+export type OAuthClientData = z.infer<typeof oauthClientSelectSchema>
+export type OAuthResourceData = z.infer<typeof oauthResourceSelectSchema>
+export type OAuthClientResourceData = z.infer<
+  typeof oauthClientResourceSelectSchema
+>
+export type OAuthClientMetadataData = z.infer<
+  typeof oauthClientMetadataSchema
+>
+export type OAuthRefreshTokenData = z.infer<
+  typeof oauthRefreshTokenSelectSchema
+>
+export type OAuthAccessTokenData = z.infer<typeof oauthAccessTokenSelectSchema>
+export type OAuthConsentData = z.infer<typeof oauthConsentSelectSchema>
+export type OAuthClientAssertionData = z.infer<
+  typeof oauthClientAssertionSelectSchema
+>
+export type SsoProviderData = z.infer<typeof ssoProviderSelectSchema>
+export type OrganizationData = z.infer<typeof organizationSelectSchema>
+export type MemberData = z.infer<typeof memberSelectSchema>
+export type TeamData = z.infer<typeof teamSelectSchema>
+export type TeamMemberData = z.infer<typeof teamMemberSelectSchema>
+export type InvitationData = z.infer<typeof invitationSelectSchema>

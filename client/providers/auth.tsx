@@ -2,6 +2,7 @@
 
 import { type PropsWithChildren, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
+import { useProgress } from "@gorth/primitive/cores/progress/next"
 import {
   AuthContext,
   type AuthContextProps,
@@ -12,6 +13,7 @@ import { resolveInternalPath } from "@/lib/utils/formatter"
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const router = useRouter()
+  const { start } = useProgress()
   const session = auth.useSession()
   const account = (session.data?.user as AuthUser | undefined) ?? null
 
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const logout = useCallback(
     async (returnTo = "/") => {
+      start()
       try {
         await auth.signOut()
       } catch (error: unknown) {
@@ -48,7 +51,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         window.location.replace(resolveInternalPath(returnTo, "/"))
       }
     },
-    [session]
+    [session, start]
   )
 
   const value = useMemo<AuthContextProps>(

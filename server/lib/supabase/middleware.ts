@@ -1,5 +1,5 @@
 import {
-  isExpressProduction,
+  isProduction,
   supabaseAnonKey,
   supabaseServiceRoleKey,
   supabaseUrl,
@@ -10,7 +10,7 @@ import {
   type User,
   type Session,
 } from "@/lib/structure/cores/supabase/index"
-import type { Request, Response, NextFunction } from "express"
+import { type NextFunction, type Request, type Response } from "express"
 
 // Extend Express Request type to include Supabase properties
 declare global {
@@ -82,16 +82,16 @@ export async function supabaseSessionMiddleware(
           // Update cookies with new tokens
           res.cookie("access_token", refreshData.session.access_token, {
             httpOnly: true,
-            secure: isExpressProduction,
-            sameSite: isExpressProduction ? "none" : "lax",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
             maxAge: 55 * 60 * 1000, // 55 minutes
           })
 
           if (refreshData.session.refresh_token) {
             res.cookie("refresh_token", refreshData.session.refresh_token, {
               httpOnly: true,
-              secure: isExpressProduction,
-              sameSite: isExpressProduction ? "none" : "lax",
+              secure: isProduction,
+              sameSite: isProduction ? "none" : "lax",
               maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             })
           }
@@ -117,19 +117,26 @@ export async function supabaseSessionMiddleware(
  *
  * Usage:
  * import { requireAuth } from '@/lib/supabase/middleware'
- * router.get('/protected', requireAuth, (req, res) => { ... })
+ * router.get('/protected', requireAuth(), (req, res) => { ... })
  */
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const user = (req as any).user
+export function requireAuth() {
+  return function requireAuthMiddleware(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const user = req.user
 
-  if (!user) {
-    return res.status(401).json({
-      error: "Unauthorized",
-      message: "Authentication required",
-    })
+    if (!user) {
+      res.status(401).json({
+        error: "Unauthorized",
+        message: "Authentication required",
+      })
+      return
+    }
+
+    next()
   }
-
-  next()
 }
 
 /**
@@ -138,7 +145,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
  *
  * Usage:
  * import { optionalAuth } from '@/lib/supabase/middleware'
- * router.get('/api/data', optionalAuth, (req, res) => {
+ * router.get('/data', optionalAuth, (req, res) => {
  *   const user = req.user // may be null
  * })
  */

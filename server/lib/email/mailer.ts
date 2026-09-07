@@ -35,7 +35,7 @@ function getSmtpPassword() {
 
   if (appPassword.length !== 16) {
     throw new Error(
-      "Gmail SMTP requires a 16-character App Password in VITE_SMTP_PASS; a regular Google account password cannot be used"
+      "Gmail SMTP requires a 16-character App Password in SMTP_PASS; a regular Google account password cannot be used"
     )
   }
 
@@ -55,15 +55,15 @@ function getTransporter() {
   if (transporter) return transporter
 
   if (!smtpUser || !smtpPassword) {
-    throw new Error("Missing VITE_SMTP_USER or VITE_SMTP_PASS")
+    throw new Error("Missing SMTP_USER or SMTP_PASS")
   }
 
   if (!smtpService && !smtpHost) {
-    throw new Error("Missing VITE_SMTP_SERVICE or VITE_SMTP_HOST")
+    throw new Error("Missing SMTP_SERVICE or SMTP_HOST")
   }
 
   if (!smtpService && (!Number.isInteger(smtpPort) || smtpPort <= 0)) {
-    throw new Error("VITE_SMTP_PORT must be a valid positive integer")
+    throw new Error("SMTP_PORT must be a valid positive integer")
   }
 
   const auth = {
@@ -158,7 +158,7 @@ export async function sendVerificationOtpEmail({
   const safeOtp = escapeHtml(otp)
   const fromAddress = emailFrom ?? smtpUser
 
-  if (!fromAddress) throw new Error("Missing VITE_EMAIL_FROM or VITE_SMTP_USER")
+  if (!fromAddress) throw new Error("Missing EMAIL_FROM or SMTP_USER")
 
   let result
 

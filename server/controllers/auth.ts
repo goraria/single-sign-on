@@ -1,4 +1,4 @@
-import type { Request, Response } from "express"
+import { type Request, type Response } from "express"
 import { toNodeHandler, fromNodeHeaders } from "@/lib/structure/auth/server"
 import {
   oauthProviderAuthServerMetadata,
@@ -10,47 +10,35 @@ export const splat = toNodeHandler(auth)
 const oauthAuthServerMetadata = oauthProviderAuthServerMetadata(auth)
 const openIdConfigMetadata = oauthProviderOpenIdConfigMetadata(auth)
 
-function getRequestUrl(req: Request) {
-  return `${req.protocol}://${req.get("host")}${req.originalUrl}`
-}
+export async function oauthAuthorizationServerMetadata(
+  req: Request,
+  res: Response
+) {
+  const response = await oauthAuthServerMetadata(
+    new Request(`${req.protocol}://${req.get("host")}${req.originalUrl}`, {
+      method: req.method,
+      headers: fromNodeHeaders(req.headers),
+    })
+  )
 
-async function sendWebResponse(res: Response, response: globalThis.Response) {
   response.headers.forEach((value, key) => {
     res.setHeader(key, value)
   })
 
-  res.status(response.status)
-  res.send(await response.text())
-}
-
-export async function me(req: Request, res: Response) {
-  const session = await auth.api.getSession({
-    headers: fromNodeHeaders(req.headers),
-  })
-  return res.json(session)
-}
-
-export async function oauthAuthorizationServerMetadata(
-  req: Request,
-  res: Response,
-) {
-  const response = await oauthAuthServerMetadata(
-    new Request(getRequestUrl(req), {
-      method: req.method,
-      headers: fromNodeHeaders(req.headers),
-    }),
-  )
-
-  return sendWebResponse(res, response)
+  res.status(response.status).send(await response.text())
 }
 
 export async function openIdConfigurationMetadata(req: Request, res: Response) {
   const response = await openIdConfigMetadata(
-    new Request(getRequestUrl(req), {
+    new Request(`${req.protocol}://${req.get("host")}${req.originalUrl}`, {
       method: req.method,
       headers: fromNodeHeaders(req.headers),
-    }),
+    })
   )
 
-  return sendWebResponse(res, response)
+  response.headers.forEach((value, key) => {
+    res.setHeader(key, value)
+  })
+
+  res.status(response.status).send(await response.text())
 }

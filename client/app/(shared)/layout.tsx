@@ -1,13 +1,17 @@
 "use client"
 
 import type { ReactNode } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@gorth/primitive/custom/button"
 import { SidebarProvider } from "@gorth/primitive/custom/sidebar"
-import { Navbar } from "@gorth/primitive/layouts/navbar"
+import { Footer } from "@gorth/primitive/layouts/footer"
+import { Header } from "@gorth/primitive/layouts/header"
+import gorthLogo from "@/assets/gorth.png"
 import { useAuth } from "@/hooks/use-auth"
 import { useUser } from "@/hooks/use-user"
-import { mainDashbar } from "@/lib/utils/constant"
+import { Copyright } from "@/layouts/copyright"
+import { mainFooter, mainHeader } from "@/lib/utils/constant"
 
 export default function SharedLayout({ children }: { children: ReactNode }) {
   const auth = useAuth()
@@ -16,20 +20,20 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <div className="bg-background text-foreground flex min-h-svh flex-1 flex-col">
-        <Navbar
+        <Header
           auth={auth}
           user={user}
           nav={{
-            main: mainDashbar.navDropdown,
-            secondary: mainDashbar.navSignal,
-            // navigation: mainDashbar.navDropdown,
+            main: mainHeader.navDropdown,
+            secondary: mainHeader.navSignal,
+            navigation: mainHeader.navSecondary,
           }}
           bottom={
             <Button
               nativeButton={false}
               render={<Link href="/" />}
               variant="ghost"
-              className="text-lg font-bold"
+              className="px-0 text-lg font-bold hover:bg-transparent"
             >
               Gorth
             </Button>
@@ -40,77 +44,30 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
           <div className="container mx-auto flex-1 p-6">{children}</div>
         </main>
 
-        <footer className="border-t">
-          <div className="container mx-auto px-6 py-10">
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
-              <div className="max-w-sm">
-                <Link href="/" className="text-foreground text-lg font-bold">
-                  Gorth
-                </Link>
-                <p className="text-muted-foreground mt-3 text-sm leading-6">
-                  One secure identity for every application your team uses.
-                  Simple access, centralized control, and fewer interruptions.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-foreground text-sm font-medium">Product</p>
-                <div className="text-muted-foreground mt-3 flex flex-col gap-2 text-sm">
-                  <Link href="/#how-it-works" className="hover:text-foreground">
-                    How it works
-                  </Link>
-                  <Link href="/#security" className="hover:text-foreground">
-                    Security
-                  </Link>
-                  <Link href="/#pricing" className="hover:text-foreground">
-                    Get started
-                  </Link>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-foreground text-sm font-medium">Account</p>
-                <div className="text-muted-foreground mt-3 flex flex-col gap-2 text-sm">
-                  <Link href="/auth/sign-in" className="hover:text-foreground">
-                    Sign in
-                  </Link>
-                  <Link href="/auth/sign-up" className="hover:text-foreground">
-                    Create account
-                  </Link>
-                  <Link href="/demo" className="hover:text-foreground">
-                    API demo
-                  </Link>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-foreground text-sm font-medium">Company</p>
-                <div className="text-muted-foreground mt-3 flex flex-col gap-2 text-sm">
-                  <a
-                    href="mailto:hello@gorth.app"
-                    className="hover:text-foreground"
-                  >
-                    Contact
-                  </a>
-                  <Link
-                    href="/privacy-policy"
-                    className="hover:text-foreground"
-                  >
-                    Privacy
-                  </Link>
-                  <Link href="/terms" className="hover:text-foreground">
-                    Terms
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-muted-foreground mt-10 flex flex-col gap-2 border-t pt-5 text-xs sm:flex-row sm:items-center sm:justify-between">
-              <span>© 2026 Gorth, Inc. All rights reserved.</span>
-              <span>Secure access, built for modern teams.</span>
-            </div>
-          </div>
-        </footer>
+        <Footer
+          nav={{
+            main: mainFooter.navDropdown,
+            secondary: [],
+          }}
+          top={
+            <Link href="/" aria-label="Gorth home" className="block size-24">
+              <Image
+                src={gorthLogo}
+                alt="Gorth"
+                width={96}
+                height={96}
+                className="size-24 object-contain"
+              />
+            </Link>
+          }
+          middle={
+            <p className="max-w-xs leading-6">
+              One secure identity for every application your team uses. Simple
+              access, centralized control, and fewer interruptions.
+            </p>
+          }
+          bottom={<Copyright />}
+        />
       </div>
     </SidebarProvider>
   )

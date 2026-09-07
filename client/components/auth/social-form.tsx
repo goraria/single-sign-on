@@ -5,6 +5,13 @@ import { useSearchParams } from "next/navigation"
 
 import { cn } from "@gorth/primitive/lib/utils"
 import { auth } from "@/lib/auth"
+import { resolveInternalPath } from "@/lib/utils/formatter"
+import {
+  buildLegacyDisabledPath,
+  buildOAuthAuthorizePath,
+  hasOAuthQuery,
+  isExternalRedirect,
+} from "@/lib/utils/temp"
 import { Button } from "@gorth/primitive/custom/button"
 
 export function SocialForm({
@@ -16,29 +23,19 @@ export function SocialForm({
   const searchParams = useSearchParams()
   const next = searchParams.get("redirect") ?? "/"
   const oauthQuery = new URLSearchParams(searchParams.toString())
-  const isOAuthFlow = Boolean(
-    oauthQuery.get("client_id") &&
-    oauthQuery.get("redirect_uri") &&
-    oauthQuery.get("response_type")
-  )
-  const isExternalRedirect = () => {
-    try {
-      const target = new URL(next)
-      return ["http:", "https:"].includes(target.protocol)
-    } catch {
-      return false
-    }
-  }
   const getCallbackURL = () => {
-    if (isOAuthFlow) {
-      return `${window.location.origin}/auth/oauth?${oauthQuery.toString()}`
+    if (hasOAuthQuery(oauthQuery)) {
+      return new URL(
+        buildOAuthAuthorizePath(oauthQuery),
+        window.location.origin
+      ).toString()
     }
 
-    if (isExternalRedirect()) {
-      return `${window.location.origin}/auth/error?error=legacy_sso_issue_disabled`
+    if (isExternalRedirect(next)) {
+      return new URL(buildLegacyDisabledPath(), window.location.origin).toString()
     }
 
-    return `${window.location.origin}/auth/oauth?next=${encodeURIComponent(next)}`
+    return new URL(resolveInternalPath(next), window.location.origin).toString()
   }
 
   const handleSocialLogin = async () => {

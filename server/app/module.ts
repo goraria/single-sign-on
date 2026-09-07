@@ -1,7 +1,9 @@
 import express from "express"
-import type { NextFunction, Request, Response } from "express"
+import { type NextFunction, type Request, type Response } from "express"
+import { morganMiddleware } from "@gorth/mechanism/configs/morgan"
 import { Logger } from "@gorth/mechanism/lib/logger"
-import { isExpressProduction } from "@/lib/utils/environment"
+import z from "@/lib/structure/cores/zod"
+import { isProduction } from "@/lib/utils/environment"
 import { getCorsOrigins } from "@/lib/utils/formatter"
 import jwksRoutes from "@/routes/jwks"
 import authRoutes from "@/routes/auth"
@@ -11,16 +13,14 @@ import ssoRoutes from "@/routes/sso"
 import {
   corsConfig,
   helmetConfig,
-  morganMiddleware,
   bodyParserConfig,
   cookieParserConfig,
 } from "@/lib/mechanism/config"
-import { ensureOAuthClients } from "@/services/oauth-client"
 
 export default async function AppModule() {
   const app = express()
 
-  if (isExpressProduction) {
+  if (isProduction) {
     app.set("trust proxy", 1)
   }
 
@@ -37,7 +37,6 @@ export default async function AppModule() {
 
   // Better Auth must receive the raw request before JSON/urlencoded parsers.
   // Mounting bodyParserConfig before this route can leave client calls pending.
-  await ensureOAuthClients()
   app.use("/auth", authRoutes)
 
   // Parsers are only needed by application-owned routes below.
@@ -56,19 +55,29 @@ export default async function AppModule() {
     })
   })
 
-  app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
-    const statusCode =
-      "statusCode" in error && typeof error.statusCode === "number"
-        ? error.statusCode
-        : 500
-    console.log(Logger(`Error: ${error}`, "error", "red"))
-    res.status(statusCode).json({
-      error: statusCode >= 500 ? "Internal Server Error" : error.message,
-      message:
-        isExpressProduction && statusCode >= 500
-          ? "Something went wrong"
-          : error.message,
-    })
-  })
+  app.use(
+    (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      const validationError = error instanceof z.ZodError
+      const statusCode = validationError
+        ? 400
+        : error instanceof Error &&
+            "statusCode" in error &&
+            typeof error.statusCode === "number"
+          ? error.statusCode
+          : 500
+      const message = validationError
+        ? "Invalid request"
+        : error instanceof Error
+          ? error.message
+          : "Unknown error"
+
+      console.log(Logger(`Error: ${error}`, "error", "red"))
+      res.status(statusCode).json({
+        error: statusCode >= 500 ? "Internal Server Error" : message,
+        message:
+          isProduction && statusCode >= 500 ? "Something went wrong" : message,
+      })
+    }
+  )
   return app
 }

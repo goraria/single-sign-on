@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Dashbar as Container } from "@gorth/primitive/layouts/dashbar"
+import { Header } from "@gorth/primitive/layouts/header"
 import {
   Tooltip,
   TooltipContent,
@@ -9,7 +9,7 @@ import {
 } from "@gorth/primitive/default/tooltip"
 import { SidebarTrigger } from "@gorth/primitive/custom/sidebar"
 import { ModeSwitcher } from "@gorth/primitive/element/mode-toggle"
-import { mainDashbar } from "@/lib/utils/constant"
+import { mainHeader } from "@/lib/utils/constant"
 import type { AuthContextProps } from "@/hooks/use-auth"
 
 export function Dashbar({ auth }: { auth: AuthContextProps }) {
@@ -17,17 +17,18 @@ export function Dashbar({ auth }: { auth: AuthContextProps }) {
   const accountEmail = auth.account?.email || ""
 
   return (
-    <Container
+    <Header
+      mode="dashboard"
       auth={auth}
       user={{
         name: accountName,
         email: accountEmail,
-        avatar: auth.account?.image ?? mainDashbar.user.avatar,
+        avatar: auth.account?.image ?? mainHeader.user.avatar,
       }}
       nav={{
-        main: mainDashbar.navDropdown,
-        secondary: mainDashbar.navSecondary,
-        navigation: mainDashbar.navDropdown,
+        main: mainHeader.navDropdown,
+        secondary: mainHeader.navSignal,
+        navigation: mainHeader.navSecondary,
       }}
       left={
         <>

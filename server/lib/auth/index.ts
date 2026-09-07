@@ -1,6 +1,11 @@
 import { betterAuth } from "@/lib/structure/auth"
 import { drizzleAdapter } from "@/lib/structure/auth/adapters"
-import { emailOTP, jwt, openAPI } from "@/lib/structure/auth/plugins"
+import {
+  emailOTP,
+  jwt,
+  openAPI,
+  organization,
+} from "@/lib/structure/auth/plugins"
 import { oauthProvider } from "@/lib/structure/auth/oap"
 import { sso } from "@/lib/structure/auth/sso"
 import { dash } from "@gorth/structure/cores/auth/server/infra"
@@ -9,7 +14,7 @@ import {
   betterAuthUrl,
   googleClientId,
   googleClientSecret,
-  isExpressProduction,
+  isProduction,
 } from "@/lib/utils/environment"
 import {
   getAudienceClaim,
@@ -156,6 +161,15 @@ export const auth = betterAuth({
 
     sso(),
 
+    organization({
+      teams: {
+        enabled: true,
+        defaultTeam: {
+          enabled: false,
+        },
+      },
+    }),
+
     emailOTP({
       otpLength: 6,
       expiresIn: 120,
@@ -201,7 +215,7 @@ export const auth = betterAuth({
   },
 
   advanced: {
-    trustedProxyHeaders: isExpressProduction,
+    trustedProxyHeaders: isProduction,
     database: {
       generateId: false,
     },
@@ -209,8 +223,8 @@ export const auth = betterAuth({
     useSecureCookies: false,
     defaultCookieAttributes: {
       httpOnly: true,
-      secure: isExpressProduction,
-      sameSite: isExpressProduction ? "none" : "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       // A partitioned cookie created while SSO is top-level is not available
       // when another Vercel app calls SSO cross-site. SameSite=None + Secure
       // already provides the credentialed CORS behavior used by this system.

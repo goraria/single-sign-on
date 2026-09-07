@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   const next = searchParams.get("next")
-  const externalTarget = resolveRedirect(next)
+  const externalTarget = await resolveRedirect(next, origin)
 
   if (externalTarget) {
     return NextResponse.redirect(

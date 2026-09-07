@@ -7,12 +7,14 @@ import { Badge } from "@gorth/primitive/default/badge"
 import { Input } from "@gorth/primitive/default/input"
 import { cn } from "@/lib/utils"
 import { toast } from "@gorth/primitive/cores/sonner"
+import { useProgress } from "@gorth/primitive/cores/progress/next"
 import { useHealthQuery, useParamQuery, useSearchQuery } from "@/services/demo"
 import { auth } from "@/lib/auth"
 import { IconDefault } from "@/assets/icon/brand/icon-default"
 
 export default function DemoPage() {
   const router = useRouter()
+  const { start } = useProgress()
   const { data: session } = auth.useSession()
 
   const {
@@ -55,6 +57,7 @@ export default function DemoPage() {
   }
 
   const signOut = async () => {
+    start()
     await auth.signOut()
     router.refresh()
     router.push("/")

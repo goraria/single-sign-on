@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server"
+import {
+  supabaseBucket,
+  supabaseServiceRoleKey,
+  supabaseUrl,
+} from "@/lib/utils/environment"
 
 import {
   getNoStoreHeaders,
@@ -23,10 +28,9 @@ interface AuthSession {
 }
 
 function getStorageConfig() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET
-  const secretKey =
-    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  const url = supabaseUrl
+  const bucket = supabaseBucket
+  const secretKey = supabaseServiceRoleKey
 
   if (!url || !bucket || !secretKey) {
     throw new Error("Supabase Storage server credentials are not configured.")

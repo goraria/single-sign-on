@@ -13,10 +13,10 @@ import {
   DropdownMenuTrigger,
 } from "@gorth/primitive/custom/dropdown"
 import {
-  DataTable,
+  DataTableAll,
   DataTableColumnHeader,
 } from "@gorth/primitive/custom/data-table"
-import type { DataTableProps } from "@gorth/primitive/lib/utils/interface"
+import type { DataTableAllProps } from "@gorth/primitive/lib/utils/interface"
 import {
   renderTaskPriority,
   renderTaskStatus,
@@ -42,7 +42,7 @@ const tasks: Task[] = Array.from({ length: 100 }, () => ({
   label: faker.helpers.arrayElement(taskLabels),
 }))
 
-const columns: DataTableProps<Task>["columns"] = [
+const columns: DataTableAllProps<Task>["columns"] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -149,7 +149,7 @@ export function Tasks() {
           </Button>
         </div>
       </div>
-      <DataTable
+      <DataTableAll
         columns={columns}
         data={data}
         search={{

@@ -1,6 +1,6 @@
-import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
+import { isProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
 import { createServerClient } from '@/lib/structure/cores/supabase/ssr'
-import type { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 // import { cookies } from 'next/headers'
 
 /**

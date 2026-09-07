@@ -56,8 +56,19 @@ export function formatUsernameLabel(value: string, fallback = "") {
   return capitalizeFirstLetter(value.trim().toLowerCase()) || fallback
 }
 
-export function formatDate(value: Date | string | number, locales = "en-US") {
-  return new Date(value).toLocaleDateString(locales)
+export function formatDate(value: Date | string | number) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+  }).format(new Date(value))
+}
+
+export function formatDateTime(
+  value: Date | string | number,
+  locales = "en-US"
+) {
+  return new Date(value).toLocaleString(locales)
 }
 
 export function formatCountdown(seconds: number) {

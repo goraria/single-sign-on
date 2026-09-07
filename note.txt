@@ -1,0 +1,42 @@
+@gorth/sso
+single-sign-on
+├── authentication
+│   ├── sign-up
+│   ├── sign-in
+│   ├── sign-out
+│   ├── session
+│   ├── password
+│   └── verification
+│
+├── identity
+│   ├── users
+│   ├── accounts
+│   ├── providers
+│   ├── profile
+│   └── credentials
+│
+├── oauth
+│   ├── authorization
+│   ├── clients
+│   ├── resources
+│   ├── access-token
+│   ├── refresh-token
+│   ├── consent
+│   └── jwks
+│
+├── organization
+│   ├── organizations
+│   ├── members
+│   ├── invitations
+│   ├── teams
+│   ├── roles
+│   └── permissions
+│
+└── security
+    ├── session-management
+    ├── token-validation
+    ├── account-linking
+    ├── ban
+    ├── audit
+    ├── access-control
+    └── authentication-event

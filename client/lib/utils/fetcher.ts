@@ -2,7 +2,7 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
   type Method,
-} from "axios"
+} from "@gorth/structure/cores/axios"
 
 export interface FetcherOptions<
   TBody = unknown,

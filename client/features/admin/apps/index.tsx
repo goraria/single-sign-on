@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { MoreHorizontal, Plus } from "@gorth/primitive/cores/lucide"
@@ -9,6 +9,10 @@ import {
   DataTableColumnHeader,
 } from "@gorth/primitive/custom/data-table"
 import type { DataTableProps } from "@gorth/primitive/lib/utils/interface"
+import type {
+  PaginationState,
+  SortingState,
+} from "@gorth/primitive/cores/tanstack/table"
 import {
   Avatar,
   AvatarFallback,
@@ -35,9 +39,46 @@ import {
 
 export function Applications() {
   const router = useRouter()
-  const applicationsQuery = useSsoApplicationsQuery(undefined)
+  const createApplication = useCallback(() => {
+    router.push("/admin/apps/create")
+  }, [router])
+  const downloadApplications = useCallback(() => undefined, [])
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "name", desc: false },
+  ])
+  const [searchInput, setSearchInput] = useState("")
+  const [search, setSearch] = useState("")
+  const [status, setStatus] = useState<(string | number | boolean)[]>([])
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setSearch(searchInput.trim()), 300)
+    return () => window.clearTimeout(timeout)
+  }, [searchInput])
+
+  const activeSort = sorting[0]
+  const applicationsQuery = useSsoApplicationsQuery({
+    page: pagination.pageIndex + 1,
+    limit: pagination.pageSize,
+    search: search || undefined,
+    status:
+      status.length === 1
+        ? (status[0] as "enabled" | "disabled")
+        : undefined,
+    sortBy: activeSort?.id as
+      | "name"
+      | "clientId"
+      | "homepageUrl"
+      | "state"
+      | "updatedAt"
+      | undefined,
+    sortOrder: activeSort?.desc ? "desc" : "asc",
+  })
   const [deleteApplication, deleteResult] = useDeleteSsoApplicationMutation()
-  const applications = applicationsQuery.data ?? []
+  const applications = applicationsQuery.data?.items ?? []
   const error = applicationsQuery.error ?? deleteResult.error
 
   const remove = useCallback(
@@ -73,6 +114,7 @@ export function Applications() {
               table.toggleAllPageRowsSelected(Boolean(value))
             }
             aria-label="Select all"
+            className="ml-2 size-4"
           />
         ),
         cell: ({ row }) => (
@@ -80,6 +122,7 @@ export function Applications() {
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
             aria-label="Select row"
+            className="ml-2 size-4"
           />
         ),
         enableSorting: false,
@@ -201,21 +244,6 @@ export function Applications() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Applications</h1>
-          <p className="text-muted-foreground">
-            Manage the apps allowed to authenticate through Gorth SSO.
-          </p>
-        </div>
-        <Button
-          render={<Link href="/admin/apps/create" />}
-          nativeButton={false}
-        >
-          <Plus className="size-4" />
-          Create application
-        </Button>
-      </div>
       {error ? (
         <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
           {error.message}
@@ -224,21 +252,33 @@ export function Applications() {
       <DataTable
         columns={columns}
         data={applications}
-        search={{ column: "name", placeholder: "Filter applications..." }}
+        rowCount={applicationsQuery.data?.total ?? 0}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        search={{
+          placeholder: "Filter applications...",
+          value: searchInput,
+          onValueChange: setSearchInput,
+        }}
         filters={[
           {
-            column: "state",
+            id: "state",
             title: "Status",
             options: [...applicationStates],
+            value: status,
+            onValueChange: setStatus,
           },
         ]}
         fluidColumn="name"
         getRowId={(application) => application.id}
-        emptyMessage={
-          applicationsQuery.isLoading
-            ? "Loading applications..."
-            : "No results."
-        }
+        loading={applicationsQuery.isLoading || applicationsQuery.isFetching}
+        loadingMessage="Loading applications..."
+        emptyMessage="No results."
+        onReload={() => void applicationsQuery.refetch()}
+        onDownload={downloadApplications}
+        onCreate={createApplication}
       />
     </div>
   )

@@ -1,5 +1,7 @@
 import "server-only"
 
+import { ssoAuthCodeSecret } from "@/lib/utils/environment"
+
 import {
   createCipheriv,
   createDecipheriv,
@@ -18,11 +20,13 @@ type AuthorizationCodeRecord = {
 }
 
 function getCodeSecret() {
-  return (
-    process.env.SSO_AUTH_CODE_SECRET ??
-    process.env.NEXT_AUTH_SECRET ??
-    "development-sso-auth-code-secret"
-  )
+  const secret = ssoAuthCodeSecret
+
+  if (!secret) {
+    throw new Error("Missing NEXT_SSO_AUTH_CODE_SECRET")
+  }
+
+  return secret
 }
 
 function getCodeKey() {

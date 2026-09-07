@@ -14,7 +14,69 @@ import {
   AppWindow,
   Bell,
   LockKeyhole,
+  ClipboardList,
+  Database,
+  MonitorSmartphone,
+  ShieldCheck,
+  Bot,
+  Boxes,
+  Cloud,
+  GitFork,
+  Mail,
+  MessageSquare,
+  Video,
 } from "@gorth/primitive/cores/lucide"
+
+export const appConnection = [
+  {
+    title: "GitHub",
+    description: "Connect repositories, issues, and deployment workflows.",
+    isActive: true,
+    icon: GitFork,
+  },
+  {
+    title: "Slack",
+    description: "Receive workspace notifications and security alerts.",
+    isActive: true,
+    icon: MessageSquare,
+  },
+  {
+    title: "Google Mail",
+    description: "Send transactional e-mails from your applications.",
+    isActive: false,
+    icon: Mail,
+  },
+  {
+    title: "Supabase",
+    description: "Synchronize users and application data securely.",
+    isActive: true,
+    icon: Database,
+  },
+  {
+    title: "Vercel",
+    description: "Manage production and preview deployments.",
+    isActive: false,
+    icon: Cloud,
+  },
+  {
+    title: "OpenAI",
+    description: "Add intelligent assistants and automation workflows.",
+    isActive: false,
+    icon: Bot,
+  },
+  {
+    title: "Video Platform",
+    description: "Connect Gorth video streaming services.",
+    isActive: true,
+    icon: Video,
+  },
+  {
+    title: "Gorth Apps",
+    description: "Manage internal ecosystem application integrations.",
+    isActive: true,
+    icon: Boxes,
+  },
+] as const
 
 export const appGlobal = {
   name: "Gorth",
@@ -89,6 +151,30 @@ export const adminSidebar = {
       icon: AppWindow,
       isActive: true,
     },
+    {
+      title: "Sessions",
+      url: "/admin/sessions",
+      icon: MonitorSmartphone,
+      isActive: true,
+    },
+    {
+      title: "Resources",
+      url: "/admin/resources",
+      icon: Database,
+      isActive: true,
+    },
+    {
+      title: "Consents",
+      url: "/admin/consents",
+      icon: ShieldCheck,
+      isActive: true,
+    },
+    {
+      title: "Audit Logs",
+      url: "/admin/audit-logs",
+      icon: ClipboardList,
+      isActive: true,
+    },
   ],
   navSecondary: [
     {
@@ -115,12 +201,12 @@ export const adminSidebar = {
   navSignal: [
     {
       title: "Sign In",
-      url: "/sign-in",
+      url: "/auth/sign-in",
       icon: LogIn,
     },
     {
       title: "Sign Up",
-      url: "/sign-up",
+      url: "/auth/sign-up",
       icon: KeySquare,
     },
   ],
@@ -183,6 +269,12 @@ export const settingSidebar = {
       isActive: true,
     },
     {
+      title: "Sessions",
+      url: "/settings/sessions",
+      icon: MonitorSmartphone,
+      isActive: true,
+    },
+    {
       title: "Options",
       url: "#",
       icon: LockKeyhole,
@@ -242,18 +334,18 @@ export const settingSidebar = {
   navSignal: [
     {
       title: "Sign In",
-      url: "/sign-in",
+      url: "/auth/sign-in",
       icon: LogIn,
     },
     {
       title: "Sign Up",
-      url: "/sign-up",
+      url: "/auth/sign-up",
       icon: KeySquare,
     },
   ],
 }
 
-export const mainDashbar = {
+export const mainHeader = {
   user: visitor,
   navMain: [
     {
@@ -286,7 +378,19 @@ export const mainDashbar = {
       title: "Home",
       url: "/",
       icon: Home,
+      description: "Home Page",
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Bolt,
       isActive: true,
+    },
+    {
+      title: "Demo",
+      url: "/demo",
+      icon: Home,
+      description: "Demo Page",
     },
   ],
   navDropdown: [
@@ -311,6 +415,55 @@ export const mainDashbar = {
       title: "Sign Up",
       url: "/auth/sign-up",
       icon: KeySquare,
+    },
+  ],
+}
+
+export const mainFooter = {
+  navDropdown: [
+    {
+      title: "Application",
+      url: "#",
+      icon: AppWindow,
+      items: [
+        { title: "Single sign-on", url: "/" },
+        { title: "Applications", url: "/settings/apps" },
+        { title: "Tasks", url: "/settings/tasks" },
+        { title: "Dashboard", url: "/settings" },
+      ],
+    },
+    {
+      title: "Resources",
+      url: "#",
+      icon: LifeBuoy,
+      items: [
+        { title: "API demo", url: "/demo" },
+        { title: "Security", url: "/#security" },
+        { title: "How it works", url: "/#how-it-works" },
+        { title: "Account", url: "/settings/account" },
+      ],
+    },
+    {
+      title: "Company",
+      url: "#",
+      icon: Users,
+      items: [
+        { title: "About", url: "/about" },
+        { title: "Contact", url: "mailto:hello@gorth.app" },
+        { title: "Careers", url: "/careers" },
+        { title: "GitHub", url: appGlobal.github },
+      ],
+    },
+    {
+      title: "Legal",
+      url: "#",
+      icon: LockKeyhole,
+      items: [
+        { title: "Terms and conditions", url: "/terms" },
+        { title: "Privacy policy", url: "/privacy-policy" },
+        { title: "Security", url: "/#security" },
+        { title: "Cookie policy", url: "/cookie-policy" },
+      ],
     },
   ],
 }

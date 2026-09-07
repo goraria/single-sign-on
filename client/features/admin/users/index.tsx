@@ -1,6 +1,13 @@
 "use client"
 
-import { MoreHorizontal, Plus, UserPlus } from "@gorth/primitive/cores/lucide"
+import { useCallback, useEffect, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
+import type {
+  PaginationState,
+  SortingState,
+} from "@gorth/primitive/cores/tanstack/table"
 import {
   Avatar,
   AvatarFallback,
@@ -19,8 +26,7 @@ import {
   DataTableColumnHeader,
 } from "@gorth/primitive/custom/data-table"
 import type { DataTableProps } from "@gorth/primitive/lib/utils/interface"
-import type { User as SsoUser } from "@/schemas/users"
-import { useUsersQuery } from "@/services/admin"
+import { type AdminUser, useUsersQuery } from "@/services/admin"
 import { formatDate, getInitials } from "@/lib/utils/formatter"
 import {
   renderUserRole,
@@ -29,7 +35,7 @@ import {
   userStates,
 } from "@/lib/utils/renderer"
 
-const columns: DataTableProps<SsoUser>["columns"] = [
+const columns: DataTableProps<AdminUser>["columns"] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -82,7 +88,9 @@ const columns: DataTableProps<SsoUser>["columns"] = [
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Role" />
+    ),
     cell: ({ row }) => renderUserRole(row.original.role),
     filterFn: (row, id, value) => value.includes(row.getValue(id)),
   },
@@ -94,7 +102,9 @@ const columns: DataTableProps<SsoUser>["columns"] = [
         : user.emailVerified
           ? "verified"
           : "unverified",
-    header: "Status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     cell: ({ row }) => renderUserStatus(row.original),
     filterFn: (row, id, value) => value.includes(row.getValue(id)),
   },
@@ -104,21 +114,33 @@ const columns: DataTableProps<SsoUser>["columns"] = [
       <DataTableColumnHeader column={column} title="Created" />
     ),
     cell: ({ row }) => formatDate(row.original.createdAt),
+    size: 120,
+  },
+  {
+    accessorKey: "updatedAt",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Modified" />
+    ),
+    cell: ({ row }) => formatDate(row.original.updatedAt),
+    size: 120,
   },
   {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
             <Button variant="ghost" size="icon" aria-label="User actions" />
           }
         >
-          <MoreHorizontal className="mr-2 size-4" />
+          <MoreHorizontal className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Ban user</DropdownMenuItem>
+          <DropdownMenuItem
+            render={<Link href={`/admin/users/edit/${row.original.id}`} />}
+          >
+            Edit
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -129,29 +151,58 @@ const columns: DataTableProps<SsoUser>["columns"] = [
 ]
 
 export function Users() {
-  const usersQuery = useUsersQuery(undefined)
-  const data = usersQuery.data ?? []
+  const router = useRouter()
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "name", desc: false },
+  ])
+  const [searchInput, setSearchInput] = useState("")
+  const [search, setSearch] = useState("")
+  const [states, setStates] = useState<(string | number | boolean)[]>([])
+  const [roles, setRoles] = useState<(string | number | boolean)[]>([])
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setSearch(searchInput.trim()), 300)
+    return () => window.clearTimeout(timeout)
+  }, [searchInput])
+
+  useEffect(() => {
+    setPagination((current) =>
+      current.pageIndex === 0 ? current : { ...current, pageIndex: 0 }
+    )
+  }, [search, states, roles])
+
+  const activeSort = sorting[0]
+  const usersQuery = useUsersQuery({
+    page: pagination.pageIndex + 1,
+    limit: pagination.pageSize,
+    search: search || undefined,
+    state:
+      states.length === 1
+        ? (states[0] as "verified" | "unverified" | "banned")
+        : undefined,
+    role: roles.length === 1 ? (roles[0] as AdminUser["role"]) : undefined,
+    sortBy: activeSort?.id as
+      | "name"
+      | "email"
+      | "role"
+      | "state"
+      | "createdAt"
+      | "updatedAt"
+      | undefined,
+    sortOrder: activeSort?.desc ? "desc" : "asc",
+  })
+  const data = usersQuery.data?.items ?? []
+  const createUser = useCallback(() => {
+    router.push("/admin/users/create")
+  }, [router])
+  const downloadUsers = useCallback(() => undefined, [])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">User List</h1>
-          <p className="text-muted-foreground">
-            Manage your users and their roles here.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <UserPlus className="size-4" />
-            Invite User
-          </Button>
-          <Button>
-            <Plus className="size-4" />
-            Add User
-          </Button>
-        </div>
-      </div>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 sm:gap-6">
       {usersQuery.error ? (
         <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
           {usersQuery.error.message}
@@ -160,14 +211,40 @@ export function Users() {
       <DataTable
         columns={columns}
         data={data}
-        search={{ column: "name", placeholder: "Filter users..." }}
+        rowCount={usersQuery.data?.total ?? 0}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        search={{
+          placeholder: "Filter users...",
+          value: searchInput,
+          onValueChange: setSearchInput,
+        }}
         filters={[
-          { column: "state", title: "Status", options: [...userStates] },
-          { column: "role", title: "Role", options: [...userRoles] },
+          {
+            id: "state",
+            title: "Status",
+            options: [...userStates],
+            value: states,
+            onValueChange: setStates,
+          },
+          {
+            id: "role",
+            title: "Role",
+            options: [...userRoles],
+            value: roles,
+            onValueChange: setRoles,
+          },
         ]}
         fluidColumn="name"
         getRowId={(user) => user.id}
-        emptyMessage={usersQuery.isLoading ? "Loading users..." : "No results."}
+        loading={usersQuery.isLoading || usersQuery.isFetching}
+        loadingMessage="Loading users..."
+        emptyMessage="No results."
+        onReload={() => void usersQuery.refetch()}
+        onDownload={downloadUsers}
+        onCreate={createUser}
       />
     </div>
   )

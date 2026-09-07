@@ -1,4 +1,7 @@
-import { ssoServerUrl } from "@/lib/utils/environment"
+import {
+  ssoClientInternalSecret,
+  ssoServerUrl,
+} from "@/lib/utils/environment"
 import {
   fetcher,
   toWebResponse,
@@ -33,6 +36,11 @@ export interface SignOutRouteRequest {
   origin: string
 }
 
+export interface OAuthRedirectPolicyRequest {
+  url: string
+  purpose: "origin" | "post_logout"
+}
+
 export interface ForwardAuthRouteRequest {
   url: URL
   method: string
@@ -49,11 +57,11 @@ export interface ForwardAdminRouteRequest {
 }
 
 function getSsoServerBaseUrl() {
-  return requireUrl(ssoServerUrl, "SSO_SERVER_INTERNAL_URL")
+  return requireUrl(ssoServerUrl, "NEXT_SSO_SERVER_URL")
 }
 
 function getInternalHeaders() {
-  const secret = process.env.SSO_CLIENT_INTERNAL_SECRET
+  const secret = ssoClientInternalSecret
   return secret ? { "x-sso-client-secret": secret } : {}
 }
 
@@ -135,6 +143,34 @@ export async function signOutRouteSession({
   })
 
   return toWebResponse(response)
+}
+
+export async function validateOAuthRedirectPolicy(
+  body: OAuthRedirectPolicyRequest
+) {
+  const response = await fetcher<
+    { allowed?: boolean },
+    OAuthRedirectPolicyRequest
+  >({
+    url: new URL(
+      "/internal/oauth-client/redirect-policy",
+      getSsoServerBaseUrl()
+    ),
+    method: "POST",
+    body,
+    headers: {
+      "Content-Type": "application/json",
+      ...getInternalHeaders(),
+    },
+    cache: "no-store",
+    validateStatus: () => true,
+  })
+
+  return (
+    response.status >= 200 &&
+    response.status < 300 &&
+    response.data.allowed === true
+  )
 }
 
 export async function forwardAuthRoute({

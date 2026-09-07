@@ -23,8 +23,9 @@ async function signOut(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const signOutResponse = await signOut(request)
 
-  const returnTo = resolveRedirect(
-    new URL(request.url).searchParams.get("returnTo")
+  const returnTo = await resolveRedirect(
+    new URL(request.url).searchParams.get("returnTo"),
+    getPublicOrigin(request)
   )
 
   return withResponseCookies(
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const signOutResponse = await signOut(request)
-  const headers = getCorsHeaders(request)
+  const headers = await getCorsHeaders(request)
 
   if (!signOutResponse.ok) {
     return withResponseCookies(
@@ -60,9 +61,9 @@ export async function POST(request: NextRequest) {
   )
 }
 
-export function OPTIONS(request: NextRequest) {
+export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 204,
-    headers: getCorsHeaders(request),
+    headers: await getCorsHeaders(request),
   })
 }

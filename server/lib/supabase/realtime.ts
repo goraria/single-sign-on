@@ -1,4 +1,4 @@
-import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
+import { isProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
 import { createClient } from "@/lib/structure/cores/supabase/index";
 // import type { Server as SocketIOServer } from "socket.io";
 import { models } from "@/lib/utils/constant";

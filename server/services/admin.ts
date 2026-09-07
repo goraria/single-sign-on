@@ -1,216 +1,51 @@
-import type { IncomingHttpHeaders } from "node:http"
-import { asc, eq } from "drizzle-orm"
-import z from "@/lib/structure/cores/zod"
+import { type IncomingHttpHeaders } from "node:http"
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  isNotNull,
+  isNull,
+  or,
+} from "drizzle-orm"
 
 import { database } from "@/database"
-import { oauthClients, users, type OAuthClient } from "@/database/schema"
+import {
+  accounts,
+  oauthClients,
+  oauthConsents,
+  oauthResources,
+  sessions,
+  users,
+} from "@/database/schema"
 import { auth } from "@/lib/auth"
 import { fromNodeHeaders } from "@/lib/structure/auth/server"
-import { isExpressProduction } from "@/lib/utils/environment"
 import {
-  adminSsoApplicationPatchSchema,
-  adminSsoApplicationPayloadSchema,
+  formatSsoApplication,
+  formatSsoApplicationCreateValues,
+  formatSsoApplicationUpdateValues,
+} from "@/lib/utils/formatter"
+import {
+  adminSsoApplicationSelection,
+  adminUserSelection,
+  type AdminSsoApplicationListQuery,
   type AdminSsoApplicationPatch,
   type AdminSsoApplicationPayload,
+  type AdminUserListQuery,
+  type AdminUserPatch,
+  type AdminUserPayload,
 } from "@/schemas/admin"
-import { oauthClientMetadataSchema } from "@/schemas/database"
+import {
+  checkSsoApplicationExists,
+  createServiceError,
+  isServiceError,
+  isUniqueViolation,
+} from "@/services/helper"
 
 const adminRoles = new Set(["admin", "master"])
-
-function createServiceError(message: string, statusCode: number) {
-  return Object.assign(new Error(message), { statusCode })
-}
-
-function parseAdminPayload(input: unknown) {
-  try {
-    return adminSsoApplicationPayloadSchema.parse(input)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      throw createServiceError("invalid_payload", 400)
-    }
-
-    throw error
-  }
-}
-
-function parseAdminPatch(input: unknown) {
-  try {
-    return adminSsoApplicationPatchSchema.parse(input)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      throw createServiceError("invalid_payload", 400)
-    }
-
-    throw error
-  }
-}
-
-function assertHttpUrl(value: string, field: string) {
-  let url: URL
-
-  try {
-    url = new URL(value)
-  } catch {
-    throw createServiceError(`invalid_${field}`, 400)
-  }
-
-  if (!["http:", "https:"].includes(url.protocol)) {
-    throw createServiceError(`invalid_${field}_protocol`, 400)
-  }
-
-  if (isExpressProduction && url.protocol !== "https:") {
-    throw createServiceError(`${field}_must_use_https`, 400)
-  }
-
-  return url.toString()
-}
-
-function normalizeUrlList(values: string[], field: string) {
-  return Array.from(new Set(values.map((value) => assertHttpUrl(value, field))))
-}
-
-function assertClientId(value: string) {
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._:-]{2,127}$/.test(value)) {
-    throw createServiceError("invalid_client_id", 400)
-  }
-
-  return value
-}
-
-function getMetadata(metadata: unknown) {
-  const parsed = oauthClientMetadataSchema.safeParse(metadata)
-  return parsed.success ? parsed.data : {}
-}
-
-function getDescription(metadata: unknown) {
-  return getMetadata(metadata).description ?? null
-}
-
-function setDescription(
-  metadata: unknown,
-  description: string | null | undefined
-) {
-  return {
-    ...getMetadata(metadata),
-    description: description ?? null,
-  }
-}
-
-function getPostLogoutRedirectUris(
-  body: AdminSsoApplicationPayload,
-  redirectUris: string[]
-) {
-  if (body.postLogoutRedirectUris?.length) {
-    return normalizeUrlList(
-      body.postLogoutRedirectUris,
-      "post_logout_redirect_uri"
-    )
-  }
-
-  return redirectUris.map((redirectUri) => new URL(redirectUri).origin)
-}
-
-function toApplicationResponse(application: OAuthClient) {
-  return {
-    id: application.id,
-    clientId: application.clientId,
-    name: application.name ?? application.clientId,
-    description: getDescription(application.metadata),
-    homepageUrl: application.uri,
-    icon: application.icon,
-    redirectUris: application.redirectUris,
-    postLogoutRedirectUris: application.postLogoutRedirectUris ?? [],
-    scopes: application.scopes ?? [],
-    grantTypes: application.grantTypes ?? [],
-    responseTypes: application.responseTypes ?? [],
-    public: application.public ?? false,
-    requirePKCE: application.requirePKCE ?? true,
-    tokenEndpointAuthMethod:
-      application.tokenEndpointAuthMethod ??
-      (application.public ? "none" : "client_secret_basic"),
-    skipConsent: application.skipConsent ?? false,
-    disabled: application.disabled ?? false,
-    createdAt: application.createdAt ?? new Date(0),
-    updatedAt: application.updatedAt ?? application.createdAt ?? new Date(0),
-  }
-}
-
-function buildCreateValues(input: unknown) {
-  const body = parseAdminPayload(input)
-  const redirectUris = normalizeUrlList(body.redirectUris, "redirect_uri")
-
-  if (!redirectUris.length) {
-    throw createServiceError("redirect_uris_required", 400)
-  }
-
-  const clientId = assertClientId(body.clientId)
-  const now = new Date()
-
-  return {
-    clientId,
-    name: body.name,
-    uri: body.homepageUrl ?? null,
-    icon: body.icon ?? null,
-    redirectUris,
-    postLogoutRedirectUris: getPostLogoutRedirectUris(body, redirectUris),
-    scopes: body.scopes,
-    grantTypes: body.grantTypes,
-    responseTypes: body.responseTypes,
-    public: body.public,
-    requirePKCE: body.requirePKCE,
-    tokenEndpointAuthMethod: body.tokenEndpointAuthMethod,
-    skipConsent: body.skipConsent,
-    enableEndSession: true,
-    disabled: body.disabled,
-    referenceId: `sso_application:${clientId}`,
-    metadata: setDescription(null, body.description),
-    updatedAt: now,
-    createdAt: now,
-  }
-}
-
-function buildUpdateValues(input: unknown, current: OAuthClient) {
-  const body = parseAdminPatch(input)
-
-  if (body.clientId && body.clientId !== current.clientId) {
-    throw createServiceError("client_id_immutable", 400)
-  }
-
-  const redirectUris = body.redirectUris
-    ? normalizeUrlList(body.redirectUris, "redirect_uri")
-    : current.redirectUris
-
-  if (!redirectUris.length) {
-    throw createServiceError("redirect_uris_required", 400)
-  }
-
-  return {
-    name: body.name ?? current.name,
-    uri: "homepageUrl" in body ? (body.homepageUrl ?? null) : current.uri,
-    icon: "icon" in body ? (body.icon ?? null) : current.icon,
-    redirectUris,
-    postLogoutRedirectUris: body.postLogoutRedirectUris
-      ? normalizeUrlList(
-          body.postLogoutRedirectUris,
-          "post_logout_redirect_uri"
-        )
-      : current.postLogoutRedirectUris,
-    scopes: body.scopes ?? current.scopes,
-    grantTypes: body.grantTypes ?? current.grantTypes,
-    responseTypes: body.responseTypes ?? current.responseTypes,
-    public: body.public ?? current.public,
-    requirePKCE: body.requirePKCE ?? current.requirePKCE,
-    tokenEndpointAuthMethod:
-      body.tokenEndpointAuthMethod ?? current.tokenEndpointAuthMethod,
-    skipConsent: body.skipConsent ?? current.skipConsent,
-    disabled: body.disabled ?? current.disabled,
-    metadata:
-      "description" in body
-        ? setDescription(current.metadata, body.description)
-        : current.metadata,
-    updatedAt: new Date(),
-  }
-}
+const credentialIssuer = "local:credential"
 
 export async function requireAdminSession(headers: IncomingHttpHeaders) {
   const session = await auth.api.getSession({
@@ -234,63 +69,340 @@ export async function requireAdminSession(headers: IncomingHttpHeaders) {
   return user
 }
 
-export async function listSsoApplications() {
-  const applications = await database
-    .select()
-    .from(oauthClients)
-    .orderBy(asc(oauthClients.name))
+export async function listSsoApplications(
+  options: AdminSsoApplicationListQuery
+) {
+  try {
+    const offset = (options.page - 1) * options.limit
+    const search = options.search
+      ? or(
+          ilike(oauthClients.name, `%${options.search}%`),
+          ilike(oauthClients.clientId, `%${options.search}%`)
+        )
+      : undefined
+    const status =
+      options.status === "disabled"
+        ? eq(oauthClients.disabled, true)
+        : options.status === "enabled"
+          ? or(eq(oauthClients.disabled, false), isNull(oauthClients.disabled))
+          : undefined
+    const where = and(search, status)
+    const sortColumns = {
+      name: oauthClients.name,
+      clientId: oauthClients.clientId,
+      homepageUrl: oauthClients.uri,
+      state: oauthClients.disabled,
+      updatedAt: oauthClients.updatedAt,
+    } as const
+    const sortColumn = sortColumns[options.sortBy]
+    const orderBy =
+      options.sortOrder === "desc" ? desc(sortColumn) : asc(sortColumn)
 
-  return applications.map(toApplicationResponse)
+    const [applications, totals] = await Promise.all([
+      database
+        .select(adminSsoApplicationSelection)
+        .from(oauthClients)
+        .where(where)
+        .orderBy(orderBy, asc(oauthClients.id))
+        .limit(options.limit)
+        .offset(offset),
+      database.select({ total: count() }).from(oauthClients).where(where),
+    ])
+
+    return {
+      items: applications.map(formatSsoApplication),
+      total: totals[0]?.total ?? 0,
+      page: options.page,
+      limit: options.limit,
+    }
+  } catch (error) {
+    if (isServiceError(error)) throw error
+    throw createServiceError("sso_applications_list_failed", 500)
+  }
 }
 
-export async function listUsers() {
+export async function getSsoApplication(id: string) {
   try {
-    return await database
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        emailVerified: users.emailVerified,
-        image: users.image,
-        role: users.role,
-        bannedUntil: users.bannedUntil,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      })
-      .from(users)
-      .orderBy(asc(users.name), asc(users.email))
-  } catch {
+    if (!id) throw createServiceError("sso_application_id_required", 400)
+
+    const application = await checkSsoApplicationExists(id)
+
+    return formatSsoApplication(application)
+  } catch (error) {
+    if (isServiceError(error)) throw error
+    throw createServiceError("sso_application_read_failed", 500)
+  }
+}
+
+export async function listUsers(options: AdminUserListQuery) {
+  try {
+    const offset = (options.page - 1) * options.limit
+    const search = options.search
+      ? or(
+          ilike(users.name, `%${options.search}%`),
+          ilike(users.email, `%${options.search}%`),
+          ilike(users.username, `%${options.search}%`)
+        )
+      : undefined
+    const state =
+      options.state === "banned"
+        ? isNotNull(users.bannedUntil)
+        : options.state === "verified"
+          ? and(eq(users.emailVerified, true), isNull(users.bannedUntil))
+          : options.state === "unverified"
+            ? and(eq(users.emailVerified, false), isNull(users.bannedUntil))
+            : undefined
+    const role = options.role ? eq(users.role, options.role) : undefined
+    const where = and(search, state, role)
+    const sortColumns = {
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      state: users.bannedUntil,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    } as const
+    const sortColumn = sortColumns[options.sortBy]
+    const orderBy =
+      options.sortOrder === "desc" ? desc(sortColumn) : asc(sortColumn)
+
+    const [items, totals] = await Promise.all([
+      database
+        .select(adminUserSelection)
+        .from(users)
+        .where(where)
+        .orderBy(orderBy, asc(users.id))
+        .limit(options.limit)
+        .offset(offset),
+      database.select({ total: count() }).from(users).where(where),
+    ])
+
+    return {
+      items,
+      total: totals[0]?.total ?? 0,
+      page: options.page,
+      limit: options.limit,
+    }
+  } catch (error) {
+    if (isServiceError(error)) throw error
     throw createServiceError("users_list_failed", 500)
   }
 }
 
-export async function createSsoApplication(input: unknown) {
+export async function getUserById(id: string) {
+  try {
+    if (!id) throw createServiceError("user_id_required", 400)
+
+    const [user] = await database
+      .select(adminUserSelection)
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1)
+
+    if (!user) throw createServiceError("user_not_found", 404)
+    return user
+  } catch (error) {
+    if (isServiceError(error)) throw error
+    throw createServiceError("user_read_failed", 500)
+  }
+}
+
+export async function createUser(input: AdminUserPayload) {
+  try {
+    const context = await auth.$context
+    const password = await context.password.hash(input.password)
+
+    return await database.transaction(async (transaction) => {
+      const [user] = await transaction
+        .insert(users)
+        .values({
+          name: input.name,
+          username: input.username,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          email: input.email,
+          emailVerified: input.emailVerified,
+          image: input.image ?? null,
+          role: input.role,
+          bannedUntil: input.bannedUntil ?? null,
+          updatedAt: new Date(),
+        })
+        .returning()
+
+      if (!user) throw createServiceError("user_create_failed", 500)
+
+      await transaction.insert(accounts).values({
+        accountId: user.id,
+        issuer: credentialIssuer,
+        providerId: "credential",
+        userId: user.id,
+        password,
+        updatedAt: new Date(),
+      })
+
+      return user
+    })
+  } catch (error) {
+    if (isServiceError(error)) throw error
+    if (isUniqueViolation(error)) {
+      throw createServiceError("email_or_username_already_exists", 409)
+    }
+    throw createServiceError("user_create_failed", 500)
+  }
+}
+
+export async function updateUser(id: string, input: AdminUserPatch) {
+  try {
+    if (!id) throw createServiceError("user_id_required", 400)
+
+    if (!Object.keys(input).length) {
+      throw createServiceError("user_update_payload_required", 400)
+    }
+
+    const { password: nextPassword, ...profile } = input
+    const [user] = await database
+      .update(users)
+      .set({ ...profile, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning()
+
+    if (!user) throw createServiceError("user_not_found", 404)
+
+    if (nextPassword) {
+      const context = await auth.$context
+      const password = await context.password.hash(nextPassword)
+      const [credential] = await database
+        .update(accounts)
+        .set({ password, updatedAt: new Date() })
+        .where(
+          and(
+            eq(accounts.userId, id),
+            eq(accounts.providerId, "credential"),
+            eq(accounts.issuer, credentialIssuer)
+          )
+        )
+        .returning({ id: accounts.id })
+
+      if (!credential) {
+        await database.insert(accounts).values({
+          accountId: id,
+          issuer: credentialIssuer,
+          providerId: "credential",
+          userId: id,
+          password,
+          updatedAt: new Date(),
+        })
+      }
+    }
+
+    return user
+  } catch (error) {
+    if (isServiceError(error)) throw error
+    if (isUniqueViolation(error)) {
+      throw createServiceError("email_or_username_already_exists", 409)
+    }
+    throw createServiceError("user_update_failed", 500)
+  }
+}
+
+export async function listSessions() {
+  try {
+    return await database
+      .select({
+        id: sessions.id,
+        userId: sessions.userId,
+        userName: users.name,
+        userEmail: users.email,
+        ipAddress: sessions.ipAddress,
+        userAgent: sessions.userAgent,
+        expiresAt: sessions.expiresAt,
+        createdAt: sessions.createdAt,
+        updatedAt: sessions.updatedAt,
+      })
+      .from(sessions)
+      .innerJoin(users, eq(sessions.userId, users.id))
+      .orderBy(desc(sessions.updatedAt))
+  } catch {
+    throw createServiceError("sessions_list_failed", 500)
+  }
+}
+
+export async function listOAuthResources() {
+  try {
+    return await database
+      .select({
+        id: oauthResources.id,
+        identifier: oauthResources.identifier,
+        name: oauthResources.name,
+        accessTokenTtl: oauthResources.accessTokenTtl,
+        refreshTokenTtl: oauthResources.refreshTokenTtl,
+        signingAlgorithm: oauthResources.signingAlgorithm,
+        allowedScopes: oauthResources.allowedScopes,
+        dpopBoundAccessTokensRequired:
+          oauthResources.dpopBoundAccessTokensRequired,
+        disabled: oauthResources.disabled,
+        createdAt: oauthResources.createdAt,
+        updatedAt: oauthResources.updatedAt,
+      })
+      .from(oauthResources)
+      .orderBy(asc(oauthResources.name))
+  } catch {
+    throw createServiceError("oauth_resources_list_failed", 500)
+  }
+}
+
+export async function listOAuthConsents() {
+  try {
+    return await database
+      .select({
+        id: oauthConsents.id,
+        clientId: oauthConsents.clientId,
+        clientName: oauthClients.name,
+        userId: oauthConsents.userId,
+        userName: users.name,
+        userEmail: users.email,
+        resources: oauthConsents.resources,
+        scopes: oauthConsents.scopes,
+        createdAt: oauthConsents.createdAt,
+        updatedAt: oauthConsents.updatedAt,
+      })
+      .from(oauthConsents)
+      .leftJoin(oauthClients, eq(oauthConsents.clientId, oauthClients.clientId))
+      .leftJoin(users, eq(oauthConsents.userId, users.id))
+      .orderBy(desc(oauthConsents.updatedAt))
+  } catch {
+    throw createServiceError("oauth_consents_list_failed", 500)
+  }
+}
+
+export async function createSsoApplication(input: AdminSsoApplicationPayload) {
   const [application] = await database
     .insert(oauthClients)
-    .values(buildCreateValues(input))
+    .values(formatSsoApplicationCreateValues(input))
     .returning()
 
   if (!application) {
     throw createServiceError("sso_application_create_failed", 500)
   }
 
-  return toApplicationResponse(application)
+  return formatSsoApplication(application)
 }
 
-export async function updateSsoApplication(id: string, input: unknown) {
+export async function updateSsoApplication(
+  id: string,
+  input: AdminSsoApplicationPatch
+) {
   if (!id) throw createServiceError("sso_application_id_required", 400)
 
-  const [current] = await database
-    .select()
-    .from(oauthClients)
-    .where(eq(oauthClients.id, id))
-    .limit(1)
+  const current = await checkSsoApplicationExists(id)
 
-  if (!current) throw createServiceError("sso_application_not_found", 404)
+  if (input.clientId && input.clientId !== current.clientId) {
+    throw createServiceError("client_id_immutable", 400)
+  }
 
   const [application] = await database
     .update(oauthClients)
-    .set(buildUpdateValues(input, current))
+    .set(formatSsoApplicationUpdateValues(input, current))
     .where(eq(oauthClients.id, id))
     .returning()
 
@@ -298,7 +410,7 @@ export async function updateSsoApplication(id: string, input: unknown) {
     throw createServiceError("sso_application_update_failed", 500)
   }
 
-  return toApplicationResponse(application)
+  return formatSsoApplication(application)
 }
 
 export async function deleteSsoApplication(id: string) {
@@ -313,8 +425,3 @@ export async function deleteSsoApplication(id: string) {
 
   return application
 }
-
-export type AdminSsoApplication = Awaited<
-  ReturnType<typeof listSsoApplications>
->[number]
-export type { AdminSsoApplicationPatch, AdminSsoApplicationPayload }

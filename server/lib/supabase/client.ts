@@ -1,4 +1,4 @@
-import { isExpressProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
+import { isProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from "@/lib/utils/environment"
 import {
   createClient as createBrowserClient,
   SupabaseClient

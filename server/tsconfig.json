@@ -25,6 +25,6 @@
     "noEmit": true,
     "incremental": false
   },
-  "include": ["app/main.ts", "vite.config.ts", "express-env.d.ts", "**/*.ts"],
-  "exclude": ["node_modules", "dist", ".express"]
+  "include": ["vite-env.d.ts", "**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -1,5 +1,5 @@
 import {
-  isExpressProduction,
+  isProduction,
   supabaseAnonKey,
   supabaseServiceRoleKey,
   supabaseUrl,

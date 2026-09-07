@@ -1,33 +1,16 @@
-import { redirectUrl } from "@/lib/utils/environment"
-import { normalizeOrigin, parseHttpUrl } from "@/lib/utils/formatter"
+import { parseHttpUrl } from "@/lib/utils/formatter"
+import { validateOAuthRedirectPolicy } from "@/services/route"
 
-const allowedRedirectOrigins = redirectUrl ?? ""
-
-export function getAllowedOrigins() {
-  return allowedRedirectOrigins
-    .split(",")
-    .map((origin) => normalizeOrigin(origin.trim()))
-    .filter((origin): origin is string => Boolean(origin))
-}
-
-function isLocalDevelopmentOrigin(target: URL) {
-  if (process.env.NODE_ENV === "production") {
-    return false
-  }
-
-  return (
-    target.protocol === "http:" &&
-    ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(target.hostname)
-  )
-}
-
-export function resolveRedirect(value: string | null) {
+export async function resolveRedirect(value: string | null, ownOrigin: string) {
   const target = parseHttpUrl(value)
   if (!target) return null
 
   if (
-    !getAllowedOrigins().includes(target.origin) &&
-    !isLocalDevelopmentOrigin(target)
+    target.origin !== ownOrigin &&
+    !(await validateOAuthRedirectPolicy({
+      url: target.toString(),
+      purpose: "post_logout",
+    }))
   ) {
     return null
   }
@@ -35,12 +18,19 @@ export function resolveRedirect(value: string | null) {
   return target.toString()
 }
 
-export function getCorsHeaders(request: Request): HeadersInit {
+export async function getCorsHeaders(request: Request): Promise<HeadersInit> {
   const origin = request.headers.get("origin")
 
-  if (!origin || !getAllowedOrigins().includes(origin)) {
+  if (!origin) {
     return {}
   }
+
+  const requestOrigin = new URL(request.url).origin
+  const isAllowed =
+    origin === requestOrigin ||
+    (await validateOAuthRedirectPolicy({ url: origin, purpose: "origin" }))
+
+  if (!isAllowed) return {}
 
   return {
     "Access-Control-Allow-Origin": origin,

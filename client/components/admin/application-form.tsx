@@ -12,7 +12,7 @@ import {
   type SsoApplication,
   useCreateSsoApplicationMutation,
   useDeleteSsoApplicationMutation,
-  useSsoApplicationsQuery,
+  useSsoApplicationQuery,
   useUpdateSsoApplicationMutation,
 } from "@/services/admin"
 import {
@@ -41,11 +41,11 @@ const emptyApplication: SsoApplicationFormState = {
 }
 
 export function ApplicationEditor({ id }: { id: string }) {
-  const applicationsQuery = useSsoApplicationsQuery(undefined)
-  const application = applicationsQuery.data?.find((item) => item.id === id)
-  const error = applicationsQuery.error?.message
+  const applicationQuery = useSsoApplicationQuery(id)
+  const application = applicationQuery.data
+  const error = applicationQuery.error?.message
 
-  if (applicationsQuery.isLoading) return <LoadingScreen />
+  if (applicationQuery.isLoading) return <LoadingScreen />
   if (error || !application)
     return (
       <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">

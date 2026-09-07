@@ -4,9 +4,11 @@ import type { ReactNode } from "react"
 import { usePathname } from "next/navigation"
 import { SidebarInset, SidebarProvider } from "@gorth/primitive/custom/sidebar"
 import { AppSidebar } from "@gorth/primitive/dashboard/app-sidebar"
+import { Footer } from "@gorth/primitive/layouts/footer"
 import { SettingsShell } from "@/components/preference/settings-shell"
+import { Copyright } from "@/layouts/copyright"
 import { Dashbar } from "@/layouts/dashbar"
-import { settingSidebar } from "@/lib/utils/constant"
+import { mainFooter, settingSidebar } from "@/lib/utils/constant"
 import { useAuth } from "@/hooks/use-auth"
 import { useUser } from "@/hooks/use-user"
 
@@ -40,6 +42,11 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
             )}
           </div>
         </main>
+        <Footer
+          mode="dashboard"
+          nav={{ main: mainFooter.navDropdown, secondary: [] }}
+          bottom={<Copyright />}
+        />
       </SidebarInset>
     </SidebarProvider>
   )

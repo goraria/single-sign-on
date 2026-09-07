@@ -22,7 +22,7 @@
 // // } else {
 // //   // Development: create a new instance with connection pool
 // //   prisma = global.prisma ?? new PrismaClient({
-// //     log: process.env.EXPRESS_NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+// //     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
 // //   });
 // //   if (!global.prisma) {
 // //     global.prisma = prisma;

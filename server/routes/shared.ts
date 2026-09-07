@@ -4,20 +4,16 @@ import { Router } from "express"
 const router = Router()
 const assetsRoot = path.resolve(process.cwd(), "assets")
 
-router.get("/favicon.ico", (req, res) => {
+router.get("/favicon.ico", (_req, res) => {
   res.sendFile("favicon.ico", { root: assetsRoot })
 })
 
-router.get("/globals.css", (req, res) => {
+router.get("/globals.css", (_req, res) => {
   res.sendFile("globals.css", { root: assetsRoot })
 })
 
-router.get("/", (req, res) => {
+router.get("/", (_req, res) => {
   res.sendFile("index.html", { root: assetsRoot })
-})
-
-router.get("/api", (_req, res) => {
-  res.send("Professor Synapse API is running")
 })
 
 router.get("/health", (_req, res) => {

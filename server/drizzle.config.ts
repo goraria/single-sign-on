@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit"
 import dotenv from "dotenv"
 
-import { databaseUrl } from "./lib/utils/environment"
+import { databaseUrl } from "@/lib/utils/environment"
 
 dotenv.config({
   override: false,
