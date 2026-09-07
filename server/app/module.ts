@@ -5,6 +5,7 @@ import { Logger } from "@gorth/mechanism/lib/logger"
 import z from "@/lib/structure/cores/zod"
 import { isProduction } from "@/lib/utils/environment"
 import { getCorsOrigins } from "@/lib/utils/formatter"
+import { getOAuthClientOrigins } from "@/services/oauth-client"
 import jwksRoutes from "@/routes/jwks"
 import authRoutes from "@/routes/auth"
 import adminRoutes from "@/routes/admin"
@@ -19,6 +20,7 @@ import {
 
 export default async function AppModule() {
   const app = express()
+  const corsOrigins = await getOAuthClientOrigins(getCorsOrigins())
 
   if (isProduction) {
     app.set("trust proxy", 1)
@@ -28,7 +30,7 @@ export default async function AppModule() {
   // credentialed OPTIONS preflight requests always receive the correct headers.
   app.use(
     corsConfig({
-      origin: getCorsOrigins(),
+      origin: corsOrigins,
     })
   )
 

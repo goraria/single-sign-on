@@ -1,3 +1,4 @@
+import { validate } from "@gorth/structure/cores/uuid"
 import z from "@/lib/structure/cores/zod"
 import { createInsertSchema, createUpdateSchema } from "drizzle-orm/zod"
 
@@ -261,7 +262,7 @@ export const adminUserListQuerySchema = z.object({
 })
 
 export const adminIdParamsSchema = z.object({
-  id: z.uuid(),
+  id: z.string().refine(validate, "Invalid UUID"),
 })
 
 export type AdminSsoApplicationPayload = z.infer<

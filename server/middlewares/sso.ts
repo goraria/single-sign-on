@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from "express"
 
-import { ssoClientInternalSecret } from "@/lib/utils/environment"
+import { authSecret } from "@/lib/utils/environment"
 
 export function requireSsoClient() {
   return function requireSsoClientMiddleware(
@@ -8,10 +8,16 @@ export function requireSsoClient() {
     _res: Response,
     next: NextFunction
   ) {
-    if (
-      ssoClientInternalSecret &&
-      req.get("x-sso-client-secret") !== ssoClientInternalSecret
-    ) {
+    if (!authSecret) {
+      next(
+        Object.assign(new Error("gorth_client_secret_not_configured"), {
+          statusCode: 500,
+        })
+      )
+      return
+    }
+
+    if (req.get("x-gorth-client-secret") !== authSecret) {
       next(Object.assign(new Error("forbidden"), { statusCode: 403 }))
       return
     }

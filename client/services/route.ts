@@ -1,7 +1,4 @@
-import {
-  ssoClientInternalSecret,
-  ssoServerUrl,
-} from "@/lib/utils/environment"
+import { authSecret, serverUrl } from "@/lib/utils/environment"
 import {
   fetcher,
   toWebResponse,
@@ -57,12 +54,12 @@ export interface ForwardAdminRouteRequest {
 }
 
 function getSsoServerBaseUrl() {
-  return requireUrl(ssoServerUrl, "NEXT_SSO_SERVER_URL")
+  return requireUrl(serverUrl, "NEXT_PUBLIC_SERVER_URL")
 }
 
 function getInternalHeaders() {
-  const secret = ssoClientInternalSecret
-  return secret ? { "x-sso-client-secret": secret } : {}
+  if (!authSecret) throw new Error("Missing NEXT_AUTH_SECRET")
+  return { "x-gorth-client-secret": authSecret }
 }
 
 export async function getRouteSession(cookie: string) {
@@ -132,7 +129,6 @@ export async function signOutRouteSession({
     body: {},
     headers: {
       ...(cookie ? { Cookie: cookie } : {}),
-      ...getInternalHeaders(),
       Accept: "application/json",
       "Content-Type": "application/json",
       Origin: origin,
@@ -222,7 +218,6 @@ export async function forwardAdminRoute({
     body,
     headers: {
       ...forwardedHeaders,
-      ...getInternalHeaders(),
     },
     cache: "no-store",
     responseType: "arraybuffer",

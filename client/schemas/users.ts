@@ -1,9 +1,10 @@
+import { validate } from "@gorth/structure/cores/uuid"
 import { z } from "@gorth/structure/cores/zod"
 
 export const userRoleSchema = z.enum(["user", "admin", "vice", "master"])
 
 export const userSchema = z.object({
-  id: z.uuid(),
+  id: z.string().refine(validate, "Invalid UUID"),
   name: z.string().min(1),
   email: z.email(),
   emailVerified: z.boolean(),

@@ -25,6 +25,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@gorth/primitive/default/card"
@@ -57,6 +58,7 @@ import {
   type DisplayNameFormat,
 } from "@/lib/utils/formatter"
 import { accountProfileSchema } from "@/schemas/auth"
+import { Separator } from "@gorth/primitive/default/separator"
 
 function AccountDetail({ label, value }: { label: string; value: string }) {
   return (
@@ -102,11 +104,12 @@ function AccountDetailsCard({ account }: { account: AuthUser }) {
           <AccountDetail label="Email" value={user.email} />
           <AccountDetail label="Role" value={formatUsernameLabel(user.role)} />
         </dl>
-
-        <Accordion className="border-t">
-          <AccordionItem value="account-information">
-            <AccordionTrigger>All account information</AccordionTrigger>
-            <AccordionContent>
+      </CardContent>
+      <CardFooter>
+        <Accordion>
+          <AccordionItem className="flex flex-col gap-6" value="account-information">
+            <AccordionTrigger className="p-0">All account information</AccordionTrigger>
+            <AccordionContent className="p-0">
               <dl className="grid gap-4 sm:grid-cols-2">
                 {details.map(([label, value]) => (
                   <AccountDetail key={label} label={label} value={value} />
@@ -115,7 +118,7 @@ function AccountDetailsCard({ account }: { account: AuthUser }) {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-      </CardContent>
+      </CardFooter>
     </Card>
   )
 }
@@ -384,9 +387,9 @@ function ProfileCard() {
                               <SelectValue>
                                 {hasFullName
                                   ? formatDisplayName(
-                                      field.state.value,
-                                      values
-                                    ) || usernameLabel
+                                    field.state.value,
+                                    values
+                                  ) || usernameLabel
                                   : lockedDisplayName}
                               </SelectValue>
                             </SelectTrigger>

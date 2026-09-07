@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { ssoPublicUrl } from "@/lib/utils/environment"
+import { clientUrl } from "@/lib/utils/environment"
 import {
   getResponseErrorDetail,
   resolveOrigin,
@@ -9,7 +9,7 @@ import { getCorsHeaders, resolveRedirect } from "@/lib/utils/redirect"
 import { signOutRouteSession } from "@/services/route"
 
 function getPublicOrigin(request: NextRequest) {
-  return resolveOrigin(ssoPublicUrl, request.nextUrl.origin)
+  return resolveOrigin(clientUrl, request.nextUrl.origin)
 }
 
 async function signOut(request: NextRequest) {

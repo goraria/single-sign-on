@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { clientUrl, isDevelopment } from "@/lib/utils/environment"
 import {
   getForwardedOrigin,
   hasSearchParameters,
   isAbsoluteHttpUrl,
+  resolveOrigin,
   resolveInternalPath,
 } from "@/lib/utils/formatter"
 import { resolveRedirect } from "@/lib/utils/redirect"
@@ -24,7 +26,8 @@ export async function GET(request: NextRequest) {
   }
 
   const next = searchParams.get("next")
-  const externalTarget = await resolveRedirect(next, origin)
+  const publicOrigin = resolveOrigin(clientUrl, origin)
+  const externalTarget = await resolveRedirect(next, publicOrigin)
 
   if (externalTarget) {
     return NextResponse.redirect(
@@ -37,10 +40,9 @@ export async function GET(request: NextRequest) {
   }
 
   const relativeNext = resolveInternalPath(next)
-  const redirectOrigin =
-    process.env.NODE_ENV === "development"
-      ? origin
-      : getForwardedOrigin(request, origin)
+  const redirectOrigin = isDevelopment
+    ? origin
+    : getForwardedOrigin(request, origin)
 
   return NextResponse.redirect(`${redirectOrigin}${relativeNext}`)
 }

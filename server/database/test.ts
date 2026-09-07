@@ -12,9 +12,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
-import { randomUUID } from "node:crypto"
-
-const createTextId = () => randomUUID()
+import { v4 } from "@gorth/structure/cores/uuid"
 
 export const categoryValues = [
   "FOLLOWING",
@@ -32,7 +30,7 @@ export const category = pgEnum("Category", categoryValues)
 export const users = pgTable(
   "User",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     name: varchar("name", { length: 191 }),
     displayName: varchar("displayName", { length: 191 }).notNull().default(""),
     username: varchar("username", { length: 191 }),
@@ -62,7 +60,7 @@ export const users = pgTable(
 export const accounts = pgTable(
   "Account",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     userId: varchar("userId", { length: 191 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -106,7 +104,7 @@ export const accounts = pgTable(
 export const sessions = pgTable(
   "Session",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     sessionToken: varchar("sessionToken", { length: 191 }).notNull(),
     userId: varchar("userId", { length: 191 })
       .notNull()
@@ -146,7 +144,7 @@ export const verificationTokens = pgTable(
 export const verifications = pgTable(
   "Verification",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     identifier: varchar("identifier", { length: 191 }).notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expiresAt", { mode: "date", precision: 3 }).notNull(),
@@ -164,7 +162,7 @@ export const verifications = pgTable(
 export const libraries = pgTable(
   "Library",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     userId: varchar("userId", { length: 191 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -199,7 +197,7 @@ export const mangas = pgTable("Manga", {
 export const libraryMangas = pgTable(
   "LibraryManga",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     libraryId: varchar("libraryId", { length: 191 })
       .notNull()
       .references(() => libraries.id, { onDelete: "cascade" }),
@@ -232,7 +230,7 @@ export const libraryMangas = pgTable(
 export const mangaComments = pgTable(
   "MangaComment",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     title: varchar("title", { length: 255 }).notNull().default(""),
     content: text("content").notNull(),
     isEdited: boolean("isEdited").notNull().default(false),
@@ -279,7 +277,7 @@ export const chapters = pgTable("Chapter", {
 export const chapterComments = pgTable(
   "ChapterComment",
   {
-    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(createTextId),
+    id: varchar("id", { length: 191 }).primaryKey().$defaultFn(v4),
     title: varchar("title", { length: 255 }).notNull().default(""),
     content: text("content").notNull(),
     isEdited: boolean("isEdited").notNull().default(false),

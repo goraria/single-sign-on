@@ -12,6 +12,7 @@ import {
 } from "@/lib/mechanism/config"
 import { isProduction } from "@/lib/utils/environment"
 import { getCorsOrigins } from "@/lib/utils/formatter"
+import { getOAuthClientOrigins } from "@/services/oauth-client"
 import adminRoutes from "@/routes/admin"
 import authRoutes from "@/routes/auth"
 import jwksRoutes from "@/routes/jwks"
@@ -19,6 +20,7 @@ import sharedRoutes from "@/routes/shared"
 import ssoRoutes from "@/routes/sso"
 
 const app = express()
+const corsOrigins = await getOAuthClientOrigins(getCorsOrigins())
 
 if (isProduction) {
   app.set("trust proxy", 1)
@@ -26,7 +28,7 @@ if (isProduction) {
 
 app.use(
   corsConfig({
-    origin: getCorsOrigins(),
+    origin: corsOrigins,
   })
 )
 app.use(helmetConfig())

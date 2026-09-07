@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { v4 } from "@gorth/structure/cores/uuid"
 import {
   supabaseBucket,
   supabaseServiceRoleKey,
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
     }
 
     const { bucket, secretKey, url } = getStorageConfig()
-    const path = `avatars/${userId}/${crypto.randomUUID()}.${getFileExtension(file)}`
+    const path = `avatars/${userId}/${v4()}.${getFileExtension(file)}`
     const { encodedBucket, encodedPath, response } = await uploadRouteAvatar({
       url,
       bucket,

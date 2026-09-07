@@ -66,6 +66,29 @@ export async function getOAuthClientAudiences(baseAudiences: string[] = []) {
   return Array.from(new Set([...baseAudiences, ...databaseAudiences]))
 }
 
+export async function getOAuthClientOrigins(baseOrigins: string[] = []) {
+  const clients = await database
+    .select({
+      disabled: oauthClients.disabled,
+      uri: oauthClients.uri,
+      redirectUris: oauthClients.redirectUris,
+      postLogoutRedirectUris: oauthClients.postLogoutRedirectUris,
+    })
+    .from(oauthClients)
+
+  const databaseOrigins = clients
+    .filter((client) => !client.disabled)
+    .flatMap((client) => [
+      client.uri,
+      ...client.redirectUris,
+      ...(client.postLogoutRedirectUris ?? []),
+    ])
+    .map(normalizeOrigin)
+    .filter((origin): origin is string => Boolean(origin))
+
+  return Array.from(new Set([...baseOrigins, ...databaseOrigins]))
+}
+
 export async function getTrustedOAuthClientIds() {
   const clients = await database
     .select({

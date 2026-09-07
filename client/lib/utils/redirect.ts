@@ -1,4 +1,5 @@
-import { parseHttpUrl } from "@/lib/utils/formatter"
+import { clientUrl } from "@/lib/utils/environment"
+import { parseHttpUrl, resolveOrigin } from "@/lib/utils/formatter"
 import { validateOAuthRedirectPolicy } from "@/services/route"
 
 export async function resolveRedirect(value: string | null, ownOrigin: string) {
@@ -25,7 +26,7 @@ export async function getCorsHeaders(request: Request): Promise<HeadersInit> {
     return {}
   }
 
-  const requestOrigin = new URL(request.url).origin
+  const requestOrigin = resolveOrigin(clientUrl, request.url)
   const isAllowed =
     origin === requestOrigin ||
     (await validateOAuthRedirectPolicy({ url: origin, purpose: "origin" }))

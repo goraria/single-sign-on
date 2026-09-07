@@ -1,14 +1,14 @@
-import { randomUUID } from "node:crypto"
-import { type IncomingHttpHeaders } from "node:http"
+import { type IncomingHttpHeaders } from "http"
 import jwt from "@gorth/mechanism/cores/jsonwebtoken"
+import { v4 } from "@gorth/structure/cores/uuid"
 
 import { auth } from "@/lib/auth"
 import { fromNodeHeaders } from "@/lib/structure/auth/server"
 import {
   accessTokenExpiresIn,
   accessTokenSecret,
+  authSecret,
   betterAuthSecret,
-  jwtSecret,
   refreshTokenExpiresIn,
   refreshTokenSecret,
 } from "@/lib/utils/environment"
@@ -101,12 +101,12 @@ function getAppContextFromToken(
 function getTokenSecrets() {
   return {
     accessTokenSecret: getRequiredSecret(
-      "SSO_ACCESS_TOKEN_SECRET",
-      accessTokenSecret ?? betterAuthSecret ?? jwtSecret
+      "GORTH_ACCESS_TOKEN_SECRET",
+      betterAuthSecret ?? authSecret
     ),
     refreshTokenSecret: getRequiredSecret(
-      "SSO_REFRESH_TOKEN_SECRET",
-      refreshTokenSecret ?? betterAuthSecret ?? jwtSecret
+      "GORTH_REFRESH_TOKEN_SECRET",
+      betterAuthSecret ?? authSecret
     ),
   }
 }
@@ -147,20 +147,20 @@ function signTokenPair(
       { ...tokenBasePayload, typ: "access" },
       accessTokenSecret,
       {
-        expiresIn: getExpiresIn("access", "15m"),
+        expiresIn: getExpiresIn("access", accessTokenExpiresIn!),
         issuer,
         audience: appContext.id,
-        jwtid: randomUUID(),
+        jwtid: v4(),
       }
     ),
     refresh_token: jwt.sign(
       { ...tokenBasePayload, typ: "refresh" },
       refreshTokenSecret,
       {
-        expiresIn: getExpiresIn("refresh", "30d"),
+        expiresIn: getExpiresIn("refresh", refreshTokenExpiresIn!),
         issuer,
         audience: appContext.id,
-        jwtid: randomUUID(),
+        jwtid: v4(),
       }
     ),
   }

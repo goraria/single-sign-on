@@ -18,14 +18,15 @@ import {
 } from "@/lib/utils/environment"
 import {
   getAudienceClaim,
+  getCorsOrigins,
   getStringClaim,
-  getTrustedOrigins,
 } from "@/lib/utils/formatter"
 
 import { database } from "@/database"
 import { betterAuthSchema } from "@/database/schema"
 import {
   getOAuthClientAudiences,
+  getOAuthClientOrigins,
   getSsoApplicationContext,
   getTrustedOAuthClientIds,
 } from "@/services/oauth-client"
@@ -115,8 +116,8 @@ async function getGorthUserInfoClaims(
   }
 }
 
-const trustedOrigins = getTrustedOrigins()
-const resources = await getOAuthClientAudiences(trustedOrigins)
+const trustedOrigins = await getOAuthClientOrigins(getCorsOrigins())
+const resources = await getOAuthClientAudiences(getCorsOrigins())
 const cachedTrustedClients = await getTrustedOAuthClientIds()
 
 export const auth = betterAuth({

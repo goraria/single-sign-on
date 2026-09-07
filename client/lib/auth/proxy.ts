@@ -1,7 +1,4 @@
-import {
-  ssoClientInternalSecret,
-  ssoServerUrl,
-} from "@/lib/utils/environment"
+import { serverUrl } from "@/lib/utils/environment"
 import {
   appendResponseCookies,
   copyUrlSearch,
@@ -26,7 +23,7 @@ const omittedResponseHeaders = new Set([
 ])
 
 function getServerBaseUrl() {
-  return requireUrl(ssoServerUrl, "NEXT_SSO_SERVER_URL")
+  return requireUrl(serverUrl, "NEXT_PUBLIC_SERVER_URL")
 }
 
 function copyRequestHeaders(request: Request) {
@@ -41,9 +38,6 @@ function copyRequestHeaders(request: Request) {
   ]) {
     headers.delete(name)
   }
-
-  const internalSecret = ssoClientInternalSecret
-  if (internalSecret) headers.set("x-sso-client-secret", internalSecret)
 
   return headers
 }

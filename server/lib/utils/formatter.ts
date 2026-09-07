@@ -5,17 +5,7 @@ import {
   type AdminSsoApplicationPayload,
 } from "@/schemas/admin"
 import { oauthClientMetadataSchema } from "@/schemas/database"
-import {
-  clientUrl,
-  localUrl,
-  mobileUrl,
-  allowedRedirectOrigins,
-  betterAuthUrl,
-  serverUrl,
-  googleClientId,
-  googleClientSecret,
-  isProduction,
-} from "@/lib/utils/environment"
+import { clientUrl } from "@/lib/utils/environment"
 export { formatCodeDate, formatDate } from "@/lib/utils/temp"
 
 export function stringifyQuery(obj: Record<string, unknown>): string {
@@ -48,17 +38,8 @@ export function normalizeEmail(email: string): string {
 }
 
 export function getCorsOrigins(): string[] {
-  return Array.from(
-    new Set(
-      [
-        "https://gorth-single-sign-on-client.vercel.app",
-        clientUrl,
-        mobileUrl,
-        localUrl,
-        allowedRedirectOrigins,
-      ].flatMap(splitOrigins)
-    )
-  )
+  const origin = normalizeOrigin(clientUrl)
+  return origin ? [origin] : []
 }
 
 export function getStringClaim(value: unknown) {
@@ -98,32 +79,6 @@ export function normalizeUrl(value: string) {
   } catch {
     return null
   }
-}
-
-export function splitOrigins(value: string | undefined | null) {
-  return (
-    value
-      ?.split(",")
-      .map((origin) => normalizeOrigin(origin.trim()))
-      .filter((origin): origin is string => Boolean(origin)) ?? []
-  )
-}
-
-export function getTrustedOrigins() {
-  return Array.from(
-    new Set([
-      ...splitOrigins(betterAuthUrl),
-      ...splitOrigins(clientUrl),
-      ...splitOrigins(localUrl),
-      ...splitOrigins(mobileUrl),
-      ...splitOrigins(serverUrl),
-      ...splitOrigins(allowedRedirectOrigins),
-      ...getCorsOrigins(),
-      ...(!isProduction
-        ? ["http://localhost:3000", "http://127.0.0.1:3000"]
-        : []),
-    ])
-  )
 }
 
 function getOAuthClientMetadata(metadata: unknown) {

@@ -1,6 +1,6 @@
 import "server-only"
 
-import { ssoAuthCodeSecret } from "@/lib/utils/environment"
+import { authSecret } from "@/lib/utils/environment"
 
 import {
   createCipheriv,
@@ -20,10 +20,10 @@ type AuthorizationCodeRecord = {
 }
 
 function getCodeSecret() {
-  const secret = ssoAuthCodeSecret
+  const secret = authSecret
 
   if (!secret) {
-    throw new Error("Missing NEXT_SSO_AUTH_CODE_SECRET")
+    throw new Error("Missing NEXT_AUTH_SECRET")
   }
 
   return secret
@@ -81,7 +81,9 @@ export function consumeAuthorizationCode(code: string) {
       decipher.update(decodeBase64Url(encryptedValue)),
       decipher.final(),
     ])
-    const record = JSON.parse(decrypted.toString("utf8")) as AuthorizationCodeRecord
+    const record = JSON.parse(
+      decrypted.toString("utf8")
+    ) as AuthorizationCodeRecord
 
     if (
       record.version !== AUTH_CODE_VERSION ||
