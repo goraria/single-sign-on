@@ -112,7 +112,7 @@ export const accounts = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     accountId: text("account_id").notNull(),
-    issuer: text("issuer").notNull(),
+    issuer: text("issuer"),
     providerId: text("provider_id").notNull(),
     userId: uuid("user_id")
       .notNull()
