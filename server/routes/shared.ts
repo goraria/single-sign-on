@@ -2,17 +2,27 @@
 import { Router } from "express"
 
 import favicon from "@/assets/favicon.ico?inline"
+import gorth from "@/assets/gorth.png?inline"
 import globalsCss from "@/assets/globals.css?raw"
 import indexHtml from "@/assets/index.html?raw"
 
 const router = Router()
 
-router.get("/favicon.ico", (req, res) => {
+router.get("/favicon.ico", (_req, res) => {
   const base64 = favicon.replace(/^data:image\/x-icon;base64,/, "")
 
   res
     .status(200)
     .type("image/x-icon")
+    .send(Buffer.from(base64, "base64"))
+})
+
+router.get("/gorth.png", (_req, res) => {
+  const base64 = gorth.replace(/^data:image\/png;base64,/, "")
+
+  res
+    .status(200)
+    .type("image/png")
     .send(Buffer.from(base64, "base64"))
 })
 
