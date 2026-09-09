@@ -1,8 +1,40 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "app/index.ts": {
-      "includeFiles": "assets/**"
+  "version": 2,
+  "builds": [
+    {
+      "src": "assets/index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/favicon.ico",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/globals.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "app/index.ts",
+      "use": "@vercel/node"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/assets/index.html"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/assets/favicon.ico"
+    },
+    {
+      "src": "/globals.css",
+      "dest": "/assets/globals.css"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/app/index.ts"
+    }
+  ]
 }

@@ -46,7 +46,7 @@ app.use(cookieParserConfig())
 app.use("/internal", ssoRoutes)
 app.use("/.well-known", jwksRoutes)
 app.use("/admin", adminRoutes)
-app.use("/", sharedRoutes)
+// app.use("/", sharedRoutes)
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({
@@ -60,8 +60,8 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   const statusCode = validationError
     ? 400
     : error instanceof Error &&
-        "statusCode" in error &&
-        typeof error.statusCode === "number"
+      "statusCode" in error &&
+      typeof error.statusCode === "number"
       ? error.statusCode
       : 500
   const message = validationError
