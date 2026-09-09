@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/index.ts": {
+      "includeFiles": "assets/**"
+    }
+  }
+}
