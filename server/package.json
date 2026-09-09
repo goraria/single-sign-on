@@ -2,7 +2,7 @@
   "name": "@gorth/single-sign-on-server",
   "version": "0.4.0",
   "description": "",
-  "main": "app/main.ts",
+  "main": "app/index.ts",
   "type": "module",
   "keywords": [],
   "author": "",
