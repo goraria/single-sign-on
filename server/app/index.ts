@@ -46,7 +46,7 @@ app.use(cookieParserConfig())
 app.use("/internal", ssoRoutes)
 app.use("/.well-known", jwksRoutes)
 app.use("/admin", adminRoutes)
-// app.use("/", sharedRoutes)
+app.use("/", sharedRoutes)
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({

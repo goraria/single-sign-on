@@ -7,7 +7,7 @@ import indexHtml from "@/assets/index.html?raw"
 
 const router = Router()
 
-router.get("/favicon.ico", (_req, res) => {
+router.get("/favicon.ico", (req, res) => {
   const base64 = favicon.replace(/^data:image\/x-icon;base64,/, "")
 
   res
@@ -16,21 +16,21 @@ router.get("/favicon.ico", (_req, res) => {
     .send(Buffer.from(base64, "base64"))
 })
 
-router.get("/globals.css", (_req, res) => {
+router.get("/globals.css", (req, res) => {
   res
     .status(200)
     .type("text/css")
     .send(globalsCss)
 })
 
-router.get("/", (_req, res) => {
+router.get("/", (req, res) => {
   res
     .status(200)
     .type("html")
     .send(indexHtml)
 })
 
-router.get("/health", (_req, res) => {
+router.get("/health", (req, res) => {
   res.status(200).json({
     status: "OK",
     timestamp: new Date().toISOString(),
@@ -57,19 +57,19 @@ router.get("/query", (req, res) => {
 
 // const assetsRoot = path.resolve(process.cwd(), "assets")
 
-// router.get("/favicon.ico", (_req, res) => {
+// router.get("/favicon.ico", (req, res) => {
 //   res.sendFile("favicon.ico", { root: assetsRoot })
 // })
 
-// router.get("/globals.css", (_req, res) => {
+// router.get("/globals.css", (req, res) => {
 //   res.sendFile("globals.css", { root: assetsRoot })
 // })
 
-// router.get("/", (_req, res) => {
+// router.get("/", (req, res) => {
 //   res.sendFile("index.html", { root: assetsRoot })
 // })
 
-// router.get("/health", (_req, res) => {
+// router.get("/health", (req, res) => {
 //   res.status(200).json({
 //     status: "OK",
 //     timestamp: new Date().toISOString(),
