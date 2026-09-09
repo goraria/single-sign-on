@@ -76,7 +76,7 @@ export const taskPriorities = [
 export const taskLabels = ["bug", "feature", "documentation"] as const
 
 export function getUserStatusVariant(user: SsoUser) {
-  if (user.bannedUntil) return "danger" as const
+  if (user.banExpires) return "danger" as const
   return user.emailVerified ? ("success" as const) : ("warning" as const)
 }
 
@@ -98,7 +98,7 @@ export function renderUserRole(role: SsoUser["role"]) {
 export function renderUserStatus(user: SsoUser) {
   return (
     <Badge variant={getUserStatusVariant(user)}>
-      {user.bannedUntil
+      {user.banExpires
         ? "Banned"
         : user.emailVerified
           ? "Verified"
@@ -126,7 +126,7 @@ export function renderTaskStatus(
 
   return (
     <span className="flex items-center gap-2">
-      <Icon className="text-muted-foreground size-4" />
+      <Icon className="size-4 text-muted-foreground" />
       {item.label}
     </span>
   )
@@ -143,7 +143,7 @@ export function renderTaskPriority(
 
   return (
     <span className="flex items-center gap-2">
-      <Icon className="text-muted-foreground size-4" />
+      <Icon className="size-4 text-muted-foreground" />
       {item.label}
     </span>
   )

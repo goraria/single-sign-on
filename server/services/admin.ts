@@ -13,15 +13,15 @@ import {
 
 import { database } from "@/database"
 import {
-  accounts,
-  oauthClients,
-  oauthConsents,
-  oauthResources,
-  sessions,
-  users,
+  account,
+  oauthClient,
+  oauthConsent,
+  oauthResource,
+  session,
+  user,
 } from "@/database/schema"
 import { auth } from "@/lib/auth"
-import { fromNodeHeaders } from "@/lib/structure/auth/server"
+import { fromNodeHeaders } from "@gorth/structure/cores/auth/server/index"
 import {
   formatSsoApplication,
   formatSsoApplicationCreateValues,
@@ -56,17 +56,17 @@ export async function requireAdminSession(headers: IncomingHttpHeaders) {
     throw createServiceError("unauthorized", 401)
   }
 
-  const [user] = await database
-    .select({ id: users.id, role: users.role })
-    .from(users)
-    .where(eq(users.id, session.user.id))
+  const [adminUser] = await database
+    .select({ id: user.id, role: user.role })
+    .from(user)
+    .where(eq(user.id, session.user.id))
     .limit(1)
 
-  if (!user || !adminRoles.has(user.role)) {
+  if (!adminUser || !adminRoles.has(adminUser.role)) {
     throw createServiceError("forbidden", 403)
   }
 
-  return user
+  return adminUser
 }
 
 export async function listSsoApplications(
@@ -76,23 +76,23 @@ export async function listSsoApplications(
     const offset = (options.page - 1) * options.limit
     const search = options.search
       ? or(
-          ilike(oauthClients.name, `%${options.search}%`),
-          ilike(oauthClients.clientId, `%${options.search}%`)
+          ilike(oauthClient.name, `%${options.search}%`),
+          ilike(oauthClient.clientId, `%${options.search}%`)
         )
       : undefined
     const status =
       options.status === "disabled"
-        ? eq(oauthClients.disabled, true)
+        ? eq(oauthClient.disabled, true)
         : options.status === "enabled"
-          ? or(eq(oauthClients.disabled, false), isNull(oauthClients.disabled))
+          ? or(eq(oauthClient.disabled, false), isNull(oauthClient.disabled))
           : undefined
     const where = and(search, status)
     const sortColumns = {
-      name: oauthClients.name,
-      clientId: oauthClients.clientId,
-      homepageUrl: oauthClients.uri,
-      state: oauthClients.disabled,
-      updatedAt: oauthClients.updatedAt,
+      name: oauthClient.name,
+      clientId: oauthClient.clientId,
+      homepageUrl: oauthClient.uri,
+      state: oauthClient.disabled,
+      updatedAt: oauthClient.updatedAt,
     } as const
     const sortColumn = sortColumns[options.sortBy]
     const orderBy =
@@ -101,12 +101,12 @@ export async function listSsoApplications(
     const [applications, totals] = await Promise.all([
       database
         .select(adminSsoApplicationSelection)
-        .from(oauthClients)
+        .from(oauthClient)
         .where(where)
-        .orderBy(orderBy, asc(oauthClients.id))
+        .orderBy(orderBy, asc(oauthClient.id))
         .limit(options.limit)
         .offset(offset),
-      database.select({ total: count() }).from(oauthClients).where(where),
+      database.select({ total: count() }).from(oauthClient).where(where),
     ])
 
     return {
@@ -139,28 +139,28 @@ export async function listUsers(options: AdminUserListQuery) {
     const offset = (options.page - 1) * options.limit
     const search = options.search
       ? or(
-          ilike(users.name, `%${options.search}%`),
-          ilike(users.email, `%${options.search}%`),
-          ilike(users.username, `%${options.search}%`)
+          ilike(user.name, `%${options.search}%`),
+          ilike(user.email, `%${options.search}%`),
+          ilike(user.username, `%${options.search}%`)
         )
       : undefined
     const state =
       options.state === "banned"
-        ? isNotNull(users.bannedUntil)
+        ? isNotNull(user.banExpires)
         : options.state === "verified"
-          ? and(eq(users.emailVerified, true), isNull(users.bannedUntil))
+          ? and(eq(user.emailVerified, true), isNull(user.banExpires))
           : options.state === "unverified"
-            ? and(eq(users.emailVerified, false), isNull(users.bannedUntil))
+            ? and(eq(user.emailVerified, false), isNull(user.banExpires))
             : undefined
-    const role = options.role ? eq(users.role, options.role) : undefined
+    const role = options.role ? eq(user.role, options.role) : undefined
     const where = and(search, state, role)
     const sortColumns = {
-      name: users.name,
-      email: users.email,
-      role: users.role,
-      state: users.bannedUntil,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      state: user.banExpires,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     } as const
     const sortColumn = sortColumns[options.sortBy]
     const orderBy =
@@ -169,12 +169,12 @@ export async function listUsers(options: AdminUserListQuery) {
     const [items, totals] = await Promise.all([
       database
         .select(adminUserSelection)
-        .from(users)
+        .from(user)
         .where(where)
-        .orderBy(orderBy, asc(users.id))
+        .orderBy(orderBy, asc(user.id))
         .limit(options.limit)
         .offset(offset),
-      database.select({ total: count() }).from(users).where(where),
+      database.select({ total: count() }).from(user).where(where),
     ])
 
     return {
@@ -193,14 +193,14 @@ export async function getUserById(id: string) {
   try {
     if (!id) throw createServiceError("user_id_required", 400)
 
-    const [user] = await database
+    const [foundUser] = await database
       .select(adminUserSelection)
-      .from(users)
-      .where(eq(users.id, id))
+      .from(user)
+      .where(eq(user.id, id))
       .limit(1)
 
-    if (!user) throw createServiceError("user_not_found", 404)
-    return user
+    if (!foundUser) throw createServiceError("user_not_found", 404)
+    return foundUser
   } catch (error) {
     if (isServiceError(error)) throw error
     throw createServiceError("user_read_failed", 500)
@@ -213,8 +213,8 @@ export async function createUser(input: AdminUserPayload) {
     const password = await context.password.hash(input.password)
 
     return await database.transaction(async (transaction) => {
-      const [user] = await transaction
-        .insert(users)
+      const [createdUser] = await transaction
+        .insert(user)
         .values({
           name: input.name,
           username: input.username,
@@ -224,23 +224,24 @@ export async function createUser(input: AdminUserPayload) {
           emailVerified: input.emailVerified,
           image: input.image ?? null,
           role: input.role,
-          bannedUntil: input.bannedUntil ?? null,
+          banExpires: input.banExpires ?? null,
+          banReason: input.banReason ?? null,
           updatedAt: new Date(),
         })
         .returning()
 
-      if (!user) throw createServiceError("user_create_failed", 500)
+      if (!createdUser) throw createServiceError("user_create_failed", 500)
 
-      await transaction.insert(accounts).values({
-        accountId: user.id,
+      await transaction.insert(account).values({
+        accountId: createdUser.id,
         issuer: credentialIssuer,
         providerId: "credential",
-        userId: user.id,
+        userId: createdUser.id,
         password,
         updatedAt: new Date(),
       })
 
-      return user
+      return createdUser
     })
   } catch (error) {
     if (isServiceError(error)) throw error
@@ -260,31 +261,31 @@ export async function updateUser(id: string, input: AdminUserPatch) {
     }
 
     const { password: nextPassword, ...profile } = input
-    const [user] = await database
-      .update(users)
+    const [updatedUser] = await database
+      .update(user)
       .set({ ...profile, updatedAt: new Date() })
-      .where(eq(users.id, id))
+      .where(eq(user.id, id))
       .returning()
 
-    if (!user) throw createServiceError("user_not_found", 404)
+    if (!updatedUser) throw createServiceError("user_not_found", 404)
 
     if (nextPassword) {
       const context = await auth.$context
       const password = await context.password.hash(nextPassword)
       const [credential] = await database
-        .update(accounts)
+        .update(account)
         .set({ password, updatedAt: new Date() })
         .where(
           and(
-            eq(accounts.userId, id),
-            eq(accounts.providerId, "credential"),
-            eq(accounts.issuer, credentialIssuer)
+            eq(account.userId, id),
+            eq(account.providerId, "credential"),
+            eq(account.issuer, credentialIssuer)
           )
         )
-        .returning({ id: accounts.id })
+        .returning({ id: account.id })
 
       if (!credential) {
-        await database.insert(accounts).values({
+        await database.insert(account).values({
           accountId: id,
           issuer: credentialIssuer,
           providerId: "credential",
@@ -295,7 +296,7 @@ export async function updateUser(id: string, input: AdminUserPatch) {
       }
     }
 
-    return user
+    return updatedUser
   } catch (error) {
     if (isServiceError(error)) throw error
     if (isUniqueViolation(error)) {
@@ -309,19 +310,19 @@ export async function listSessions() {
   try {
     return await database
       .select({
-        id: sessions.id,
-        userId: sessions.userId,
-        userName: users.name,
-        userEmail: users.email,
-        ipAddress: sessions.ipAddress,
-        userAgent: sessions.userAgent,
-        expiresAt: sessions.expiresAt,
-        createdAt: sessions.createdAt,
-        updatedAt: sessions.updatedAt,
+        id: session.id,
+        userId: session.userId,
+        userName: user.name,
+        userEmail: user.email,
+        ipAddress: session.ipAddress,
+        userAgent: session.userAgent,
+        expiresAt: session.expiresAt,
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
       })
-      .from(sessions)
-      .innerJoin(users, eq(sessions.userId, users.id))
-      .orderBy(desc(sessions.updatedAt))
+      .from(session)
+      .innerJoin(user, eq(session.userId, user.id))
+      .orderBy(desc(session.updatedAt))
   } catch {
     throw createServiceError("sessions_list_failed", 500)
   }
@@ -331,21 +332,21 @@ export async function listOAuthResources() {
   try {
     return await database
       .select({
-        id: oauthResources.id,
-        identifier: oauthResources.identifier,
-        name: oauthResources.name,
-        accessTokenTtl: oauthResources.accessTokenTtl,
-        refreshTokenTtl: oauthResources.refreshTokenTtl,
-        signingAlgorithm: oauthResources.signingAlgorithm,
-        allowedScopes: oauthResources.allowedScopes,
+        id: oauthResource.id,
+        identifier: oauthResource.identifier,
+        name: oauthResource.name,
+        accessTokenTtl: oauthResource.accessTokenTtl,
+        refreshTokenTtl: oauthResource.refreshTokenTtl,
+        signingAlgorithm: oauthResource.signingAlgorithm,
+        allowedScopes: oauthResource.allowedScopes,
         dpopBoundAccessTokensRequired:
-          oauthResources.dpopBoundAccessTokensRequired,
-        disabled: oauthResources.disabled,
-        createdAt: oauthResources.createdAt,
-        updatedAt: oauthResources.updatedAt,
+          oauthResource.dpopBoundAccessTokensRequired,
+        disabled: oauthResource.disabled,
+        createdAt: oauthResource.createdAt,
+        updatedAt: oauthResource.updatedAt,
       })
-      .from(oauthResources)
-      .orderBy(asc(oauthResources.name))
+      .from(oauthResource)
+      .orderBy(asc(oauthResource.name))
   } catch {
     throw createServiceError("oauth_resources_list_failed", 500)
   }
@@ -355,21 +356,21 @@ export async function listOAuthConsents() {
   try {
     return await database
       .select({
-        id: oauthConsents.id,
-        clientId: oauthConsents.clientId,
-        clientName: oauthClients.name,
-        userId: oauthConsents.userId,
-        userName: users.name,
-        userEmail: users.email,
-        resources: oauthConsents.resources,
-        scopes: oauthConsents.scopes,
-        createdAt: oauthConsents.createdAt,
-        updatedAt: oauthConsents.updatedAt,
+        id: oauthConsent.id,
+        clientId: oauthConsent.clientId,
+        clientName: oauthClient.name,
+        userId: oauthConsent.userId,
+        userName: user.name,
+        userEmail: user.email,
+        resources: oauthConsent.resources,
+        scopes: oauthConsent.scopes,
+        createdAt: oauthConsent.createdAt,
+        updatedAt: oauthConsent.updatedAt,
       })
-      .from(oauthConsents)
-      .leftJoin(oauthClients, eq(oauthConsents.clientId, oauthClients.clientId))
-      .leftJoin(users, eq(oauthConsents.userId, users.id))
-      .orderBy(desc(oauthConsents.updatedAt))
+      .from(oauthConsent)
+      .leftJoin(oauthClient, eq(oauthConsent.clientId, oauthClient.clientId))
+      .leftJoin(user, eq(oauthConsent.userId, user.id))
+      .orderBy(desc(oauthConsent.updatedAt))
   } catch {
     throw createServiceError("oauth_consents_list_failed", 500)
   }
@@ -377,7 +378,7 @@ export async function listOAuthConsents() {
 
 export async function createSsoApplication(input: AdminSsoApplicationPayload) {
   const [application] = await database
-    .insert(oauthClients)
+    .insert(oauthClient)
     .values(formatSsoApplicationCreateValues(input))
     .returning()
 
@@ -401,9 +402,9 @@ export async function updateSsoApplication(
   }
 
   const [application] = await database
-    .update(oauthClients)
+    .update(oauthClient)
     .set(formatSsoApplicationUpdateValues(input, current))
-    .where(eq(oauthClients.id, id))
+    .where(eq(oauthClient.id, id))
     .returning()
 
   if (!application) {
@@ -417,9 +418,9 @@ export async function deleteSsoApplication(id: string) {
   if (!id) throw createServiceError("sso_application_id_required", 400)
 
   const [application] = await database
-    .delete(oauthClients)
-    .where(eq(oauthClients.id, id))
-    .returning({ id: oauthClients.id })
+    .delete(oauthClient)
+    .where(eq(oauthClient.id, id))
+    .returning({ id: oauthClient.id })
 
   if (!application) throw createServiceError("sso_application_not_found", 404)
 

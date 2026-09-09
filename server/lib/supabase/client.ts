@@ -2,7 +2,7 @@ import { isProduction, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } fr
 import {
   createClient as createBrowserClient,
   SupabaseClient
-} from '@/lib/structure/cores/supabase/index'
+} from '@gorth/structure/cores/supabase/index'
 
 /**
  * Creates a Supabase client for Express (server-side)

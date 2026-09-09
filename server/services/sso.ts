@@ -3,7 +3,7 @@ import jwt from "@gorth/mechanism/cores/jsonwebtoken"
 import { v4 } from "@gorth/structure/cores/uuid"
 
 import { auth } from "@/lib/auth"
-import { fromNodeHeaders } from "@/lib/structure/auth/server"
+import { fromNodeHeaders } from "@gorth/structure/cores/auth/server/index"
 import {
   accessTokenExpiresIn,
   accessTokenSecret,

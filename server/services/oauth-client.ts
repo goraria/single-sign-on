@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 
 import { database } from "@/database"
-import { oauthClients } from "@/database/schema"
+import { oauthClient } from "@/database/schema"
 import { normalizeOrigin, normalizeUrl } from "@/lib/utils/formatter"
 import { type OAuthClientRedirectPurpose } from "@/schemas/sso"
 
@@ -20,11 +20,11 @@ export async function isOAuthClientRedirectAllowed(
 
   const clients = await database
     .select({
-      disabled: oauthClients.disabled,
-      redirectUris: oauthClients.redirectUris,
-      postLogoutRedirectUris: oauthClients.postLogoutRedirectUris,
+      disabled: oauthClient.disabled,
+      redirectUris: oauthClient.redirectUris,
+      postLogoutRedirectUris: oauthClient.postLogoutRedirectUris,
     })
-    .from(oauthClients)
+    .from(oauthClient)
 
   const targetUrl = new URL(target)
 
@@ -53,10 +53,10 @@ export async function isOAuthClientRedirectAllowed(
 export async function getOAuthClientAudiences(baseAudiences: string[] = []) {
   const clients = await database
     .select({
-      disabled: oauthClients.disabled,
-      redirectUris: oauthClients.redirectUris,
+      disabled: oauthClient.disabled,
+      redirectUris: oauthClient.redirectUris,
     })
-    .from(oauthClients)
+    .from(oauthClient)
 
   const databaseAudiences = clients
     .filter((client) => !client.disabled)
@@ -69,12 +69,12 @@ export async function getOAuthClientAudiences(baseAudiences: string[] = []) {
 export async function getOAuthClientOrigins(baseOrigins: string[] = []) {
   const clients = await database
     .select({
-      disabled: oauthClients.disabled,
-      uri: oauthClients.uri,
-      redirectUris: oauthClients.redirectUris,
-      postLogoutRedirectUris: oauthClients.postLogoutRedirectUris,
+      disabled: oauthClient.disabled,
+      uri: oauthClient.uri,
+      redirectUris: oauthClient.redirectUris,
+      postLogoutRedirectUris: oauthClient.postLogoutRedirectUris,
     })
-    .from(oauthClients)
+    .from(oauthClient)
 
   const databaseOrigins = clients
     .filter((client) => !client.disabled)
@@ -92,10 +92,10 @@ export async function getOAuthClientOrigins(baseOrigins: string[] = []) {
 export async function getTrustedOAuthClientIds() {
   const clients = await database
     .select({
-      clientId: oauthClients.clientId,
-      disabled: oauthClients.disabled,
+      clientId: oauthClient.clientId,
+      disabled: oauthClient.disabled,
     })
-    .from(oauthClients)
+    .from(oauthClient)
   return new Set(
     clients
       .filter((client) => !client.disabled)
@@ -108,12 +108,12 @@ export async function getSsoApplicationContext(
 ): Promise<SsoApplicationContext | null> {
   const [application] = await database
     .select({
-      id: oauthClients.clientId,
-      name: oauthClients.name,
-      homepageUrl: oauthClients.uri,
+      id: oauthClient.clientId,
+      name: oauthClient.name,
+      homepageUrl: oauthClient.uri,
     })
-    .from(oauthClients)
-    .where(eq(oauthClients.clientId, clientId))
+    .from(oauthClient)
+    .where(eq(oauthClient.clientId, clientId))
     .limit(1)
 
   if (!application) return null

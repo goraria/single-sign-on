@@ -102,7 +102,8 @@ export interface AdminUserPayload {
   image?: string | null
   role: AdminUser["role"]
   emailVerified: boolean
-  bannedUntil?: string | null
+  banExpires?: string | null
+  banReason?: string | null
   password: string
 }
 

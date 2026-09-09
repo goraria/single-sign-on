@@ -1,4 +1,4 @@
-import z from "@/lib/structure/cores/zod"
+import z from "@gorth/structure/cores/zod"
 import {
   createInsertSchema,
   createSelectSchema,
@@ -6,31 +6,29 @@ import {
 } from "drizzle-orm/zod"
 
 import {
-  accounts,
-  invitations,
-  jwkss,
-  members,
-  oauthAccessTokens,
+  account,
+  invitation,
+  jwks,
+  member,
+  oauthAccessToken,
   oauthApplicationType,
-  oauthClientAssertions,
-  oauthClientResources,
-  oauthClients,
-  oauthConsents,
+  oauthClientAssertion,
+  oauthClientResource,
+  oauthClient,
+  oauthConsent,
   oauthGrantType,
-  oauthRefreshTokens,
-  oauthResources,
+  oauthRefreshToken,
+  oauthResource,
   oauthResponseType,
   oauthSubjectType,
   oauthTokenEndpointAuthMethod,
-  organizations,
-  sessions,
-  ssoProviders,
-  teamMembers,
-  teams,
+  organization,
+  session,
+  ssoProvider,
   userRole,
   userStatus,
-  users,
-  verifications,
+  user,
+  verification,
 } from "@/database/schema"
 
 export const userRoleSchema = createSelectSchema(userRole)
@@ -41,9 +39,8 @@ export const oauthTokenEndpointAuthMethodSchema = createSelectSchema(
   oauthTokenEndpointAuthMethod
 )
 export const oauthSubjectTypeSchema = createSelectSchema(oauthSubjectType)
-export const oauthApplicationTypeSchema = createSelectSchema(
-  oauthApplicationType
-)
+export const oauthApplicationTypeSchema =
+  createSelectSchema(oauthApplicationType)
 
 export const oauthScopeSchema = z.enum([
   "openid",
@@ -58,8 +55,8 @@ export const oauthClientMetadataSchema = z
   })
   .catchall(z.unknown())
 
-export const userSelectSchema = createSelectSchema(users)
-export const userInsertSchema = createInsertSchema(users, {
+export const userSelectSchema = createSelectSchema(user)
+export const userInsertSchema = createInsertSchema(user, {
   name: (schema) => schema.min(1).max(255),
   username: (schema) =>
     schema
@@ -70,7 +67,7 @@ export const userInsertSchema = createInsertSchema(users, {
   firstName: (schema) => schema.max(128),
   lastName: (schema) => schema.max(128),
 })
-export const userUpdateSchema = createUpdateSchema(users, {
+export const userUpdateSchema = createUpdateSchema(user, {
   name: (schema) => schema.min(1).max(255),
   username: (schema) =>
     schema
@@ -82,170 +79,152 @@ export const userUpdateSchema = createUpdateSchema(users, {
   lastName: (schema) => schema.max(128),
 })
 
-export const sessionSelectSchema = createSelectSchema(sessions)
-export const sessionInsertSchema = createInsertSchema(sessions)
-export const sessionUpdateSchema = createUpdateSchema(sessions)
+export const sessionSelectSchema = createSelectSchema(session)
+export const sessionInsertSchema = createInsertSchema(session)
+export const sessionUpdateSchema = createUpdateSchema(session)
 
-export const accountSelectSchema = createSelectSchema(accounts)
-export const accountInsertSchema = createInsertSchema(accounts)
-export const accountUpdateSchema = createUpdateSchema(accounts)
+export const accountSelectSchema = createSelectSchema(account)
+export const accountInsertSchema = createInsertSchema(account)
+export const accountUpdateSchema = createUpdateSchema(account)
 
-export const verificationSelectSchema = createSelectSchema(verifications)
-export const verificationInsertSchema = createInsertSchema(verifications)
-export const verificationUpdateSchema = createUpdateSchema(verifications)
+export const verificationSelectSchema = createSelectSchema(verification)
+export const verificationInsertSchema = createInsertSchema(verification)
+export const verificationUpdateSchema = createUpdateSchema(verification)
 
-export const jwksSelectSchema = createSelectSchema(jwkss)
-export const jwksInsertSchema = createInsertSchema(jwkss)
-export const jwksUpdateSchema = createUpdateSchema(jwkss)
+export const jwksSelectSchema = createSelectSchema(jwks)
+export const jwksInsertSchema = createInsertSchema(jwks)
+export const jwksUpdateSchema = createUpdateSchema(jwks)
 
-export const oauthClientSelectSchema = createSelectSchema(oauthClients)
-export const oauthClientInsertSchema = createInsertSchema(oauthClients)
-export const oauthClientUpdateSchema = createUpdateSchema(oauthClients)
+export const oauthClientSelectSchema = createSelectSchema(oauthClient)
+export const oauthClientInsertSchema = createInsertSchema(oauthClient)
+export const oauthClientUpdateSchema = createUpdateSchema(oauthClient)
 
-export const oauthResourceSelectSchema = createSelectSchema(oauthResources)
-export const oauthResourceInsertSchema = createInsertSchema(oauthResources)
-export const oauthResourceUpdateSchema = createUpdateSchema(oauthResources)
+export const oauthResourceSelectSchema = createSelectSchema(oauthResource)
+export const oauthResourceInsertSchema = createInsertSchema(oauthResource)
+export const oauthResourceUpdateSchema = createUpdateSchema(oauthResource)
 
 export const oauthClientResourceSelectSchema =
-  createSelectSchema(oauthClientResources)
+  createSelectSchema(oauthClientResource)
 export const oauthClientResourceInsertSchema =
-  createInsertSchema(oauthClientResources)
+  createInsertSchema(oauthClientResource)
 export const oauthClientResourceUpdateSchema =
-  createUpdateSchema(oauthClientResources)
+  createUpdateSchema(oauthClientResource)
 
 export const oauthRefreshTokenSelectSchema =
-  createSelectSchema(oauthRefreshTokens)
+  createSelectSchema(oauthRefreshToken)
 export const oauthRefreshTokenInsertSchema =
-  createInsertSchema(oauthRefreshTokens)
+  createInsertSchema(oauthRefreshToken)
 export const oauthRefreshTokenUpdateSchema =
-  createUpdateSchema(oauthRefreshTokens)
+  createUpdateSchema(oauthRefreshToken)
 
-export const oauthAccessTokenSelectSchema = createSelectSchema(oauthAccessTokens)
-export const oauthAccessTokenInsertSchema = createInsertSchema(oauthAccessTokens)
-export const oauthAccessTokenUpdateSchema = createUpdateSchema(oauthAccessTokens)
+export const oauthAccessTokenSelectSchema = createSelectSchema(oauthAccessToken)
+export const oauthAccessTokenInsertSchema = createInsertSchema(oauthAccessToken)
+export const oauthAccessTokenUpdateSchema = createUpdateSchema(oauthAccessToken)
 
-export const oauthConsentSelectSchema = createSelectSchema(oauthConsents)
-export const oauthConsentInsertSchema = createInsertSchema(oauthConsents)
-export const oauthConsentUpdateSchema = createUpdateSchema(oauthConsents)
+export const oauthConsentSelectSchema = createSelectSchema(oauthConsent)
+export const oauthConsentInsertSchema = createInsertSchema(oauthConsent)
+export const oauthConsentUpdateSchema = createUpdateSchema(oauthConsent)
 
 export const oauthClientAssertionSelectSchema =
-  createSelectSchema(oauthClientAssertions)
+  createSelectSchema(oauthClientAssertion)
 export const oauthClientAssertionInsertSchema =
-  createInsertSchema(oauthClientAssertions)
+  createInsertSchema(oauthClientAssertion)
 export const oauthClientAssertionUpdateSchema =
-  createUpdateSchema(oauthClientAssertions)
+  createUpdateSchema(oauthClientAssertion)
 
-export const ssoProviderSelectSchema = createSelectSchema(ssoProviders)
-export const ssoProviderInsertSchema = createInsertSchema(ssoProviders)
-export const ssoProviderUpdateSchema = createUpdateSchema(ssoProviders)
+export const ssoProviderSelectSchema = createSelectSchema(ssoProvider)
+export const ssoProviderInsertSchema = createInsertSchema(ssoProvider)
+export const ssoProviderUpdateSchema = createUpdateSchema(ssoProvider)
 
-export const organizationSelectSchema = createSelectSchema(organizations)
-export const organizationInsertSchema = createInsertSchema(organizations)
-export const organizationUpdateSchema = createUpdateSchema(organizations)
+export const organizationSelectSchema = createSelectSchema(organization)
+export const organizationInsertSchema = createInsertSchema(organization)
+export const organizationUpdateSchema = createUpdateSchema(organization)
 
-export const memberSelectSchema = createSelectSchema(members)
-export const memberInsertSchema = createInsertSchema(members)
-export const memberUpdateSchema = createUpdateSchema(members)
+export const memberSelectSchema = createSelectSchema(member)
+export const memberInsertSchema = createInsertSchema(member)
+export const memberUpdateSchema = createUpdateSchema(member)
 
-export const teamSelectSchema = createSelectSchema(teams)
-export const teamInsertSchema = createInsertSchema(teams)
-export const teamUpdateSchema = createUpdateSchema(teams)
-
-export const teamMemberSelectSchema = createSelectSchema(teamMembers)
-export const teamMemberInsertSchema = createInsertSchema(teamMembers)
-export const teamMemberUpdateSchema = createUpdateSchema(teamMembers)
-
-export const invitationSelectSchema = createSelectSchema(invitations)
-export const invitationInsertSchema = createInsertSchema(invitations)
-export const invitationUpdateSchema = createUpdateSchema(invitations)
+export const invitationSelectSchema = createSelectSchema(invitation)
+export const invitationInsertSchema = createInsertSchema(invitation)
+export const invitationUpdateSchema = createUpdateSchema(invitation)
 
 export const databaseSchemas = {
-  users: {
+  user: {
     select: userSelectSchema,
     insert: userInsertSchema,
     update: userUpdateSchema,
   },
-  sessions: {
+  session: {
     select: sessionSelectSchema,
     insert: sessionInsertSchema,
     update: sessionUpdateSchema,
   },
-  accounts: {
+  account: {
     select: accountSelectSchema,
     insert: accountInsertSchema,
     update: accountUpdateSchema,
   },
-  verifications: {
+  verification: {
     select: verificationSelectSchema,
     insert: verificationInsertSchema,
     update: verificationUpdateSchema,
   },
-  jwkss: {
+  jwks: {
     select: jwksSelectSchema,
     insert: jwksInsertSchema,
     update: jwksUpdateSchema,
   },
-  oauthClients: {
+  oauthClient: {
     select: oauthClientSelectSchema,
     insert: oauthClientInsertSchema,
     update: oauthClientUpdateSchema,
   },
-  oauthResources: {
+  oauthResource: {
     select: oauthResourceSelectSchema,
     insert: oauthResourceInsertSchema,
     update: oauthResourceUpdateSchema,
   },
-  oauthClientResources: {
+  oauthClientResource: {
     select: oauthClientResourceSelectSchema,
     insert: oauthClientResourceInsertSchema,
     update: oauthClientResourceUpdateSchema,
   },
-  oauthRefreshTokens: {
+  oauthRefreshToken: {
     select: oauthRefreshTokenSelectSchema,
     insert: oauthRefreshTokenInsertSchema,
     update: oauthRefreshTokenUpdateSchema,
   },
-  oauthAccessTokens: {
+  oauthAccessToken: {
     select: oauthAccessTokenSelectSchema,
     insert: oauthAccessTokenInsertSchema,
     update: oauthAccessTokenUpdateSchema,
   },
-  oauthConsents: {
+  oauthConsent: {
     select: oauthConsentSelectSchema,
     insert: oauthConsentInsertSchema,
     update: oauthConsentUpdateSchema,
   },
-  oauthClientAssertions: {
+  oauthClientAssertion: {
     select: oauthClientAssertionSelectSchema,
     insert: oauthClientAssertionInsertSchema,
     update: oauthClientAssertionUpdateSchema,
   },
-  ssoProviders: {
+  ssoProvider: {
     select: ssoProviderSelectSchema,
     insert: ssoProviderInsertSchema,
     update: ssoProviderUpdateSchema,
   },
-  organizations: {
+  organization: {
     select: organizationSelectSchema,
     insert: organizationInsertSchema,
     update: organizationUpdateSchema,
   },
-  members: {
+  member: {
     select: memberSelectSchema,
     insert: memberInsertSchema,
     update: memberUpdateSchema,
   },
-  teams: {
-    select: teamSelectSchema,
-    insert: teamInsertSchema,
-    update: teamUpdateSchema,
-  },
-  teamMembers: {
-    select: teamMemberSelectSchema,
-    insert: teamMemberInsertSchema,
-    update: teamMemberUpdateSchema,
-  },
-  invitations: {
+  invitation: {
     select: invitationSelectSchema,
     insert: invitationInsertSchema,
     update: invitationUpdateSchema,
@@ -274,9 +253,7 @@ export type OAuthResourceData = z.infer<typeof oauthResourceSelectSchema>
 export type OAuthClientResourceData = z.infer<
   typeof oauthClientResourceSelectSchema
 >
-export type OAuthClientMetadataData = z.infer<
-  typeof oauthClientMetadataSchema
->
+export type OAuthClientMetadataData = z.infer<typeof oauthClientMetadataSchema>
 export type OAuthRefreshTokenData = z.infer<
   typeof oauthRefreshTokenSelectSchema
 >
@@ -288,6 +265,4 @@ export type OAuthClientAssertionData = z.infer<
 export type SsoProviderData = z.infer<typeof ssoProviderSelectSchema>
 export type OrganizationData = z.infer<typeof organizationSelectSchema>
 export type MemberData = z.infer<typeof memberSelectSchema>
-export type TeamData = z.infer<typeof teamSelectSchema>
-export type TeamMemberData = z.infer<typeof teamMemberSelectSchema>
 export type InvitationData = z.infer<typeof invitationSelectSchema>

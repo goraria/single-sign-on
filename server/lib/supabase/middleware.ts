@@ -9,7 +9,7 @@ import {
   type SupabaseClient,
   type User,
   type Session,
-} from "@/lib/structure/cores/supabase/index"
+} from "@gorth/structure/cores/supabase/index"
 import { type NextFunction, type Request, type Response } from "express"
 
 // Extend Express Request type to include Supabase properties

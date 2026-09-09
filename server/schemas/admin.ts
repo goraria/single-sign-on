@@ -1,8 +1,8 @@
 import { validate } from "@gorth/structure/cores/uuid"
-import z from "@/lib/structure/cores/zod"
+import z from "@gorth/structure/cores/zod"
 import { createInsertSchema, createUpdateSchema } from "drizzle-orm/zod"
 
-import { oauthClients, users, type OAuthClient } from "@/database/schema"
+import { oauthClient, user, type OAuthClient } from "@/database/schema"
 import { isProduction } from "@/lib/utils/environment"
 import {
   oauthGrantTypeSchema,
@@ -13,39 +13,40 @@ import {
 } from "@/schemas/database"
 
 export const adminUserSelection = {
-  id: users.id,
-  name: users.name,
-  username: users.username,
-  firstName: users.firstName,
-  lastName: users.lastName,
-  email: users.email,
-  emailVerified: users.emailVerified,
-  image: users.image,
-  role: users.role,
-  bannedUntil: users.bannedUntil,
-  createdAt: users.createdAt,
-  updatedAt: users.updatedAt,
+  id: user.id,
+  name: user.name,
+  username: user.username,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  email: user.email,
+  emailVerified: user.emailVerified,
+  image: user.image,
+  role: user.role,
+  banExpires: user.banExpires,
+  banReason: user.banReason,
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
 }
 
 export const adminSsoApplicationSelection = {
-  id: oauthClients.id,
-  clientId: oauthClients.clientId,
-  name: oauthClients.name,
-  metadata: oauthClients.metadata,
-  uri: oauthClients.uri,
-  icon: oauthClients.icon,
-  redirectUris: oauthClients.redirectUris,
-  postLogoutRedirectUris: oauthClients.postLogoutRedirectUris,
-  scopes: oauthClients.scopes,
-  grantTypes: oauthClients.grantTypes,
-  responseTypes: oauthClients.responseTypes,
-  public: oauthClients.public,
-  requirePKCE: oauthClients.requirePKCE,
-  tokenEndpointAuthMethod: oauthClients.tokenEndpointAuthMethod,
-  skipConsent: oauthClients.skipConsent,
-  disabled: oauthClients.disabled,
-  createdAt: oauthClients.createdAt,
-  updatedAt: oauthClients.updatedAt,
+  id: oauthClient.id,
+  clientId: oauthClient.clientId,
+  name: oauthClient.name,
+  metadata: oauthClient.metadata,
+  uri: oauthClient.uri,
+  icon: oauthClient.icon,
+  redirectUris: oauthClient.redirectUris,
+  postLogoutRedirectUris: oauthClient.postLogoutRedirectUris,
+  scopes: oauthClient.scopes,
+  grantTypes: oauthClient.grantTypes,
+  responseTypes: oauthClient.responseTypes,
+  public: oauthClient.public,
+  requirePKCE: oauthClient.requirePKCE,
+  tokenEndpointAuthMethod: oauthClient.tokenEndpointAuthMethod,
+  skipConsent: oauthClient.skipConsent,
+  disabled: oauthClient.disabled,
+  createdAt: oauthClient.createdAt,
+  updatedAt: oauthClient.updatedAt,
 }
 
 function splitStringList(value: unknown) {
@@ -181,7 +182,7 @@ export const adminSsoApplicationListQuerySchema = z.object({
 
 export const adminUserRoleSchema = userRoleSchema
 
-const adminUserInsertSchema = createInsertSchema(users, {
+const adminUserInsertSchema = createInsertSchema(user, {
   name: z.string().trim().min(1).max(255),
   username: z
     .string()
@@ -198,10 +199,11 @@ const adminUserInsertSchema = createInsertSchema(users, {
   firstName: z.string().trim().min(1).max(128),
   lastName: z.string().trim().min(1).max(128),
   image: adminOptionalStringSchema.optional(),
-  bannedUntil: z.coerce.date().nullable().optional(),
+  banExpires: z.coerce.date().nullable().optional(),
+  banReason: adminOptionalStringSchema.optional(),
 })
 
-const adminUserUpdateSchema = createUpdateSchema(users, {
+const adminUserUpdateSchema = createUpdateSchema(user, {
   name: z.string().trim().min(1).max(255),
   username: z
     .string()
@@ -218,7 +220,8 @@ const adminUserUpdateSchema = createUpdateSchema(users, {
   firstName: z.string().trim().min(1).max(128),
   lastName: z.string().trim().min(1).max(128),
   image: adminOptionalStringSchema.optional(),
-  bannedUntil: z.coerce.date().nullable().optional(),
+  banExpires: z.coerce.date().nullable().optional(),
+  banReason: adminOptionalStringSchema.optional(),
 })
 
 export const adminUserPayloadSchema = adminUserInsertSchema
@@ -231,7 +234,8 @@ export const adminUserPayloadSchema = adminUserInsertSchema
     image: true,
     role: true,
     emailVerified: true,
-    bannedUntil: true,
+    banExpires: true,
+    banReason: true,
   })
   .extend({ password: z.string().min(8).max(128) })
 
@@ -245,7 +249,8 @@ export const adminUserPatchSchema = adminUserUpdateSchema
     image: true,
     role: true,
     emailVerified: true,
-    bannedUntil: true,
+    banExpires: true,
+    banReason: true,
   })
   .extend({ password: z.string().min(8).max(128).optional() })
 

@@ -2,7 +2,7 @@ import express from "express"
 import { type NextFunction, type Request, type Response } from "express"
 import { morganMiddleware } from "@gorth/mechanism/configs/morgan"
 import { Logger } from "@gorth/mechanism/lib/logger"
-import z from "@/lib/structure/cores/zod"
+import z from "@gorth/structure/cores/zod"
 import { isProduction } from "@/lib/utils/environment"
 import { getCorsOrigins } from "@/lib/utils/formatter"
 import { getOAuthClientOrigins } from "@/services/oauth-client"
@@ -11,12 +11,10 @@ import authRoutes from "@/routes/auth"
 import adminRoutes from "@/routes/admin"
 import sharedRoutes from "@/routes/shared"
 import ssoRoutes from "@/routes/sso"
-import {
-  corsConfig,
-  helmetConfig,
-  bodyParserConfig,
-  cookieParserConfig,
-} from "@/lib/mechanism/config"
+import { corsConfig } from "@gorth/mechanism/configs/cors"
+import { helmetConfig } from "@gorth/mechanism/configs/helmet"
+import { bodyParserConfig } from "@gorth/mechanism/configs/body-parser"
+import { cookieParserConfig } from "@gorth/mechanism/configs/cookie-parser"
 
 export default async function AppModule() {
   const app = express()

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 
 import { database } from "@/database"
-import { oauthClients } from "@/database/schema"
+import { oauthClient } from "@/database/schema"
 import { adminSsoApplicationSelection } from "@/schemas/admin"
 
 export function createServiceError(message: string, statusCode: number) {
@@ -24,8 +24,8 @@ export function isUniqueViolation(error: unknown) {
 export async function checkSsoApplicationExists(id: string) {
   const [application] = await database
     .select(adminSsoApplicationSelection)
-    .from(oauthClients)
-    .where(eq(oauthClients.id, id))
+    .from(oauthClient)
+    .where(eq(oauthClient.id, id))
     .limit(1)
 
   if (!application) {

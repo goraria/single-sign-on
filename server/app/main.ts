@@ -1,5 +1,5 @@
 import express from "express"
-import { corsConfig } from "@/lib/mechanism/config"
+import { corsConfig } from "@gorth/mechanism/configs/cors"
 import { getCorsOrigins } from "@/lib/utils/formatter"
 
 const bootstrap = express()

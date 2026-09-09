@@ -10,7 +10,8 @@ export const userSchema = z.object({
   emailVerified: z.boolean(),
   image: z.url().nullable(),
   role: userRoleSchema,
-  bannedUntil: z.string().nullable(),
+  banExpires: z.string().nullable(),
+  banReason: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })

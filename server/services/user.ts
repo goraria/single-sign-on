@@ -1,28 +1,30 @@
 import { eq } from "drizzle-orm"
 
 import { database } from "@/database"
-import { users } from "@/database/schema"
+import { user } from "@/database/schema"
 
 export async function getUserProfileClaims(userId: string) {
-  const [user] = await database
+  const [profile] = await database
     .select({
-      name: users.name,
-      username: users.username,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      image: users.image,
+      name: user.name,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      image: user.image,
+      status: user.status,
     })
-    .from(users)
-    .where(eq(users.id, userId))
+    .from(user)
+    .where(eq(user.id, userId))
     .limit(1)
 
-  if (!user) return {}
+  if (!profile) return {}
 
   return {
-    name: user.name,
-    preferred_username: user.username,
-    given_name: user.firstName,
-    family_name: user.lastName,
-    picture: user.image,
+    name: profile.name,
+    preferred_username: profile.username,
+    given_name: profile.firstName,
+    family_name: profile.lastName,
+    picture: profile.image,
+    status: profile.status,
   }
 }

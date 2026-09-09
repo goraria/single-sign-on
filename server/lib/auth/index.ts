@@ -1,13 +1,13 @@
-import { betterAuth } from "@/lib/structure/auth"
-import { drizzleAdapter } from "@/lib/structure/auth/adapters"
+import { betterAuth } from "@gorth/structure/cores/auth/index"
+import { drizzleAdapter } from "@gorth/structure/cores/auth/adapters/index"
 import {
   emailOTP,
   jwt,
   openAPI,
   organization,
-} from "@/lib/structure/auth/plugins"
-import { oauthProvider } from "@/lib/structure/auth/oap"
-import { sso } from "@/lib/structure/auth/sso"
+} from "@gorth/structure/cores/auth/plugins/index"
+import { oauthProvider } from "@gorth/structure/cores/auth/server/oap"
+import { sso } from "@gorth/structure/cores/auth/server/sso"
 import { dash } from "@gorth/structure/cores/auth/server/infra"
 import {
   betterAuthSecret,
@@ -67,15 +67,15 @@ function synchronizeUserProfile<T extends Record<string, unknown>>(user: T) {
     ...user,
     ...(nameParts
       ? {
-          firstName:
-            typeof user.firstName === "string" && user.firstName.trim()
-              ? user.firstName.trim()
-              : nameParts.firstName,
-          lastName:
-            typeof user.lastName === "string" && user.lastName.trim()
-              ? user.lastName.trim()
-              : nameParts.lastName,
-        }
+        firstName:
+          typeof user.firstName === "string" && user.firstName.trim()
+            ? user.firstName.trim()
+            : nameParts.firstName,
+        lastName:
+          typeof user.lastName === "string" && user.lastName.trim()
+            ? user.lastName.trim()
+            : nameParts.lastName,
+      }
       : {}),
     ...(username ? { username } : {}),
   }
@@ -162,14 +162,7 @@ export const auth = betterAuth({
 
     sso(),
 
-    organization({
-      teams: {
-        enabled: true,
-        defaultTeam: {
-          enabled: false,
-        },
-      },
-    }),
+    organization(),
 
     emailOTP({
       otpLength: 6,
@@ -191,7 +184,7 @@ export const auth = betterAuth({
 
   database: drizzleAdapter(database, {
     provider: "pg",
-    usePlural: true,
+    // usePlural: true,
     schema: betterAuthSchema,
   }),
 

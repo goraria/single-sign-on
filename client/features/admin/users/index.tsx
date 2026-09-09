@@ -78,7 +78,7 @@ const columns: DataTableProps<AdminUser>["columns"] = [
         </Avatar>
         <div className="min-w-0">
           <p className="truncate font-medium">{row.original.name}</p>
-          <p className="text-muted-foreground truncate text-xs">
+          <p className="truncate text-xs text-muted-foreground">
             {row.original.email}
             {/* {row.original.id} */}
           </p>
@@ -97,7 +97,7 @@ const columns: DataTableProps<AdminUser>["columns"] = [
   {
     id: "state",
     accessorFn: (user) =>
-      user.bannedUntil
+      user.banExpires
         ? "banned"
         : user.emailVerified
           ? "verified"
@@ -204,7 +204,7 @@ export function Users() {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 sm:gap-6">
       {usersQuery.error ? (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {usersQuery.error.message}
         </div>
       ) : null}

@@ -1,4 +1,4 @@
-import z from "@/lib/structure/cores/zod"
+import z from "@gorth/structure/cores/zod"
 
 export const oauthClientRedirectPurposeSchema = z.enum([
   "origin",

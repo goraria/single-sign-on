@@ -1,9 +1,9 @@
 import { type Request, type Response } from "express"
-import { toNodeHandler, fromNodeHeaders } from "@/lib/structure/auth/server"
+import { toNodeHandler, fromNodeHeaders } from "@gorth/structure/cores/auth/server/index"
 import {
   oauthProviderAuthServerMetadata,
   oauthProviderOpenIdConfigMetadata,
-} from "@/lib/structure/auth/oap"
+} from "@gorth/structure/cores/auth/server/oap"
 import { auth } from "@/lib/auth"
 
 export const splat = toNodeHandler(auth)

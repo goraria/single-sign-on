@@ -7,7 +7,7 @@ import {
 import {
   createClient as createAdminClient,
   SupabaseClient,
-} from "@/lib/structure/cores/supabase/index"
+} from "@gorth/structure/cores/supabase/index"
 
 export function createAdmin(): SupabaseClient {
   const supabase = createAdminClient(supabaseUrl!, supabaseServiceRoleKey!, {

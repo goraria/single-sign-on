@@ -33,7 +33,8 @@ interface UserFormState {
   image: string
   role: AdminUser["role"]
   emailVerified: boolean
-  bannedUntil: string
+  banExpires: string
+  banReason: string
   password: string
 }
 
@@ -46,7 +47,8 @@ const emptyUser: UserFormState = {
   image: "",
   role: "user",
   emailVerified: false,
-  bannedUntil: "",
+  banExpires: "",
+  banReason: "",
   password: "",
 }
 
@@ -69,7 +71,8 @@ function toUserFormState(user: AdminUser): UserFormState {
     image: user.image ?? "",
     role: user.role,
     emailVerified: user.emailVerified,
-    bannedUntil: toDateTimeLocal(user.bannedUntil),
+    banExpires: toDateTimeLocal(user.banExpires),
+    banReason: user.banReason ?? "",
     password: "",
   }
 }
@@ -81,7 +84,7 @@ export function UserEditor({ id }: { id: string }) {
   if (userQuery.isLoading) return <LoadingScreen />
   if (userQuery.error || !user) {
     return (
-      <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
+      <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
         {userQuery.error?.message ?? "User not found"}
       </div>
     )
@@ -119,9 +122,10 @@ export function UserForm({ user }: { user?: AdminUser }) {
       image: form.image.trim() || null,
       role: form.role,
       emailVerified: form.emailVerified,
-      bannedUntil: form.bannedUntil
-        ? new Date(form.bannedUntil).toISOString()
+      banExpires: form.banExpires
+        ? new Date(form.banExpires).toISOString()
         : null,
+      banReason: form.banReason.trim() || null,
       password: form.password,
     }
 
@@ -154,7 +158,7 @@ export function UserForm({ user }: { user?: AdminUser }) {
         </p>
       </div>
       {error ? (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </div>
       ) : null}
@@ -242,12 +246,19 @@ export function UserForm({ user }: { user?: AdminUser }) {
               onChange={(event) => update("image", event.target.value)}
             />
           </TextField>
-          <TextField label="Banned until" htmlFor="bannedUntil">
+          <TextField label="Ban expires" htmlFor="banExpires">
             <Input
-              id="bannedUntil"
+              id="banExpires"
               type="datetime-local"
-              value={form.bannedUntil}
-              onChange={(event) => update("bannedUntil", event.target.value)}
+              value={form.banExpires}
+              onChange={(event) => update("banExpires", event.target.value)}
+            />
+          </TextField>
+          <TextField label="Ban reason" htmlFor="banReason">
+            <Input
+              id="banReason"
+              value={form.banReason}
+              onChange={(event) => update("banReason", event.target.value)}
             />
           </TextField>
         </div>
