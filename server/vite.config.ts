@@ -4,6 +4,13 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   clearScreen: false,
+  build: {
+    rollupOptions: {
+      output: {
+        codeSplitting: false,
+      },
+    },
+  },
   server: {
     host: true,
     strictPort: true,
@@ -19,6 +26,7 @@ export default defineConfig({
     }),
     build({
       entry: "src/index.ts",
+      emptyOutDir: true,
       entryContentAfterHooks: [
         () => "import { handle } from 'hono/vercel'",
       ],
