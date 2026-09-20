@@ -8,6 +8,7 @@ dotenv.config({
 })
 
 export const nodeEnv = process.env.NODE_ENV
+export const isDevelopment = nodeEnv === "development"
 export const isProduction = nodeEnv === "production"
 export const port = process.env.VITE_PUBLIC_PORT
 export const authUrl = process.env.VITE_PUBLIC_AUTH_URL
@@ -20,6 +21,7 @@ export const betterAuthUrl = process.env.BETTER_AUTH_URL
 export const betterAuthSecret = process.env.BETTER_AUTH_SECRET
 export const accessToken = process.env.GORTH_ACCESS_TOKEN
 export const refreshToken = process.env.GORTH_REFRESH_TOKEN
+export const cookiePrefix = process.env.GORTH_COOKIE_PREFIX
 export const accessTokenSecret = process.env.GORTH_ACCESS_TOKEN_SECRET
 export const refreshTokenSecret = process.env.GORTH_REFRESH_TOKEN_SECRET
 export const accessTokenExpiresIn = process.env.GORTH_ACCESS_TOKEN_EXPIRES_IN

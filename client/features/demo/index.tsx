@@ -6,7 +6,7 @@ import { Button } from "@gorth/primitive/default/button"
 import { Badge } from "@gorth/primitive/default/badge"
 import { Input } from "@gorth/primitive/default/input"
 import { cn } from "@/lib/utils"
-import { toast } from "@gorth/primitive/cores/sonner"
+import { toast } from "@gorth/primitive/custom/toast"
 import { useProgress } from "@gorth/primitive/cores/progress/next"
 import { useHealthQuery, useParamQuery, useSearchQuery } from "@/services/demo"
 import { auth } from "@/lib/auth"
@@ -48,12 +48,12 @@ export default function DemoPage() {
 
   const fetchParam = async () => {
     await refetchParam()
-    toast.success(`param = ${paramId}`)
+    toast.add({ type: "success", description: `param = ${paramId}` })
   }
 
   const fetchQuery = async () => {
     await refetchQuery()
-    toast.success(`query = ${queryText}`)
+    toast.add({ type: "success", description: `query = ${queryText}` })
   }
 
   const signOut = async () => {

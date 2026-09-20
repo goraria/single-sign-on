@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@gorth/primitive/default/select"
-import { Toaster, toast } from "@gorth/primitive/default/toast"
+import { Toaster, toast } from "@gorth/primitive/custom/toast"
 import { Spinner } from "@gorth/primitive/pattern/spinner"
 
 import { ChangePasswordForm } from "@/components/auth/change-password-form"

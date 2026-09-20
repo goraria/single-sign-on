@@ -1,4 +1,5 @@
-import { type NextFunction, type Request, type Response } from "express"
+import type { Context } from "hono"
+import type { IncomingHttpHeaders } from "node:http"
 
 import { betterAuthUrl } from "@/lib/utils/environment"
 import {
@@ -12,54 +13,27 @@ import {
   verifyToken as verifyTokenServices,
 } from "@/services/sso"
 
-export async function getOAuthClientRedirectPolicy(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const input = oauthClientRedirectPolicySchema.parse(req.body)
-    const allowed = await getOAuthClientRedirectPolicyServices(input)
-
-    res.status(200).json({ allowed })
-  } catch (error) {
-    next(error)
-  }
+function getIssuer(context: Context) {
+  return betterAuthUrl ?? new URL(context.req.url).origin
 }
 
-export async function createTokenBundle(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const input = tokenBundleSchema.parse(req.body)
-    const data = await createTokenBundleServices(
-      input,
-      req.headers,
-      betterAuthUrl ?? `${req.protocol}://${req.get("host")}`
-    )
-
-    res.status(200).json(data)
-  } catch (error) {
-    next(error)
-  }
+export async function getOAuthClientRedirectPolicy(context: Context) {
+  const input = oauthClientRedirectPolicySchema.parse(await context.req.json())
+  const allowed = await getOAuthClientRedirectPolicyServices(input)
+  return context.json({ allowed })
 }
 
-export async function verifyToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const input = tokenVerifySchema.parse(req.body)
-    const data = await verifyTokenServices(
-      input,
-      betterAuthUrl ?? `${req.protocol}://${req.get("host")}`
-    )
+export async function createTokenBundle(context: Context) {
+  const input = tokenBundleSchema.parse(await context.req.json())
+  const data = await createTokenBundleServices(
+    input,
+    context.req.header() as IncomingHttpHeaders,
+    getIssuer(context),
+  )
+  return context.json(data)
+}
 
-    res.status(200).json(data)
-  } catch (error) {
-    next(error)
-  }
+export async function verifyToken(context: Context) {
+  const input = tokenVerifySchema.parse(await context.req.json())
+  return context.json(await verifyTokenServices(input, getIssuer(context)))
 }

@@ -28,7 +28,6 @@ single-sign-on
 │   ├── organizations
 │   ├── members
 │   ├── invitations
-│   ├── teams
 │   ├── roles
 │   └── permissions
 │

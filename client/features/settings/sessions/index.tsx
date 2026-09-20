@@ -3,7 +3,7 @@
 import { MonitorSmartphone, Trash2 } from "@gorth/primitive/cores/lucide"
 import { Button } from "@gorth/primitive/custom/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@gorth/primitive/default/card"
-import { toast } from "@gorth/primitive/default/toast"
+import { toast } from "@gorth/primitive/custom/toast"
 import { formatDateTime } from "@/lib/utils/formatter"
 import { useAccountSessionsQuery, useRevokeSessionMutation } from "@/services/account"
 

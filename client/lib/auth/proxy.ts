@@ -61,15 +61,17 @@ function copyResponseHeaders(source: Response) {
 }
 
 function logProxyResponse(request: Request, path: string, response: Response) {
-  console.info("[auth-proxy]", {
-    method: request.method,
-    path: `/auth/${path}`,
-    status: response.status,
-    requestHasCookie: request.headers.has("cookie"),
-    setCookieCount: Number(
-      response.headers.get("x-gorth-auth-set-cookie-count") ?? 0
-    ),
-  })
+  // console.info("[auth-proxy]", {
+  //   method: request.method,
+  //   path: `/auth/${path}`,
+  //   status: response.status,
+  //   requestHasCookie: request.headers.has("cookie"),
+  //   setCookieCount: Number(
+  //     response.headers.get("x-gorth-auth-set-cookie-count") ?? 0
+  //   ),
+  // })
+
+  console.info(` ${request.method}`, `/auth/${path} ${response.status} (has-cookie: ${response.headers.has("cookie")}, set-cookie: ${response.headers.get("x-gorth-auth-set-cookie-count") ?? 0}, auth-proxy)`)
 
   return response
 }

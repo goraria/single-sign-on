@@ -1,5 +1,5 @@
 import { type IncomingHttpHeaders } from "http"
-import jwt from "@gorth/mechanism/cores/jsonwebtoken"
+import jwt from "@gorth/principle/cores/jsonwebtoken"
 import { v4 } from "@gorth/structure/cores/uuid"
 
 import { auth } from "@/lib/auth"

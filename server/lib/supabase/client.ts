@@ -5,10 +5,10 @@ import {
 } from '@gorth/structure/cores/supabase/index'
 
 /**
- * Creates a Supabase client for Express (server-side)
- * This is equivalent to Next.js createBrowserClient but for Express backend
+ * Creates a Supabase client for the Hono server runtime.
+ * This is equivalent to Next.js createBrowserClient at the API boundary.
  * 
- * Note: In Express, we typically use this for:
+ * Use this for:
  * - Direct Supabase API calls (not user-specific)
  * - Use makeSupabaseForToken() or makeSupabaseForSession() for authenticated requests
  */
@@ -31,7 +31,7 @@ export function createClient(): SupabaseClient {
       },
       global: {
         headers: {
-          'User-Agent': 'Express-Server',
+          'User-Agent': 'Hono-Server',
         },
         fetch: (...args) => fetch(...args),
       },
@@ -41,7 +41,7 @@ export function createClient(): SupabaseClient {
 
 
 /**
- * Creates a Supabase server client for Express with cookie-based session management.
+ * Creates a Supabase server client with cookie-based session management.
  * Always create a new client within each request when using it.
  */
 // export function createClient(
@@ -65,7 +65,7 @@ export function createClient(): SupabaseClient {
 //       },
 //       global: {
 //         headers: {
-//           'User-Agent': `Express-Server`,
+//           'User-Agent': `Hono-Server`,
 //         },
 //       },
 //     }

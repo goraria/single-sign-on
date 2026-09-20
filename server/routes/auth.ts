@@ -1,8 +1,9 @@
-import { Router } from "express"
+import { Hono } from "hono"
+
 import { splat } from "@/controllers/auth"
 
-const router = Router()
+const router = new Hono()
 
-router.all("/*splat", splat)
+router.all("/*", splat)
 
 export default router

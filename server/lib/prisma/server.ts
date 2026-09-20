@@ -1,4 +1,5 @@
 // import { PrismaClient } from '@prisma/client/index';
+// import { isDevelopment, isProduction } from "@/lib/utils/environment";
 //
 // declare global {
 //   var prisma: PrismaClient | undefined;
@@ -11,7 +12,7 @@
 // }
 // prisma = global.prisma;
 //
-// // if (process.env.NODE_ENV === 'production') {
+// // if (isProduction) {
 // //   // Production: create a single instance with optimized connection pool
 // //   prisma = global.prisma ?? new PrismaClient({
 // //     log: ['error']
@@ -22,7 +23,7 @@
 // // } else {
 // //   // Development: create a new instance with connection pool
 // //   prisma = global.prisma ?? new PrismaClient({
-// //     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+// //     log: isDevelopment ? ["query", "error", "warn"] : ["error"],
 // //   });
 // //   if (!global.prisma) {
 // //     global.prisma = prisma;

@@ -12,6 +12,7 @@ import { dash } from "@gorth/structure/cores/auth/server/infra"
 import {
   betterAuthSecret,
   betterAuthUrl,
+  cookiePrefix,
   googleClientId,
   googleClientSecret,
   isProduction,
@@ -226,7 +227,7 @@ export const auth = betterAuth({
       path: "/",
     },
 
-    cookiePrefix: "gorth",
+    cookiePrefix,
   },
 
   emailAndPassword: {

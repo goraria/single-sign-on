@@ -1,8 +1,8 @@
 {
   "name": "@gorth/single-sign-on-server",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "",
-  "main": "app/index.ts",
+  "main": "app/main.ts",
   "type": "module",
   "keywords": [],
   "author": "",
@@ -14,33 +14,34 @@
     "lint": "eslint",
     "preview": "vite preview",
     "clean": "rm -rf node_modules",
-    "postinstall": "pnpm update @gorth/mechanism @gorth/structure",
+    "postinstall": "pnpm update @gorth/principle @gorth/structure",
     "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@gorth/mechanism": "github:goraria/base-mechanism",
+    "@gorth/principle": "github:goraria/base-principle",
     "@gorth/structure": "github:goraria/base-structure",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.1",
     "drizzle-orm": "1.0.0-rc.4",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.7.0",
-    "express-session": "^1.19.0"
+    "hono": "^4.13.8",
+    "hono-openapi": "^1.3.3",
+    "hono-rate-limiter": "^0.5.4"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6",
-    "@types/express-session": "^1.19.0",
-    "@types/node": "^26.5.0",
-    "@vercel/node": "^12.0.3",
+    "@hono/eslint-config": "^2.1.1",
+    "@hono/vite-build": "^1.11.1",
+    "@hono/vite-dev-server": "^0.26.1",
+    "@types/node": "^26.6.2",
+    "@vercel/node": "^13.0.1",
     "concurrently": "^10.0.5",
     "drizzle-kit": "1.0.0-rc.4",
     "eslint": "^9.39.5",
     "globals": "^17.12.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.8",
     "rimraf": "^6.1.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0",
-    "vite": "^8.2.2"
+    "vite": "^8.3.0"
   },
   "packageManager": "pnpm@10.33.4"
 }

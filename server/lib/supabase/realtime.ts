@@ -31,7 +31,7 @@ export async function createRealtime() {
       },
       global: {
         headers: {
-          'User-Agent': 'Express-Server',
+          'User-Agent': 'Hono-Server',
         },
       },
     }

@@ -1,8 +1,8 @@
-import { Router } from "express"
+import { Hono } from "hono"
 
 import {
-  createUser,
   createSsoApplication,
+  createUser,
   deleteSsoApplication,
   getSsoApplication,
   getUserById,
@@ -11,12 +11,12 @@ import {
   listSessions,
   listSsoApplications,
   listUsers,
-  updateUser,
   updateSsoApplication,
+  updateUser,
 } from "@/controllers/admin"
 import { requireAdmin } from "@/middlewares/admin"
 
-const router = Router()
+const router = new Hono()
 
 router.get("/users", requireAdmin(), listUsers)
 router.get("/users/:id", requireAdmin(), getUserById)

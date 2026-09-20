@@ -1,11 +1,11 @@
-import { Router } from "express"
+import { Hono } from "hono"
 
 import {
   oauthAuthorizationServerMetadata,
   openIdConfigurationMetadata,
 } from "@/controllers/auth"
 
-const router = Router()
+const router = new Hono()
 
 router.get("/oauth-authorization-server/auth", oauthAuthorizationServerMetadata)
 router.get("/oauth-authorization-server", oauthAuthorizationServerMetadata)

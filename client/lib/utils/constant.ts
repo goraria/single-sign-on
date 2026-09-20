@@ -27,6 +27,25 @@ import {
   Video,
 } from "@gorth/primitive/cores/lucide"
 
+export const publicPrefixes = [
+  "/demo",
+  "/terms",
+  "/privacy-policy",
+  "/auth",
+  "/.well-known",
+] as const
+
+export const authenticationPageRoutes = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/forgot-password",
+  "/auth/verify",
+  "/auth/reset-password",
+  "/auth/change-password",
+] as const
+
+export const adminRoute = "/admin"
+
 export const appConnection = [
   {
     title: "GitHub",

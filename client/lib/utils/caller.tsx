@@ -8,7 +8,7 @@ import axios, {
   type Method,
   type ResponseType,
 } from "@gorth/structure/cores/axios"
-import { toast as showToast } from "@gorth/primitive/cores/sonner"
+import { toast } from "@gorth/primitive/custom/toast"
 import {
   useMutation as useMutationDefault,
   useQuery as useQueryDefault,
@@ -388,7 +388,7 @@ function notifySuccess<TData>(
   if (!option || option === true) return
 
   const message = resolveToastMessage(option.success, data)
-  if (message) showToast.success(message)
+  if (message) toast.add({ type: "success", description: message })
 }
 
 function notifyError<TData>(
@@ -401,7 +401,7 @@ function notifyError<TData>(
     option === true
       ? error.message
       : (resolveToastMessage(option.error, error) ?? error.message)
-  showToast.error(message)
+  toast.add({ type: "error", description: message })
 }
 
 export async function caller<

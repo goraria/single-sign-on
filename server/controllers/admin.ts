@@ -1,4 +1,4 @@
-import { type NextFunction, type Request, type Response } from "express"
+import type { Context } from "hono"
 
 import {
   adminIdParamsSchema,
@@ -24,181 +24,76 @@ import {
   updateUser as updateUserServices,
 } from "@/services/admin"
 
-export async function listSsoApplications(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const options = adminSsoApplicationListQuerySchema.parse(req.query)
-    const data = await listSsoApplicationsServices(options)
-
-    res.status(200).json({ data })
-  } catch (error) {
-    next(error)
-  }
+export async function listSsoApplications(context: Context) {
+  const options = adminSsoApplicationListQuerySchema.parse(context.req.query())
+  return context.json({ data: await listSsoApplicationsServices(options) })
 }
 
-export async function getSsoApplication(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const { id } = adminIdParamsSchema.parse(req.params)
-    const data = await getSsoApplicationServices(id)
-
-    res.status(200).json({ data })
-  } catch (error) {
-    next(error)
-  }
+export async function getSsoApplication(context: Context) {
+  const { id } = adminIdParamsSchema.parse(context.req.param())
+  return context.json({ data: await getSsoApplicationServices(id) })
 }
 
-export async function createSsoApplication(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const input = adminSsoApplicationPayloadSchema.parse(req.body)
-    const data = await createSsoApplicationServices(input)
-
-    res.status(200).json({ data, message: "SSO application created" })
-  } catch (error) {
-    next(error)
-  }
+export async function createSsoApplication(context: Context) {
+  const input = adminSsoApplicationPayloadSchema.parse(await context.req.json())
+  return context.json({
+    data: await createSsoApplicationServices(input),
+    message: "SSO application created",
+  })
 }
 
-export async function updateSsoApplication(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const { id } = adminIdParamsSchema.parse(req.params)
-    const input = adminSsoApplicationPatchSchema.parse(req.body)
-    const data = await updateSsoApplicationServices(id, input)
-
-    res.status(200).json({ data, message: "SSO application updated" })
-  } catch (error) {
-    next(error)
-  }
+export async function updateSsoApplication(context: Context) {
+  const { id } = adminIdParamsSchema.parse(context.req.param())
+  const input = adminSsoApplicationPatchSchema.parse(await context.req.json())
+  return context.json({
+    data: await updateSsoApplicationServices(id, input),
+    message: "SSO application updated",
+  })
 }
 
-export async function deleteSsoApplication(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const { id } = adminIdParamsSchema.parse(req.params)
-    const data = await deleteSsoApplicationServices(id)
-
-    res.status(200).json({ data, message: "SSO application deleted" })
-  } catch (error) {
-    next(error)
-  }
+export async function deleteSsoApplication(context: Context) {
+  const { id } = adminIdParamsSchema.parse(context.req.param())
+  return context.json({
+    data: await deleteSsoApplicationServices(id),
+    message: "SSO application deleted",
+  })
 }
 
-export async function listUsers(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const options = adminUserListQuerySchema.parse(req.query)
-    const data = await listUsersServices(options)
-
-    res.status(200).json({ data })
-  } catch (error) {
-    next(error)
-  }
+export async function listUsers(context: Context) {
+  const options = adminUserListQuerySchema.parse(context.req.query())
+  return context.json({ data: await listUsersServices(options) })
 }
 
-export async function getUserById(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const { id } = adminIdParamsSchema.parse(req.params)
-    const data = await getUserByIdServices(id)
-
-    res.status(200).json({ data })
-  } catch (error) {
-    next(error)
-  }
+export async function getUserById(context: Context) {
+  const { id } = adminIdParamsSchema.parse(context.req.param())
+  return context.json({ data: await getUserByIdServices(id) })
 }
 
-export async function createUser(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const input = adminUserPayloadSchema.parse(req.body)
-    const data = await createUserServices(input)
-
-    res.status(200).json({ data, message: "User created" })
-  } catch (error) {
-    next(error)
-  }
+export async function createUser(context: Context) {
+  const input = adminUserPayloadSchema.parse(await context.req.json())
+  return context.json({
+    data: await createUserServices(input),
+    message: "User created",
+  })
 }
 
-export async function updateUser(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const { id } = adminIdParamsSchema.parse(req.params)
-    const input = adminUserPatchSchema.parse(req.body)
-    const data = await updateUserServices(id, input)
-
-    res.status(200).json({ data, message: "User updated" })
-  } catch (error) {
-    next(error)
-  }
+export async function updateUser(context: Context) {
+  const { id } = adminIdParamsSchema.parse(context.req.param())
+  const input = adminUserPatchSchema.parse(await context.req.json())
+  return context.json({
+    data: await updateUserServices(id, input),
+    message: "User updated",
+  })
 }
 
-export async function listSessions(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const data = await listSessionsServices()
-
-    res.status(200).json({ data })
-  } catch (error) {
-    next(error)
-  }
+export async function listSessions(context: Context) {
+  return context.json({ data: await listSessionsServices() })
 }
 
-export async function listOAuthResources(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const data = await listOAuthResourcesServices()
-
-    res.status(200).json({ data })
-  } catch (error) {
-    next(error)
-  }
+export async function listOAuthResources(context: Context) {
+  return context.json({ data: await listOAuthResourcesServices() })
 }
 
-export async function listOAuthConsents(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const data = await listOAuthConsentsServices()
-
-    res.status(200).json({ data })
-  } catch (error) {
-    next(error)
-  }
+export async function listOAuthConsents(context: Context) {
+  return context.json({ data: await listOAuthConsentsServices() })
 }

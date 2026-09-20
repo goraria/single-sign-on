@@ -1,4 +1,4 @@
-import { Router } from "express"
+import { Hono } from "hono"
 
 import {
   createTokenBundle,
@@ -11,25 +11,25 @@ import {
   requireSsoClient,
 } from "@/middlewares/sso"
 
-const router = Router()
+const router = new Hono()
 
 router.post(
   "/oauth-client/redirect-policy",
   requireSsoClient(),
-  getOAuthClientRedirectPolicy
+  getOAuthClientRedirectPolicy,
 )
 router.post(
   "/sso/token-bundle",
   requireSsoClient(),
   requireLegacySso(),
   deprecateLegacySso(),
-  createTokenBundle
+  createTokenBundle,
 )
 router.post(
   "/sso/verify-token",
   requireSsoClient(),
   deprecateLegacySso(),
-  verifyToken
+  verifyToken,
 )
 
 export default router

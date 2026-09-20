@@ -8,12 +8,8 @@ import {
 import { getCorsHeaders, resolveRedirect } from "@/lib/utils/redirect"
 import { signOutRouteSession } from "@/services/route"
 
-function getPublicOrigin(request: NextRequest) {
-  return resolveOrigin(clientUrl, request.nextUrl.origin)
-}
-
 async function signOut(request: NextRequest) {
-  const origin = getPublicOrigin(request)
+  const origin = resolveOrigin(clientUrl, request.nextUrl.origin)
   return signOutRouteSession({
     cookie: request.headers.get("cookie"),
     origin,
@@ -22,10 +18,11 @@ async function signOut(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const signOutResponse = await signOut(request)
+  const publicOrigin = resolveOrigin(clientUrl, request.nextUrl.origin)
 
   const returnTo = await resolveRedirect(
     new URL(request.url).searchParams.get("returnTo"),
-    getPublicOrigin(request)
+    publicOrigin
   )
 
   return withResponseCookies(

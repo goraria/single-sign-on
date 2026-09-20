@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@gorth/primitive/default/card"
 import { Label } from "@gorth/primitive/default/label"
-import { toast } from "@gorth/primitive/default/toast"
+import { toast } from "@gorth/primitive/custom/toast"
 import { Spinner } from "@gorth/primitive/pattern/spinner"
 
 import { PasswordInput } from "@/components/auth/password-input"

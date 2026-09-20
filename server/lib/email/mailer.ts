@@ -1,4 +1,4 @@
-import nodemailer from "@gorth/mechanism/cores/nodemailer"
+import nodemailer from "@gorth/principle/cores/nodemailer"
 
 import {
   emailFrom,

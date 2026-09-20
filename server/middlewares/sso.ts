@@ -1,59 +1,44 @@
-import { type NextFunction, type Request, type Response } from "express"
+import type { MiddlewareHandler } from "hono"
+import { HTTPException } from "hono/http-exception"
 
 import { authSecret } from "@/lib/utils/environment"
 
-export function requireSsoClient() {
-  return function requireSsoClientMiddleware(
-    req: Request,
-    _res: Response,
-    next: NextFunction
-  ) {
+export function requireSsoClient(): MiddlewareHandler {
+  return async (context, next) => {
     if (!authSecret) {
-      next(
-        Object.assign(new Error("gorth_client_secret_not_configured"), {
-          statusCode: 500,
-        })
-      )
-      return
+      throw new HTTPException(500, {
+        message: "gorth_client_secret_not_configured",
+      })
     }
 
-    if (req.get("x-gorth-client-secret") !== authSecret) {
-      next(Object.assign(new Error("forbidden"), { statusCode: 403 }))
-      return
+    if (context.req.header("x-gorth-client-secret") !== authSecret) {
+      throw new HTTPException(403, { message: "forbidden" })
     }
 
-    next()
+    await next()
   }
 }
 
-export function requireLegacySso() {
-  return function requireLegacySsoMiddleware(
-    req: Request,
-    _res: Response,
-    next: NextFunction
-  ) {
-    if (req.get("x-gorth-legacy-sso") !== "true") {
-      next(
-        Object.assign(new Error("legacy_sso_issue_disabled"), {
-          statusCode: 410,
-        })
-      )
-      return
+export function requireLegacySso(): MiddlewareHandler {
+  return async (context, next) => {
+    if (context.req.header("x-gorth-legacy-sso") !== "true") {
+      throw new HTTPException(410, {
+        message: "legacy_sso_issue_disabled",
+      })
     }
 
-    next()
+    await next()
   }
 }
 
-export function deprecateLegacySso() {
-  return function deprecateLegacySsoMiddleware(
-    _req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    res.setHeader("Deprecation", "true")
-    res.setHeader("Sunset", new Date("2026-12-31T00:00:00.000Z").toUTCString())
-    res.setHeader("Link", '</auth/oauth2/authorize>; rel="successor-version"')
-    next()
+export function deprecateLegacySso(): MiddlewareHandler {
+  return async (context, next) => {
+    context.header("Deprecation", "true")
+    context.header(
+      "Sunset",
+      new Date("2026-12-31T00:00:00.000Z").toUTCString(),
+    )
+    context.header("Link", '</auth/oauth2/authorize>; rel="successor-version"')
+    await next()
   }
 }

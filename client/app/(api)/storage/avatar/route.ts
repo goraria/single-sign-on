@@ -9,6 +9,7 @@ import {
 import {
   getNoStoreHeaders,
   getResponseErrorMessage,
+  resolveFileExtension,
 } from "@/lib/utils/formatter"
 import { getSession } from "@/services/auth"
 import { uploadRouteAvatar } from "@/services/route"
@@ -38,16 +39,6 @@ function getStorageConfig() {
   }
 
   return { bucket, secretKey, url: url.replace(/\/$/, "") }
-}
-
-function getFileExtension(file: File) {
-  const original = file.name.split(".").pop()?.toLowerCase() ?? ""
-  const allowedExtensions = extensionsByMimeType[file.type] ?? []
-  const fallbackExtension = allowedExtensions[0]
-
-  if (!fallbackExtension) throw new Error("Unsupported image format.")
-
-  return allowedExtensions.includes(original) ? original : fallbackExtension
 }
 
 export async function POST(request: Request) {
@@ -87,7 +78,12 @@ export async function POST(request: Request) {
     }
 
     const { bucket, secretKey, url } = getStorageConfig()
-    const path = `avatars/${userId}/${v4()}.${getFileExtension(file)}`
+    const extension = resolveFileExtension(
+      file.name,
+      file.type,
+      extensionsByMimeType
+    )
+    const path = `avatars/${userId}/${v4()}.${extension}`
     const { encodedBucket, encodedPath, response } = await uploadRouteAvatar({
       url,
       bucket,
