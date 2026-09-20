@@ -15,10 +15,10 @@ export default defineConfig({
   },
   plugins: [
     devServer({
-      entry: "app/main.ts",
+      entry: "src/index.ts",
     }),
     build({
-      entry: "app/main.ts",
+      entry: "src/index.ts",
       entryContentAfterHooks: [
         () => "import { handle } from 'hono/vercel'",
       ],
