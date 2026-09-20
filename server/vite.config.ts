@@ -28,10 +28,11 @@ export default defineConfig({
       entry: "src/index.ts",
       emptyOutDir: true,
       entryContentAfterHooks: [
-        () => "import { handle } from 'hono/vercel'",
+        () =>
+          "import { getRequestListener } from '@gorth/principle/cores/hono/server'",
       ],
       entryContentDefaultExportHook: (appName) =>
-        `export default handle(${appName})`,
+        `export default getRequestListener(${appName}.fetch)`,
     }),
   ],
 })
