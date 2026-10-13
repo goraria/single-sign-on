@@ -18,6 +18,8 @@ node_modules
 
 # Build Outputs
 .next/
+.turbo/
+*.tsbuildinfo
 out/
 build
 dist

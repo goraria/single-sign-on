@@ -1,0 +1,17 @@
+@import "tailwindcss" source(none);
+@import "@gorth/primitive/globals.css";
+
+
+/* Watch source only: a recursive client-root glob includes Next's generated
+   route types and can trigger an endless dev rebuild/reload cycle. Primitive
+   registers its own sources through the imported stylesheet above. */
+@source "../app";
+@source "../assets";
+@source "../components";
+@source "../features";
+@source "../hooks";
+@source "../layouts";
+@source "../lib";
+@source "../providers";
+@source "../utils/client";
+@source "../utils/renderer.tsx";

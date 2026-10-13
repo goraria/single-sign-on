@@ -1,0 +1,40 @@
+import { eq } from "drizzle-orm"
+import { HTTPException } from "hono/http-exception"
+
+import { database } from "@/database"
+import { oauthClient } from "@/database/schema"
+import { adminSsoApplicationSelection } from "@/schemas/admin"
+
+export function createServiceError(
+  message: string,
+  statusCode: HTTPException["status"]
+) {
+  return new HTTPException(statusCode, { message })
+}
+
+export function isServiceError(error: unknown) {
+  return error instanceof HTTPException
+}
+
+export function isUniqueViolation(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "23505"
+  )
+}
+
+export async function checkSsoApplicationExists(id: string) {
+  const [application] = await database
+    .select(adminSsoApplicationSelection)
+    .from(oauthClient)
+    .where(eq(oauthClient.id, id))
+    .limit(1)
+
+  if (!application) {
+    throw createServiceError("sso_application_not_found", 404)
+  }
+
+  return application
+}
