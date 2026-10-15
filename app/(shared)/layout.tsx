@@ -3,7 +3,6 @@
 import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Button } from "@gorth/primitive/custom/button"
 import { SidebarProvider } from "@gorth/primitive/custom/sidebar"
 import { Footer } from "@gorth/primitive/layouts/footer"
 import { Header } from "@gorth/primitive/layouts/header"
@@ -32,14 +31,19 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
           nav={nav}
           right={<HeaderActions user={user} auth={auth} nav={nav} />}
           bottom={
-            <Button
-              nativeButton={false}
-              render={<Link href="/" />}
-              variant="ghost"
-              className="px-0 text-lg font-bold hover:bg-transparent"
+            <Link
+              href="/"
+              aria-label="Gorth home"
+              className="block size-9 shrink-0"
             >
-              Gorth
-            </Button>
+              <Image
+                src={gorthLogo}
+                alt="Gorth"
+                width={36}
+                height={36}
+                className="size-9 object-contain"
+              />
+            </Link>
           }
         />
 

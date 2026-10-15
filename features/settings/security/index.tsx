@@ -45,7 +45,7 @@ import { useAuth, type AuthUser } from "@/hooks/use-auth"
 import { useUser } from "@/hooks/use-user"
 import { auth } from "@/lib/auth/client"
 import { getUsernameAvailabilityError } from "@/lib/auth/client/username"
-import { useUploadProfileImageMutation } from "@/lib/supabase/storage"
+import { useUploadProfileImageMutation } from "@/services/client/media"
 import {
   formatDisplayName,
   formatDate,

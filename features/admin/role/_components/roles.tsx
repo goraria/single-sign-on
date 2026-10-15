@@ -1,258 +1,131 @@
 "use client"
 
-import { useState } from "react"
-
-import {
-  type ColumnFiltersState,
-  type PaginationState,
-  useTable,
-} from "@gorth/primitive/cores/tanstack/table"
-import {
-  AlertTriangle,
-  ChevronRight,
-  FileUp,
-  Search,
-} from "@gorth/primitive/cores/lucide"
-
+import { AlertTriangle, ChevronRight } from "@gorth/primitive/cores/lucide"
 import {
   Alert,
-  AlertAction,
   AlertDescription,
   AlertTitle,
 } from "@gorth/primitive/default/alert"
 import { Button } from "@gorth/primitive/custom/button"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@gorth/primitive/default/input-group"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@gorth/primitive/default/select"
+import { DataTable } from "@gorth/primitive/custom/data-table"
+import { toast } from "@gorth/primitive/custom/toast"
+import { useLocalDataTable } from "@/hooks/use-local-data-table"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@gorth/primitive/custom/tabs"
-import { dataTableFeatures } from "@/utils/data-table-features"
-
 import { rolesColumns } from "./roles-table/columns"
 import type { Role } from "./roles-table/data"
-import { RolesTable } from "./roles-table/table"
 
-function getRoleTypeFilter(groupFilter: string) {
-  if (groupFilter === "System roles") {
-    return "System"
+export function Roles({
+  roles,
+  readOnly = false,
+}: {
+  roles: Role[]
+  readOnly?: boolean
+}) {
+  const columns = readOnly
+    ? rolesColumns.filter((column) => column.id !== "actions")
+    : rolesColumns
+  const table = useLocalDataTable({ data: roles, columns, initialPageSize: 12 })
+
+  function explainDemoAction(action: string) {
+    toast.add({
+      type: "info",
+      description: `${action} is not connected yet. This role list is a demo and does not change SSO permissions.`,
+    })
   }
-
-  if (groupFilter === "Custom roles") {
-    return "Custom"
-  }
-
-  return "All"
-}
-
-function getRoleGroupFilterValue(typeFilter: string | null) {
-  if (typeFilter === "System") {
-    return "System roles"
-  }
-
-  if (typeFilter === "Custom") {
-    return "Custom roles"
-  }
-
-  return undefined
-}
-
-export function Roles({ roles }: { roles: Role[] }) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 12,
-  })
-
-  const table = useTable({
-    features: dataTableFeatures,
-    data: roles,
-    columns: rolesColumns,
-    defaultColumn: {
-      size: 140,
-      minSize: 80,
-      maxSize: 420,
-    },
-    state: { columnFilters, pagination },
-    onColumnFiltersChange: setColumnFilters,
-    onPaginationChange: setPagination,
-    autoResetPageIndex: false,
-    initialState: {
-      columnVisibility: { group: false, search: false },
-    },
-  })
-
-  const search =
-    (table.getColumn("search")?.getFilterValue() as string | undefined) ?? ""
-  const groupFilter =
-    (table.getColumn("group")?.getFilterValue() as string | undefined) ?? ""
-  const typeFilter = getRoleTypeFilter(groupFilter)
-  const ownerFilter =
-    (table.getColumn("owner")?.getFilterValue() as string | undefined) ?? "All"
-  const statusFilter =
-    (table.getColumn("status")?.getFilterValue() as string | undefined) ?? "All"
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl tracking-tight">Roles & Permissions</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage access roles and permissions across your organization.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline">
-            <FileUp data-icon="inline-start" />
-            Import JSON
-          </Button>
-          <Button size="sm">Create role</Button>
-        </div>
-      </div>
-
-      <Tabs className="h-full gap-4" defaultValue="roles">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+      <Tabs className="gap-4" defaultValue="roles">
         <TabsList className="w-full justify-start gap-2 border-b ps-0 *:data-[slot=tabs-trigger]:flex-none">
           <TabsTrigger value="roles">Roles</TabsTrigger>
-          <TabsTrigger value="permission-sets">Permission sets</TabsTrigger>
-          <TabsTrigger value="access-reviews">Access reviews</TabsTrigger>
+          {!readOnly && (
+            <>
+              <TabsTrigger value="permission-sets">Permission sets</TabsTrigger>
+              <TabsTrigger value="access-reviews">Access reviews</TabsTrigger>
+            </>
+          )}
         </TabsList>
-
         <TabsContent value="roles">
-          <div className="flex flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-4">
             <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
               <AlertTriangle className="size-4" />
               <AlertTitle>Role preview</AlertTitle>
               <AlertDescription>
                 Demo only. This screen does not change SSO access permissions.
               </AlertDescription>
-              <AlertAction>
-                <Button size="sm" variant="link">
-                  Review changes
-                  <ChevronRight data-icon="inline-end" />
-                </Button>
-              </AlertAction>
             </Alert>
-
-            <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
-              <div className="flex flex-col items-stretch gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                <InputGroup className="h-7 w-full rounded-md sm:w-82">
-                  <InputGroupAddon>
-                    <Search />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    className="h-7"
-                    placeholder="Search roles..."
-                    value={search}
-                    onChange={(e) => {
-                      table
-                        .getColumn("search")
-                        ?.setFilterValue(e.target.value || undefined)
-                      table.setPageIndex(0)
-                    }}
-                  />
-                </InputGroup>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Select
-                    value={typeFilter}
-                    onValueChange={(v) => {
-                      table
-                        .getColumn("group")
-                        ?.setFilterValue(getRoleGroupFilterValue(v))
-                      table.setPageIndex(0)
-                    }}
+            <DataTable
+              {...table.props}
+              nav={{
+                name: "Roles & Permissions",
+                description: readOnly
+                  ? "Preview the role for this dashboard."
+                  : "Manage access roles and permissions across your organization.",
+              }}
+              labels={{ import: "Import JSON", add: "Create role" }}
+              onImport={
+                readOnly ? undefined : () => explainDemoAction("Import JSON")
+              }
+              onCreate={
+                readOnly ? undefined : () => explainDemoAction("Create role")
+              }
+              render={
+                !readOnly && (
+                  <Button
+                    variant="outline"
+                    onClick={() => explainDemoAction("Review changes")}
                   >
-                    <SelectTrigger size="sm">
-                      <span className="text-muted-foreground">Type:</span>
-                      <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent align="start" alignItemWithTrigger={false}>
-                      <SelectGroup>
-                        <SelectItem value="All">All</SelectItem>
-                        <SelectItem value="System">System</SelectItem>
-                        <SelectItem value="Custom">Custom</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={ownerFilter}
-                    onValueChange={(v) => {
-                      table
-                        .getColumn("owner")
-                        ?.setFilterValue(v === "All" ? undefined : v)
-                      table.setPageIndex(0)
-                    }}
-                  >
-                    <SelectTrigger size="sm">
-                      <span className="text-muted-foreground">Owner:</span>
-                      <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent align="start" alignItemWithTrigger={false}>
-                      <SelectGroup>
-                        <SelectItem value="All">All</SelectItem>
-                        <SelectItem value="System">System</SelectItem>
-                        <SelectItem value="Jane Doe">Jane Doe</SelectItem>
-                        <SelectItem value="Alex Kim">Alex Kim</SelectItem>
-                        <SelectItem value="Chris Lee">Chris Lee</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={statusFilter}
-                    onValueChange={(v) => {
-                      table
-                        .getColumn("status")
-                        ?.setFilterValue(v === "All" ? undefined : v)
-                      table.setPageIndex(0)
-                    }}
-                  >
-                    <SelectTrigger size="sm">
-                      <span className="text-muted-foreground">Status:</span>
-                      <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent align="start" alignItemWithTrigger={false}>
-                      <SelectGroup>
-                        <SelectItem value="All">All</SelectItem>
-                        <SelectItem value="Active">Active</SelectItem>
-                        <SelectItem value="Needs review">
-                          Needs review
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    Review changes
+                    <ChevronRight data-icon="inline-end" />
+                  </Button>
+                )
+              }
+              columns={columns}
+              search={table.search("role", "Search roles...")}
+              filters={[
+                table.filter("group", "Type", [
+                  { label: "System", value: "System roles" },
+                  { label: "Custom", value: "Custom roles" },
+                ]),
+                table.filter(
+                  "owner",
+                  "Owner",
+                  [...new Set(roles.map((role) => role.owner))].map(
+                    (owner) => ({ label: owner, value: owner })
+                  )
+                ),
+                table.filter("status", "Status", [
+                  { label: "Active", value: "Active" },
+                  { label: "Needs review", value: "Needs review" },
+                ]),
+              ]}
+              pageSizeOptions={[12, 24, 48]}
+              fluidColumn="permissionSets"
+              getRowId={(role) => role.role}
+              enableRowSelection={false}
+              emptyMessage="No roles found."
+            />
+          </div>
+        </TabsContent>
+        {!readOnly && (
+          <>
+            <TabsContent value="permission-sets">
+              <div className="flex items-center justify-center rounded-md border border-dashed p-6 text-muted-foreground text-sm">
+                Permission Sets Coming Soon
               </div>
-
-              <RolesTable table={table} />
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="permission-sets">
-          <div className="flex h-full items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm">
-            Permission Sets Coming Soon
-          </div>
-        </TabsContent>
-        <TabsContent value="access-reviews">
-          <div className="flex h-full items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm">
-            Access Reviews Coming Soon
-          </div>
-        </TabsContent>
+            </TabsContent>
+            <TabsContent value="access-reviews">
+              <div className="flex items-center justify-center rounded-md border border-dashed p-6 text-muted-foreground text-sm">
+                Access Reviews Coming Soon
+              </div>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   )

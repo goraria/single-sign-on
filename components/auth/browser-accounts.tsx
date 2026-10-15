@@ -10,6 +10,7 @@ import { Button } from "@gorth/primitive/custom/button"
 import { Separator } from "@gorth/primitive/default/separator"
 import type { BrowserAccount } from "@/schemas/browser-account"
 import { resolveInternalPath } from "@/utils/client/formatter"
+import { defaultAuthRedirect } from "@/utils/constant"
 import { hasOAuthQuery } from "@/utils/client/temp"
 import {
   changeBrowserAccount,
@@ -62,7 +63,10 @@ export function BrowserAccounts() {
         else
           window.location.replace(
             operation === "switch"
-              ? resolveInternalPath(searchParams.get("redirect"), "/settings")
+              ? resolveInternalPath(
+                  searchParams.get("redirect"),
+                  defaultAuthRedirect
+                )
               : chooser
           )
       }
@@ -101,8 +105,6 @@ export function BrowserAccounts() {
                   avatar: account.user.image,
                   email: account.user.email,
                 }}
-                hover
-                tooltip
               />
               <div className="flex shrink-0 items-center gap-2">
                 {/* {account.active ? (

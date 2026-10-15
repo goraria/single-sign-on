@@ -16,7 +16,9 @@ import {
   formatCountdown,
   getErrorCode,
   getFormErrorMessage,
+  resolveInternalPath,
 } from "@/utils/client/formatter"
+import { defaultAuthRedirect } from "@/utils/constant"
 import {
   buildLegacyDisabledPath,
   buildOAuthAuthorizePath,
@@ -90,7 +92,7 @@ export function OtpForm() {
       return
     }
 
-    router.replace(redirect || "/")
+    router.replace(resolveInternalPath(redirect, defaultAuthRedirect))
     router.refresh()
   }
 

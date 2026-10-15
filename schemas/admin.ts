@@ -1,6 +1,7 @@
 import { validate } from "@gorth/structure/cores/uuid"
 import z from "@gorth/structure/cores/zod"
 import { createInsertSchema, createUpdateSchema } from "drizzle-orm/zod"
+import { sql } from "drizzle-orm"
 
 import {
   oauthClient,
@@ -62,11 +63,15 @@ export const adminOAuthResourceSelection = {
   accessTokenTtl: oauthResource.accessTokenTtl,
   refreshTokenTtl: oauthResource.refreshTokenTtl,
   signingAlgorithm: oauthResource.signingAlgorithm,
+  signingKeyId: oauthResource.signingKeyId,
   allowedScopes: oauthResource.allowedScopes,
   dpopBoundAccessTokensRequired: oauthResource.dpopBoundAccessTokensRequired,
   disabled: oauthResource.disabled,
   createdAt: oauthResource.createdAt,
   updatedAt: oauthResource.updatedAt,
+  policyVersion: oauthResource.policyVersion,
+  // Only expose a service identifier, never arbitrary private registry metadata.
+  application: sql<string | null>`${oauthResource.metadata}->>'application'`,
 }
 
 function splitStringList(value: unknown) {
@@ -299,6 +304,43 @@ export const adminOAuthResourceListQuerySchema = z.object({
     .default("name"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
 })
+
+export const adminOAuthResourcePayloadSchema = z.object({
+  identifier: z
+    .string()
+    .trim()
+    .max(2048)
+    .url()
+    .refine((value) => {
+      try {
+        const url = new URL(value)
+        return (
+          !value.includes("#") &&
+          !url.username &&
+          !url.password &&
+          (url.protocol === "https:" ||
+            (url.protocol === "http:" &&
+              ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)))
+        )
+      } catch {
+        return false
+      }
+    }, "Use HTTPS or a localhost development URL without credentials or fragments"),
+  name: z.string().trim().min(1).max(255),
+  accessTokenTtl: z.number().int().positive().max(2147483647).nullable(),
+  refreshTokenTtl: z.number().int().positive().max(2147483647).nullable(),
+  signingAlgorithm: z
+    .enum(["RS256", "PS256", "ES256", "ES512", "EdDSA"])
+    .nullable(),
+  signingKeyId: z.string().trim().min(1).max(255).nullable(),
+  allowedScopes: z.array(z.string().trim().min(1).max(128)).max(256).nullable(),
+  dpopBoundAccessTokensRequired: z.boolean(),
+  disabled: z.boolean(),
+})
+
+export type AdminOAuthResourcePayload = z.infer<
+  typeof adminOAuthResourcePayloadSchema
+>
 
 export const adminIdParamsSchema = z.object({
   id: z.string().refine(validate, "Invalid UUID"),

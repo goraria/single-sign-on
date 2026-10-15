@@ -2,8 +2,11 @@ import { eq } from "drizzle-orm"
 import { HTTPException } from "hono/http-exception"
 
 import { database } from "@/database"
-import { oauthClient } from "@/database/schema"
-import { adminSsoApplicationSelection } from "@/schemas/admin"
+import { oauthClient, oauthResource } from "@/database/schema"
+import {
+  adminSsoApplicationSelection,
+  adminOAuthResourceSelection,
+} from "@/schemas/admin"
 
 export function createServiceError(
   message: string,
@@ -37,4 +40,15 @@ export async function checkSsoApplicationExists(id: string) {
   }
 
   return application
+}
+
+export async function checkOAuthResourceExists(id: string) {
+  const [resource] = await database
+    .select(adminOAuthResourceSelection)
+    .from(oauthResource)
+    .where(eq(oauthResource.id, id))
+    .limit(1)
+
+  if (!resource) throw createServiceError("oauth_resource_not_found", 404)
+  return resource
 }

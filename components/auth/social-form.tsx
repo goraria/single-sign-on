@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { cn } from "@gorth/primitive/cores/cn"
 import { additionalAccountAuth, auth } from "@/lib/auth/client"
 import { resolveInternalPath } from "@/utils/client/formatter"
+import { defaultAuthRedirect } from "@/utils/constant"
 import {
   buildLegacyDisabledPath,
   buildOAuthAuthorizePath,
@@ -22,7 +23,7 @@ export function SocialForm({
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const searchParams = useSearchParams()
-  const next = searchParams.get("redirect") ?? "/"
+  const next = searchParams.get("redirect") ?? defaultAuthRedirect
   const oauthQuery = new URLSearchParams(searchParams.toString())
   const getCallbackURL = () => {
     if (hasOAuthQuery(oauthQuery)) {
@@ -41,7 +42,10 @@ export function SocialForm({
       ).toString()
     }
 
-    return new URL(resolveInternalPath(next), window.location.origin).toString()
+    return new URL(
+      resolveInternalPath(next, defaultAuthRedirect),
+      window.location.origin
+    ).toString()
   }
 
   const handleSocialLogin = async () => {

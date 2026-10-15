@@ -15,12 +15,13 @@ export const readerResourceUrl = "http://localhost:3032"
 export const socialResourceUrl = "http://localhost:3033"
 export const taskResourceUrl = "http://localhost:3034"
 export const marketplaceResourceUrl = "http://localhost:3035"
-export const resourceInteractionResourceUrl = "http://localhost:7073"
-export const notificationCenterResourceUrl = "http://localhost:7072"
-export const mediaStorageResourceUrl = "http://localhost:7077"
-export const paymentGatewayResourceUrl = "http://localhost:7075"
-export const billingSubscriptionResourceUrl = "http://localhost:7076"
-export const discoveryEngineResourceUrl = "http://localhost:7074"
+export const resourceInteractionResourceUrl = "http://localhost:5053"
+export const notificationCenterResourceUrl = "http://localhost:5052"
+export const mediaStorageResourceUrl = "http://localhost:5057"
+export const paymentGatewayResourceUrl = "http://localhost:5055"
+export const billingSubscriptionResourceUrl = "http://localhost:5056"
+export const discoveryEngineResourceUrl = "http://localhost:5054"
+export const insightGovernanceResourceUrl = "http://localhost:5058"
 
 const accessTokenTtl = 60 * 10
 const oidcScopes = ["openid", "profile", "email", "offline_access"]
@@ -195,6 +196,30 @@ export const oauthResourceSeeds = [
     ],
     metadata: {
       application: "shared-discovery-engine",
+      managedBy: "database-seed",
+    },
+  },
+  {
+    identifier: insightGovernanceResourceUrl,
+    name: "Gorth Insight Governance API",
+    accessTokenTtl,
+    allowedScopes: [
+      ...oidcScopes,
+      "chat:read",
+      "chat:write",
+      "video:read",
+      "video:write",
+      "reader:read",
+      "reader:write",
+      "social:read",
+      "social:write",
+      "task:read",
+      "task:write",
+      "marketplace:read",
+      "marketplace:write",
+    ],
+    metadata: {
+      application: "shared-insight-governance",
       managedBy: "database-seed",
     },
   },

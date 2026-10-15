@@ -120,7 +120,6 @@ export default function Page() {
                     <NavIdentity
                       user={{ name: "japtor@gorth.org" }}
                       description="Gorth workspace"
-                      hover
                       trailing={<Check className="text-accent" />}
                     />
                   </Card>

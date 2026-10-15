@@ -68,7 +68,6 @@ export function FileListView({ files }: { files: FileManagerFile[] }) {
                 <NavIdentity
                   user={{ name: file.owner }}
                   description={null}
-                  tooltip
                 />
               </TableCell>
               <TableCell className="hidden text-muted-foreground lg:table-cell">

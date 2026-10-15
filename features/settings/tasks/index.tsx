@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo } from "react"
 import { faker } from "@faker-js/faker"
-import { Download, MoreHorizontal, Plus } from "@gorth/primitive/cores/lucide"
+import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
+import { toast } from "@gorth/primitive/custom/toast"
 import { Badge } from "@gorth/primitive/custom/badge"
 import { Button } from "@gorth/primitive/custom/button"
 import { Checkbox } from "@gorth/primitive/default/checkbox"
@@ -13,10 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@gorth/primitive/custom/dropdown"
 import {
-  DataTableAll,
+  DataTable,
   DataTableColumnHeader,
 } from "@gorth/primitive/custom/data-table"
-import type { DataTableAllProps } from "@gorth/primitive/utils/interface"
+import type { DataTableProps } from "@gorth/primitive/utils/interface"
+import { useLocalDataTable } from "@/hooks/use-local-data-table"
 import {
   renderTaskPriority,
   renderTaskStatus,
@@ -42,7 +43,7 @@ const tasks: Task[] = Array.from({ length: 100 }, () => ({
   label: faker.helpers.arrayElement(taskLabels),
 }))
 
-const columns: DataTableAllProps<Task>["columns"] = [
+const columns: DataTableProps<Task>["columns"] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -77,6 +78,10 @@ const columns: DataTableAllProps<Task>["columns"] = [
   },
   {
     accessorKey: "title",
+    filterFn: (row, _id, value) =>
+      `${row.original.id} ${row.original.title}`
+        .toLowerCase()
+        .includes(String(value).trim().toLowerCase()),
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Title" />
     ),
@@ -127,46 +132,48 @@ const columns: DataTableAllProps<Task>["columns"] = [
 ]
 
 export function Tasks() {
-  const data = useMemo(() => tasks, [])
+  const table = useLocalDataTable({ data: tasks, columns })
+
+  function explainDemoAction(action: string) {
+    toast.add({
+      type: "info",
+      description: `${action} is not connected yet. This task list uses demo data.`,
+    })
+  }
+
+  function exportTasks() {
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(tasks, null, 2)], { type: "application/json" })
+    )
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "demo-tasks.json"
+    document.body.append(link)
+    link.click()
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 0)
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tasks</h1>
-          <p className="text-muted-foreground">
-            Here&apos;s a list of your tasks for this month!
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <span>Import</span>
-            <Download className="size-4" />
-          </Button>
-          <Button>
-            <span>Create</span>
-            <Plus className="size-4" />
-          </Button>
-        </div>
-      </div>
-      <DataTableAll
-        columns={columns}
-        data={data}
-        search={{
-          column: "title",
-          placeholder: "Filter by title or ID...",
+      <DataTable
+        {...table.props}
+        feat="default"
+        nav={{
+          name: "Tasks",
+          description: "Here's a list of your tasks for this month!",
         }}
+        labels={{ add: "Add Task" }}
+        // Primitive owns the column menu; this callback enables its trigger.
+        onToggle={() => undefined}
+        onImport={() => explainDemoAction("Import")}
+        onDownload={exportTasks}
+        onCreate={() => explainDemoAction("Add Task")}
+        columns={columns}
+        search={table.search("title", "Filter by title or ID...")}
         filters={[
-          {
-            column: "status",
-            title: "Status",
-            options: [...taskStatuses],
-          },
-          {
-            column: "priority",
-            title: "Priority",
-            options: [...taskPriorities],
-          },
+          table.filter("status", "Status", [...taskStatuses]),
+          table.filter("priority", "Priority", [...taskPriorities]),
         ]}
         fluidColumn="title"
         getRowId={(task) => task.id}

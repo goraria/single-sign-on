@@ -163,6 +163,36 @@ const customerAccounts = {
 
 export const shipments: Shipment[] = [
   {
+    id: "SDA-00-2400",
+    customer: customerAccounts.techCorp,
+    origin: {
+      display: "HAN Airport · Nội Bài",
+      country: "Vietnam",
+      countryCode: "VN",
+      coordinates: [105.807178, 21.221192],
+    },
+    destination: {
+      display: "SIN Airport · Changi",
+      country: "Singapore",
+      countryCode: "SG",
+      coordinates: [103.9949824, 1.3510921],
+    },
+    cargo: "General cargo (demo)",
+    handling: {
+      label: "Demo air shipment",
+      note: "Route preview from Nội Bài, Vietnam to Changi, Singapore. Not live flight tracking.",
+      tags: [{ label: "Keep upright", icon: ArrowUp }],
+    },
+    weight: "—",
+    eta: "Not scheduled",
+    etaMeta: "",
+    status: "Scheduled",
+    progress: 0,
+    mode: "air",
+    routeType: "flight",
+    transportNumber: "Demo HAN–SIN",
+  },
+  {
     id: "SDA-01-2401",
     customer: customerAccounts.techCorp,
     origin: {

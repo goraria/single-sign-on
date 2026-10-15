@@ -15,7 +15,11 @@ import {
   isOAuthRegistrationSession,
 } from "@/lib/auth/client/registration"
 import { setPendingVerification } from "@/lib/auth/client/pending-verification"
-import { sanitizeUsernameInput } from "@/utils/client/formatter"
+import {
+  resolveInternalPath,
+  sanitizeUsernameInput,
+} from "@/utils/client/formatter"
+import { defaultAuthRedirect } from "@/utils/constant"
 import { signUpSchema } from "@/schemas/auth"
 import {
   buildLegacyDisabledPath,
@@ -34,7 +38,7 @@ export function SignUpForm() {
   } | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get("redirect") ?? "/"
+  const redirect = searchParams.get("redirect") ?? defaultAuthRedirect
   const oauthQueryString = searchParams.toString()
   const oauthQuery = new URLSearchParams(oauthQueryString)
   const isOAuthFlow = hasOAuthQuery(oauthQuery)
@@ -71,7 +75,7 @@ export function SignUpForm() {
     }
     if (isExternalRedirect(redirect))
       window.location.replace(buildLegacyDisabledPath())
-    else router.replace("/")
+    else router.replace(resolveInternalPath(redirect, defaultAuthRedirect))
   }, [account, canResume, continueOAuth, isOAuthFlow, redirect, router])
 
   const form = useForm({
@@ -99,7 +103,7 @@ export function SignUpForm() {
             : {
                 callbackURL: isExternalRedirect(redirect)
                   ? buildLegacyDisabledPath()
-                  : "/",
+                  : resolveInternalPath(redirect, defaultAuthRedirect),
               }),
         } as Parameters<typeof auth.signUp.email>[0] & {
           firstName: string

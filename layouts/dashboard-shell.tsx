@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type ReactNode } from "react"
+import { usePathname } from "next/navigation"
 import { SidebarInset, SidebarProvider } from "@gorth/primitive/custom/sidebar"
 import { Footer } from "@gorth/primitive/layouts/footer"
 import { AppSidebar } from "@gorth/primitive/dashboard/app-sidebar"
@@ -24,6 +25,7 @@ interface DashboardShellProps {
 }
 
 export function DashboardShell({ children, section }: DashboardShellProps) {
+  const isLogistics = usePathname() === "/admin/logistics"
   const auth = useAuth()
   const user = useUser()
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
@@ -79,14 +81,27 @@ export function DashboardShell({ children, section }: DashboardShellProps) {
           loading: browserAccounts.loading,
           pendingSessionId: browserAccounts.pendingSessionId,
           error: browserAccounts.error,
-          onSelect: (account: SwitcherAccount) => void browserAccounts.selectAccount(account),
+          onSelect: (account: SwitcherAccount) =>
+            void browserAccounts.selectAccount(account),
           onRetry: browserAccounts.reloadAccounts,
-          addAccountHref: "/auth/add-account?redirect=%2Fsettings",
+          addAccountHref: "/auth/add-account",
         }}
       />
-      <SidebarInset className="min-h-0 min-w-0 overflow-hidden">
+      <SidebarInset
+        className={
+          isLogistics
+            ? "min-h-0 min-w-0 overflow-hidden"
+            : "min-h-0 min-w-0 overflow-x-hidden overflow-y-auto"
+        }
+      >
         <Dashbar auth={auth} />
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+        <main
+          className={
+            isLogistics
+              ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+              : "flex min-w-0 flex-1 shrink-0 flex-col"
+          }
+        >
           <div className="container mx-auto flex min-h-0 w-full flex-1 flex-col p-6">
             {children}
           </div>

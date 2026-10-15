@@ -179,7 +179,7 @@ export function ShipmentList({
   onSelectShipment,
 }: ShipmentListProps) {
   return (
-    <Card className="h-full rounded-none ring-0">
+    <Card className="h-full min-h-0 overflow-hidden rounded-none ring-0">
       <CardHeader>
         <CardTitle className="font-normal text-xl">Shipments</CardTitle>
         <CardAction>
@@ -188,7 +188,7 @@ export function ShipmentList({
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col gap-4 overflow-hidden px-0">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-0">
         <Tabs defaultValue="all">
           <TabsList className="w-full border-b px-4">
             <TabsTrigger className="text-xs" value="all">

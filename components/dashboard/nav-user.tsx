@@ -36,7 +36,7 @@ export function NavUser(props: ComponentProps<typeof PrimitiveNavUser>) {
       error={browserAccounts.error}
       onSelect={(account) => void browserAccounts.selectAccount(account)}
       onRetry={browserAccounts.reloadAccounts}
-      addAccountHref="/auth/add-account?redirect=%2Fsettings"
+      addAccountHref="/auth/add-account"
     />
   )
 }

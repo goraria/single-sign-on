@@ -3,23 +3,18 @@ export const nodeEnv = process.env.NODE_ENV
 export const isDevelopment = nodeEnv === "development"
 export const isProduction = nodeEnv === "production"
 export const appUrl = process.env.NEXT_PUBLIC_APP_URL
+export const mediaAvatarBucketId = process.env.NEXT_MEDIA_AVATAR_BUCKET_ID
+export const awsEndpointUrlS3 = process.env.AWS_ENDPOINT_URL_S3
+export const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
+export const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+export const awsRegion = process.env.AWS_REGION
+export const awsBucket = process.env.AWS_BUCKET
 export const authSecret = process.env.NEXT_AUTH_SECRET
 export const betterAuthUrl = process.env.BETTER_AUTH_URL
 export const betterAuthSecret = process.env.BETTER_AUTH_SECRET
 export const cookiePrefix = process.env.GORTH_COOKIE_PREFIX?.trim() || "gorth"
 export const databaseUrl = process.env.DATABASE_URL
 export const pgPoolMax = process.env.PG_POOL_MAX
-export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-export const supabasePublishableKey =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-export const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-export const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY
-export const supabasePublishableOrAnonKey =
-  process.env.SUPABASE_PUBLISHABLE_OR_ANON_KEY
-export const supabasePublishableDefaultKey =
-  process.env.SUPABASE_PUBLISHABLE_DEFAULT_KEY
-export const supabaseBucket = process.env.SUPABASE_BUCKET
 export const googleClientId = process.env.GOOGLE_CLIENT_ID
 export const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET
 export const smtpService = process.env.SMTP_SERVICE

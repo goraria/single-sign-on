@@ -33,7 +33,7 @@ export const infrastructureGroups: InfrastructureGroup[] = [
     organization: "Weblabs Studio",
     rows: [
       {
-        domain: "next-shadcn-admin-dashboard.vercel.app/dashboard",
+        domain: "gorth-auth.vercel.app/dashboard",
         platform: {
           name: "Next.js",
           icon: siNextdotjs,
@@ -54,7 +54,7 @@ export const infrastructureGroups: InfrastructureGroup[] = [
     organization: "Aiy Cap",
     rows: [
       {
-        domain: "next-shadcn-admin-dashboard.vercel.app/analytics",
+        domain: "gorth-auth.vercel.app/analytics",
         platform: {
           name: "React",
           icon: siReact,
@@ -69,7 +69,7 @@ export const infrastructureGroups: InfrastructureGroup[] = [
         resources: { cpu: 49, ram: 42, disk: 44 },
       },
       {
-        domain: "next-shadcn-admin-dashboard.vercel.app/reports",
+        domain: "gorth-auth.vercel.app/reports",
         platform: {
           name: "Remix",
           icon: siRemix,
@@ -90,7 +90,7 @@ export const infrastructureGroups: InfrastructureGroup[] = [
     organization: "Storeframe",
     rows: [
       {
-        domain: "next-shadcn-admin-dashboard.vercel.app/kanban",
+        domain: "gorth-auth.vercel.app/kanban",
         platform: {
           name: "Node.js",
           icon: siNodedotjs,

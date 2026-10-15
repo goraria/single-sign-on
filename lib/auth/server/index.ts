@@ -36,10 +36,13 @@ import {
 import { getUserProfileClaims } from "@/services/user"
 import { sendVerificationOtpEmail } from "@/lib/email/mailer"
 import { adminAccessControl, adminRoles } from "@/lib/auth/server/access"
+import { mediaAccess } from "@/lib/auth/server/media-access"
+import { adminAudit } from "@/lib/auth/server/admin-audit"
 
-const gorthAppClaim = "https://gorth.dev/claims/app"
+const gorthAppClaim = "https://gorth-auth.vercel.app/claims/app"
 const accessTokenExpiresIn = 60 * 10
 const refreshTokenExpiresIn = 60 * 60 * 24 * 30
+const jwtOptions = { disableSettingJwtHeader: true }
 
 function getNameParts(value: unknown) {
   if (typeof value !== "string") return null
@@ -131,12 +134,10 @@ export const auth = betterAuth({
       adminRoles: ["admin", "master"],
     }),
 
-    jwt({
-      // Session reads do not need a freshly signed JWT response header.
-      // OAuth endpoints still use the JWT/JWKS plugin normally, while
-      // /get-session remains independent from legacy encrypted JWKS rows.
-      disableSettingJwtHeader: true,
-    }),
+    // Reuse the same JWKS/signing configuration for OAuth and Media delegation.
+    jwt(jwtOptions),
+    mediaAccess(jwtOptions),
+    adminAudit(),
     oauthProvider({
       loginPage: "/auth/sign-in",
       consentPage: "/auth/consent",
@@ -155,6 +156,9 @@ export const auth = betterAuth({
         "profile",
         "email",
         "offline_access",
+        "sso:read",
+        "sso:write",
+        "storage:sso:credential",
         "chat:read",
         "chat:write",
         "video:read",
@@ -172,6 +176,39 @@ export const auth = betterAuth({
       // is idempotently seeded; later changes use the OAuth Provider resource
       // API. Runtime instances never rebuild the registry from environment.
       enforcePerClientResources: true,
+
+      // Optional: automatically link these seven services to every NEW client
+      // registered through Better Auth (including adminCreateOAuthClient and M2M).
+      // Existing clients are NOT backfilled; app env changes do not create links.
+      // Before enabling, also declare these identifiers in `resources`, using
+      // resourceSeedMode: "insertOnly" to preserve database-managed policies.
+      // URLs below are development examples; use registered HTTPS URLs in prod.
+      // Never include the private storage-credential resource in this list.
+      // This creates registration links, not token audiences or granted scopes;
+      // apps must still request the appropriate resource indicators and scopes.
+      // clientRegistrationDefaultResources: [
+      //   "http://localhost:5052", // Notification
+      //   "http://localhost:5053", // Resource
+      //   "http://localhost:5054", // Discovery
+      //   "http://localhost:5055", // Payment
+      //   "http://localhost:5056", // Billing
+      //   "http://localhost:5057", // Media
+      //   "http://localhost:5058", // Insight
+      // ],
+
+      // Alternative: replace the active `true` above with `false` to allow ALL
+      // registered clients to request ANY enabled resource without a client link.
+      // This is global, not limited to the seven services, and does not register
+      // resources, discover endpoints, or bypass scopes and API authorization.
+      // Review private-resource/M2M protections before enabling this alternative.
+      // Keep the provider schema and the links used by storage authorization.
+      // enforcePerClientResources: false,
+
+      // Machine scope ceilings are administrative policy, never user consent.
+      clientPrivileges: ({ action, user }) =>
+        action === "configure-client-credentials-scopes"
+          ? user?.role === "master"
+          : Boolean(user),
 
       allowPublicClientPrelogin: true,
       accessTokenExpiresIn,

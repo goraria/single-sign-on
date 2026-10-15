@@ -4,6 +4,15 @@ import { oauthClientMetadataSchema } from "@/schemas/database"
 import { appUrl } from "@/utils/environment"
 export { formatCodeDate, formatDate } from "@/utils/server/temp"
 
+export function matchesAvatarSignature(bytes: Uint8Array, contentType: string) {
+  const starts = (expected: number[]) => expected.every((byte, index) => bytes[index] === byte)
+  if (contentType === "image/png") return starts([137, 80, 78, 71, 13, 10, 26, 10])
+  if (contentType === "image/jpeg") return starts([255, 216, 255])
+  if (contentType === "image/gif") return starts([71, 73, 70, 56]) && [55, 57].includes(bytes[4]) && bytes[5] === 97
+  if (contentType === "image/webp") return starts([82, 73, 70, 70]) && [87, 69, 66, 80].every((byte, index) => bytes[index + 8] === byte)
+  return false
+}
+
 export function stringifyQuery(obj: Record<string, unknown>): string {
   return Object.entries(obj)
     .map(

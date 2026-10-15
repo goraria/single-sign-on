@@ -2,15 +2,10 @@ import { type IncomingHttpHeaders } from "node:http"
 import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm"
 
 import { database } from "@/database"
-import {
-  oauthClient,
-  oauthConsent,
-  oauthResource,
-  session,
-  user,
-} from "@/database/schema"
+import { oauthClient, oauthResource, user } from "@/database/schema"
 import { auth } from "@/lib/auth/server/index"
 import { fromNodeHeaders } from "better-auth/node"
+import { APIError } from "better-auth/api"
 import { formatSsoApplication } from "@/utils/server/formatter"
 import {
   adminSsoApplicationSelection,
@@ -23,9 +18,11 @@ import {
   type AdminUserPatch,
   type AdminUserPayload,
   type AdminOAuthResourceListQuery,
+  type AdminOAuthResourcePayload,
 } from "@/schemas/admin"
 import {
   checkSsoApplicationExists,
+  checkOAuthResourceExists,
   createServiceError,
   isServiceError,
   isUniqueViolation,
@@ -44,7 +41,12 @@ export async function requireAdminSession(headers: IncomingHttpHeaders) {
   }
 
   const [adminUser] = await database
-    .select({ id: user.id, role: user.role })
+    .select({
+      id: user.id,
+      role: user.role,
+      name: user.name,
+      email: user.email,
+    })
     .from(user)
     .where(eq(user.id, session.user.id))
     .limit(1)
@@ -322,28 +324,6 @@ export async function updateUser(
   }
 }
 
-export async function listSessions() {
-  try {
-    return await database
-      .select({
-        id: session.id,
-        userId: session.userId,
-        userName: user.name,
-        userEmail: user.email,
-        ipAddress: session.ipAddress,
-        userAgent: session.userAgent,
-        expiresAt: session.expiresAt,
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
-      })
-      .from(session)
-      .innerJoin(user, eq(session.userId, user.id))
-      .orderBy(desc(session.updatedAt))
-  } catch {
-    throw createServiceError("sessions_list_failed", 500)
-  }
-}
-
 export async function listOAuthResources(options: AdminOAuthResourceListQuery) {
   try {
     const offset = (options.page - 1) * options.limit
@@ -393,32 +373,71 @@ export async function listOAuthResources(options: AdminOAuthResourceListQuery) {
   }
 }
 
-export async function listOAuthConsents() {
+export async function getOAuthResource(id: string) {
+  return checkOAuthResourceExists(id)
+}
+
+export async function createOAuthResource(
+  input: AdminOAuthResourcePayload,
+  headers: Headers
+) {
   try {
-    return await database
-      .select({
-        id: oauthConsent.id,
-        clientId: oauthConsent.clientId,
-        clientName: oauthClient.name,
-        userId: oauthConsent.userId,
-        userName: user.name,
-        userEmail: user.email,
-        resources: oauthConsent.resources,
-        scopes: oauthConsent.scopes,
-        createdAt: oauthConsent.createdAt,
-        updatedAt: oauthConsent.updatedAt,
-      })
-      .from(oauthConsent)
-      .leftJoin(oauthClient, eq(oauthConsent.clientId, oauthClient.clientId))
-      .leftJoin(user, eq(oauthConsent.userId, user.id))
-      .orderBy(desc(oauthConsent.updatedAt))
-  } catch {
-    throw createServiceError("oauth_consents_list_failed", 500)
+    const created = await auth.api.adminCreateOAuthResource({
+      headers,
+      body: input,
+    })
+    return getOAuthResource(created.id)
+  } catch (error) {
+    if (isServiceError(error)) throw error
+    throw createServiceError(
+      "oauth_resource_create_failed",
+      error instanceof APIError && error.statusCode === 400 ? 400 : 500
+    )
   }
 }
 
-export async function createSsoApplication(input: AdminSsoApplicationPayload) {
+export async function updateOAuthResource(
+  id: string,
+  input: AdminOAuthResourcePayload,
+  headers: Headers
+) {
+  const current = await checkOAuthResourceExists(id)
+  // Changing an audience invalidates existing grants and client links. Native
+  // Better Auth does not rename identifiers through its resource update API.
+  if (input.identifier !== current.identifier)
+    throw createServiceError("resource_identifier_immutable", 400)
+  const { identifier, ...policy } = input
+  try {
+    await auth.api.adminUpdateOAuthResource({
+      headers,
+      params: { identifier: encodeURIComponent(identifier) },
+      body: policy,
+    })
+    return getOAuthResource(id)
+  } catch (error) {
+    if (isServiceError(error)) throw error
+    throw createServiceError(
+      "oauth_resource_update_failed",
+      error instanceof APIError && error.statusCode === 400 ? 400 : 500
+    )
+  }
+}
+
+export async function deleteOAuthResource(id: string, headers: Headers) {
+  const current = await checkOAuthResourceExists(id)
+  await auth.api.adminDeleteOAuthResource({
+    headers,
+    params: { identifier: encodeURIComponent(current.identifier) },
+  })
+  return { id }
+}
+
+export async function createSsoApplication(
+  input: AdminSsoApplicationPayload,
+  headers: Headers
+) {
   const created = await auth.api.adminCreateOAuthClient({
+    headers,
     body: {
       redirect_uris: input.redirectUris,
       scope: input.scopes.join(" "),
@@ -457,7 +476,8 @@ export async function createSsoApplication(input: AdminSsoApplicationPayload) {
 
 export async function updateSsoApplication(
   id: string,
-  input: AdminSsoApplicationPatch
+  input: AdminSsoApplicationPatch,
+  headers: Headers
 ) {
   if (!id) throw createServiceError("sso_application_id_required", 400)
 
@@ -487,6 +507,7 @@ export async function updateSsoApplication(
   }
 
   await auth.api.adminUpdateOAuthClient({
+    headers,
     body: {
       client_id: current.clientId,
       update: {

@@ -2,8 +2,9 @@ import nextEnv from "@next/env"
 import { Pool } from "@gorth/structure/cores/pg"
 
 nextEnv.loadEnvConfig(process.cwd())
-if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required")
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+const { databaseUrl } = await import("../utils/environment.ts")
+if (!databaseUrl) throw new Error("DATABASE_URL is required")
+const pool = new Pool({ connectionString: databaseUrl, max: 1 })
 const client = await pool.connect()
 try {
   await client.query("BEGIN")

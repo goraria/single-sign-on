@@ -97,7 +97,7 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
   const transportNumberLabel = getTransportNumberLabel(shipment.mode)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-2">
           <h1 className="font-medium text-lg tabular-nums tracking-tight sm:text-xl">
@@ -143,8 +143,6 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
               <Copy className="size-3" />
             </span>
           }
-          hover
-          tooltip
         />
 
         <div className="flex flex-col items-end gap-1">
@@ -160,7 +158,7 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
 
       <Separator />
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-medium">Cargo details</h2>
 
@@ -249,7 +247,7 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
 export function ShipmentDetails({ shipment }: ShipmentDetailsProps) {
   if (!shipment) {
     return (
-      <div className="grid h-full min-h-0 grid-rows-[320px_1fr] overflow-hidden lg:grid-rows-[420px_1fr]">
+      <div className="grid h-full min-h-0 grid-rows-[minmax(120px,1fr)_auto] overflow-hidden">
         <div className="min-h-0 overflow-hidden">
           <ShipmentRouteMap shipment={null} />
         </div>
@@ -261,7 +259,7 @@ export function ShipmentDetails({ shipment }: ShipmentDetailsProps) {
   }
 
   return (
-    <div className="grid h-full min-h-0 grid-rows-[320px_1fr] overflow-hidden lg:grid-rows-[420px_1fr]">
+    <div className="grid h-full min-h-0 grid-rows-[minmax(120px,1fr)_auto] overflow-hidden">
       <div className="min-h-0 overflow-hidden">
         <ShipmentRouteMap shipment={shipment} />
       </div>
@@ -285,7 +283,10 @@ export function ShipmentDetails({ shipment }: ShipmentDetailsProps) {
                 Activity
               </TabsTrigger>
             </TabsList>
-            <TabsContent className="min-h-0 overflow-auto p-4" value="overview">
+            <TabsContent
+              className="min-h-0 overflow-hidden p-4"
+              value="overview"
+            >
               <ShipmentOverview shipment={shipment} />
             </TabsContent>
             <TabsContent className="p-4" value="route">

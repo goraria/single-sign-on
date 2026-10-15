@@ -35,7 +35,7 @@ export function Logistics() {
     <>
       <div
         data-content-padding="false"
-        className="grid h-[calc(100dvh-var(--dashboard-header-height))] overflow-hidden lg:grid-cols-[400px_minmax(0,1fr)] lg:divide-x"
+        className="grid h-full min-h-0 flex-1 overflow-hidden lg:grid-cols-[400px_minmax(0,1fr)] lg:divide-x"
       >
         <div className="h-full overflow-hidden">
           <ShipmentList

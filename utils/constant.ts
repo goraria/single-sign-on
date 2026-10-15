@@ -23,6 +23,11 @@ import {
   GitFork,
   Mail,
   MessageSquare,
+  MessageCircle,
+  Clapperboard,
+  SatelliteDish,
+  LibraryBig,
+  Store,
   Video,
   Banknote,
   ChartBar,
@@ -33,14 +38,13 @@ import {
   Server,
   FolderOpen,
   HeartPulse,
-  BookOpen,
-  Rss,
   Search,
   CreditCard,
   Receipt,
   Images,
   Globe,
   Rocket,
+  FileBox
 } from "@gorth/primitive/cores/lucide"
 
 import type { OrbitData } from "@gorth/primitive/illustration/orbit"
@@ -57,7 +61,7 @@ export const authOrbitData: OrbitData = {
       title: "Auth",
       url: "",
       icon: ShieldCheck,
-      description: "var(--professional-primary-1)",
+      description: "var(--professional-main)",
     },
     {
       title: "Ecosystem",
@@ -69,45 +73,45 @@ export const authOrbitData: OrbitData = {
       title: "Service",
       url: "",
       icon: Server,
-      description: "var(--professional-primary-3)",
+      description: "var(--professional-primary-5)",
     },
   ],
   navSecondary: [
     {
-      title: "Chat",
+      title: "GorCer",
       url: "",
-      icon: MessageSquare,
-      description: "var(--professional-primary-4)",
-    },
-    {
-      title: "Video",
-      url: "",
-      icon: Video,
-      description: "var(--professional-primary-5)",
-    },
-    {
-      title: "Reader",
-      url: "",
-      icon: BookOpen,
+      icon: MessageCircle,
       description: "var(--professional-secondary)",
     },
     {
-      title: "Social",
+      title: "GorBox",
       url: "",
-      icon: Rss,
-      description: "var(--professional-success)",
+      icon: Clapperboard,
+      description: "var(--professional-primary-4)",
     },
     {
-      title: "Task",
+      title: "GorDex",
+      url: "",
+      icon: LibraryBig,
+      description: "var(--professional-primary-2)",
+    },
+    {
+      title: "GorMea",
+      url: "",
+      icon: SatelliteDish,
+      description: "var(--professional-primary-5)",
+    },
+    {
+      title: "GorTou",
       url: "",
       icon: ListTodo,
-      description: "var(--professional-info)",
+      description: "var(--professional-primary-3)",
     },
     {
-      title: "Marketplace",
+      title: "GorSop",
       url: "",
-      icon: ShoppingBag,
-      description: "var(--professional-warning)",
+      icon: Store,
+      description: "var(--professional-primary-1)",
     },
   ],
   navSignal: [
@@ -121,37 +125,37 @@ export const authOrbitData: OrbitData = {
       title: "Resource",
       url: "",
       icon: Database,
-      description: "var(--professional-main)",
+      description: "var(--professional-info)",
     },
     {
       title: "Discovery",
       url: "",
       icon: Search,
-      description: "var(--professional-primary-1)",
+      description: "var(--professional-secondary)",
     },
     {
       title: "Payment",
       url: "",
       icon: CreditCard,
-      description: "var(--professional-primary-2)",
+      description: "var(--professional-main)",
     },
     {
       title: "Billing",
       url: "",
       icon: Receipt,
-      description: "var(--professional-primary-3)",
+      description: "var(--professional-warning)",
     },
     {
       title: "Media",
       url: "",
       icon: Images,
-      description: "var(--professional-primary-4)",
+      description: "var(--professional-primary-1)",
     },
     {
       title: "Insight",
       url: "",
       icon: ChartBar,
-      description: "var(--professional-primary-5)",
+      description: "var(--professional-primary-4)",
     },
     {
       title: "Browser",
@@ -185,6 +189,7 @@ export const guestRoutes = [
 ] as const
 
 export const protectedRoutes = ["/settings", "/dashboard", "/user"] as const
+export const defaultAuthRedirect = "/dashboard"
 export const adminRoutes = ["/admin"] as const
 export const viceRoutes = ["/vice"] as const
 
@@ -285,6 +290,40 @@ export const visitor = {
   role: "user" as const,
 }
 
+export const secondary = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+    isActive: false,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Bolt,
+    isActive: false,
+  },
+  {
+    title: "Home",
+    url: "/",
+    icon: Home,
+    isActive: false,
+  },
+  {
+    title: "Demo",
+    url: "/demo",
+    icon: FileBox,
+    // description: "Demo",
+    isActive: false,
+  },
+]
+
+export const oauthAdminPaths = {
+  client: "/admin/oauth/client",
+  resource: "/admin/oauth/resource",
+  consent: "/admin/oauth/consent",
+} as const
+
 export const adminServices = [
   {
     slug: "notification",
@@ -366,68 +405,37 @@ export const adminSidebar = {
       url: "/admin/patient-monitoring",
       icon: HeartPulse,
     },
-    { title: "Roles", url: "/admin/role", icon: ShieldCheck },
+    { title: "Role", url: "/admin/role", icon: ShieldCheck },
     {
-      title: "Services",
+      title: "OAuth",
       url: "#",
-      icon: Server,
-      items: adminServices.map((service) => ({
-        title: service.title,
-        url: `/admin/services/${service.slug}`,
-        icon: service.icon,
-      })),
+      icon: KeySquare,
+      items: [
+        { title: "Client", url: oauthAdminPaths.client, icon: AppWindow },
+        { title: "Resource", url: oauthAdminPaths.resource, icon: Database },
+        { title: "Consent", url: oauthAdminPaths.consent, icon: ShieldCheck },
+      ],
     },
     {
-      title: "Users",
-      url: "/admin/users",
+      title: "User",
+      url: "/admin/user",
       icon: Users,
       isActive: true,
     },
     {
-      title: "Applications",
-      url: "/admin/apps",
-      icon: AppWindow,
-      isActive: true,
-    },
-    {
-      title: "Sessions",
-      url: "/admin/sessions",
+      title: "Session",
+      url: "/admin/session",
       icon: MonitorSmartphone,
       isActive: true,
     },
     {
-      title: "Resources",
-      url: "/admin/resources",
-      icon: Database,
-      isActive: true,
-    },
-    {
-      title: "Consents",
-      url: "/admin/consents",
-      icon: ShieldCheck,
-      isActive: true,
-    },
-    {
-      title: "Audit Logs",
-      url: "/admin/audit-logs",
+      title: "Audit log",
+      url: "/admin/audit-log",
       icon: ClipboardList,
       isActive: true,
     },
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Bolt,
-      isActive: true,
-    },
-    {
-      title: "Home",
-      url: "/",
-      icon: Home,
-      isActive: true,
-    },
-  ],
+  navSecondary: secondary,
   projects: [],
   navDropdown: [
     {
@@ -524,10 +532,7 @@ export const settingsSidebar = {
     },
   ],
 
-  navSecondary: [
-    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Home", url: "/", icon: Home },
-  ],
+  navSecondary: secondary,
   projects: [],
   navDropdown: [{ title: "Settings", url: "/settings", icon: Bolt }],
   navSignal: adminSidebar.navSignal,
@@ -536,12 +541,18 @@ export const settingsSidebar = {
 export const roleSidebars = {
   user: {
     ...settingsSidebar,
-    navMain: [{ title: "User dashboard", url: "/user", icon: LayoutDashboard }],
+    navMain: [
+      { title: "User dashboard", url: "/user", icon: LayoutDashboard },
+      { title: "Role", url: "/user/role", icon: ShieldCheck },
+    ],
     projects: [],
   },
   vice: {
     ...settingsSidebar,
-    navMain: [{ title: "Vice dashboard", url: "/vice", icon: LayoutDashboard }],
+    navMain: [
+      { title: "Vice dashboard", url: "/vice", icon: LayoutDashboard },
+      { title: "Role", url: "/vice/role", icon: ShieldCheck },
+    ],
     projects: [],
   },
 }
@@ -556,14 +567,14 @@ export const mainHeader = {
       isActive: true,
     },
     {
-      title: "Users",
-      url: "/admin/users",
+      title: "User",
+      url: "/admin/user",
       icon: Users,
       isActive: true,
     },
     {
-      title: "Applications",
-      url: "/admin/apps",
+      title: "Client",
+      url: oauthAdminPaths.client,
       icon: AppWindow,
       isActive: true,
     },
@@ -574,26 +585,7 @@ export const mainHeader = {
       isActive: true,
     },
   ],
-  navSecondary: [
-    {
-      title: "Home",
-      url: "/",
-      icon: Home,
-      description: "Home Page",
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Bolt,
-      isActive: true,
-    },
-    {
-      title: "Demo",
-      url: "/demo",
-      icon: Home,
-      description: "Demo Page",
-    },
-  ],
+  navSecondary: secondary,
   navDropdown: [
     {
       title: "Account",

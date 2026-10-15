@@ -3,7 +3,12 @@ import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { fileURLToPath } from "node:url"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { adminServices, adminSidebar, settingsSidebar } from "@/utils/constant"
+import {
+  adminServices,
+  adminSidebar,
+  settingsSidebar,
+  oauthAdminPaths,
+} from "@/utils/constant"
 import { canAccessDashboard, getDashboardPath } from "@/utils/dashboard"
 import { NavDropdownItem } from "@gorth/primitive/dashboard/nav-user"
 import { DropdownMenu } from "@gorth/primitive/custom/dropdown"
@@ -19,7 +24,7 @@ vi.mock("@/services/client/auth", () => ({ getSession: mocks.getSession }))
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }))
 vi.mock("@/layouts/dashboard-shell", () => ({ DashboardShell: () => null }))
 
-import DashboardPage from "@/app/(dashboard)/dashboard/page"
+import { DashboardRedirect as DashboardPage } from "@/features/role-dashboard/redirect"
 import { RoleDashboardLayout } from "@/layouts/role-dashboard"
 
 beforeEach(() => {
@@ -35,14 +40,14 @@ describe("server dashboard routing", () => {
     ["master", "/admin"],
   ])("redirects %s to its static dashboard", async (role, path) => {
     mocks.getSession.mockResolvedValue({ user: { role } })
-    await expect(DashboardPage()).rejects.toThrow(`redirect:${path}`)
-    expect(mocks.redirect).toHaveBeenCalledWith(path)
+    expect((await DashboardPage()).props.href).toBe(path)
+    expect(mocks.redirect).not.toHaveBeenCalled()
     expect(getDashboardPath(role)).toBe(path)
   })
   it("requires an authenticated session", async () => {
     mocks.getSession.mockResolvedValue(null)
-    await expect(DashboardPage()).rejects.toThrow(
-      "redirect:/auth/sign-in?redirect=%2Fdashboard"
+    expect((await DashboardPage()).props.href).toBe(
+      "/auth/sign-in?redirect=%2Fdashboard"
     )
   })
   it("never turns an unknown role into an arbitrary redirect or elevated access", () => {
@@ -66,19 +71,79 @@ describe("server dashboard routing", () => {
   }
 })
 
-it("places dashboards only under admin and creates all seven static service pages", () => {
+it("groups OAuth management under admin and replaces static service pages with resource details", () => {
   const root = fileURLToPath(new URL("../", import.meta.url))
   expect(adminServices).toHaveLength(7)
-  const services = adminSidebar.navMain.find(
-    (item) => item.title === "Services"
+  const oauth = adminSidebar.navMain.find((item) => item.title === "OAuth")
+  expect(
+    oauth && "items" in oauth ? (oauth.items ?? []).map((item) => item.url) : []
+  ).toEqual([
+    oauthAdminPaths.client,
+    oauthAdminPaths.resource,
+    oauthAdminPaths.consent,
+  ])
+  expect(adminSidebar.navMain.some((item) => item.title === "Services")).toBe(
+    false
   )
-  expect(services && "items" in services ? services.items : []).toHaveLength(7)
+  for (const path of ["oauth/client", "oauth/resource"]) {
+    for (const suffix of ["", "/create", "/edit/[id]"]) {
+      expect(
+        existsSync(`${root}app/(dashboard)/admin/${path}${suffix}/page.tsx`)
+      ).toBe(true)
+    }
+  }
+  for (const path of ["apps", "apps/create", "apps/edit/[id]", "resources"]) {
+    expect(existsSync(`${root}app/(dashboard)/admin/${path}/page.tsx`)).toBe(
+      false
+    )
+  }
+  for (const [path, title] of [
+    ["user", "User"],
+    ["session", "Session"],
+    ["role", "Role"],
+    ["audit-log", "Audit log"],
+  ]) {
+    expect(existsSync(`${root}app/(dashboard)/admin/${path}/page.tsx`)).toBe(
+      true
+    )
+    expect(
+      adminSidebar.navMain.some(
+        (item) => item.title === title && item.url === `/admin/${path}`
+      )
+    ).toBe(true)
+  }
+  expect(
+    existsSync(`${root}app/(dashboard)/admin/oauth/consent/page.tsx`)
+  ).toBe(true)
+  expect(
+    oauth && "items" in oauth
+      ? (oauth.items ?? []).map((item) => item.title)
+      : []
+  ).toEqual(["Client", "Resource", "Consent"])
+  for (const path of [
+    "users",
+    "users/create",
+    "users/edit/[id]",
+    "users/[id]",
+    "sessions",
+    "consents",
+    "audit-logs",
+  ]) {
+    expect(existsSync(`${root}app/(dashboard)/admin/${path}/page.tsx`)).toBe(
+      false
+    )
+  }
+  for (const suffix of ["create", "edit/[id]", "[id]"]) {
+    expect(
+      existsSync(`${root}app/(dashboard)/admin/user/${suffix}/page.tsx`)
+    ).toBe(true)
+  }
   for (const service of adminServices) {
     expect(
       existsSync(
         `${root}app/(dashboard)/admin/services/${service.slug}/page.tsx`
       )
-    ).toBe(true)
+    ).toBe(false)
   }
   expect(existsSync(`${root}app/(dashboard)/setting/page.tsx`)).toBe(false)
   expect(existsSync(`${root}app/(dashboard)/master/page.tsx`)).toBe(false)

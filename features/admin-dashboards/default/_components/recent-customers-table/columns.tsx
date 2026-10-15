@@ -90,8 +90,6 @@ export const recentCustomersColumns: ColumnDef<
       <NavIdentity
         user={{ name: row.original.name }}
         description={`#${row.original.id}`}
-        hover
-        tooltip
       />
     ),
     enableHiding: false,

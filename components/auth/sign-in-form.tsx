@@ -19,6 +19,7 @@ import {
   isExternalRedirect,
 } from "@/utils/client/temp"
 import { resolveInternalPath } from "@/utils/client/formatter"
+import { defaultAuthRedirect } from "@/utils/constant"
 import { Button } from "@gorth/primitive/custom/button"
 import { Checkbox } from "@gorth/primitive/default/checkbox"
 import { StatusInput as Input } from "@gorth/primitive/custom/input-status"
@@ -28,7 +29,7 @@ export function LoginForm({ addAccount = false }: { addAccount?: boolean }) {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get("redirect") ?? "/"
+  const redirect = searchParams.get("redirect") ?? defaultAuthRedirect
   const oauthQueryString = searchParams.toString()
   const { account } = useAuth()
   const navigationStarted = useRef(false)
@@ -45,7 +46,7 @@ export function LoginForm({ addAccount = false }: { addAccount?: boolean }) {
       return buildLegacyDisabledPath()
     }
 
-    return resolveInternalPath(redirect)
+    return resolveInternalPath(redirect, defaultAuthRedirect)
   }, [addAccount, oauthQueryString, redirect])
 
   const continueAfterAuthentication = useCallback(

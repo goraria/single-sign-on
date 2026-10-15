@@ -3,22 +3,13 @@ import { auth } from "@/lib/auth/server/index"
 import { fetchApi } from "@/lib/hono"
 import { isOAuthClientRedirectAllowed } from "@/services/oauth-client"
 import { appUrl } from "@/utils/environment"
-import { fetcher, toWebResponse } from "@/utils/fetcher"
-import { encodePathSegments, requireUrl } from "@/utils/client/formatter"
+import { requireUrl } from "@/utils/client/formatter"
 
 export interface RouteSession {
   user?: {
     id?: string
     role?: string
   }
-}
-
-export interface AvatarUploadRequest {
-  url: string
-  bucket: string
-  path: string
-  secretKey: string
-  file: File
 }
 
 export interface SignOutRouteRequest {
@@ -48,37 +39,6 @@ export async function getRouteSession(cookie: string) {
     headers: new Headers({ Cookie: cookie }),
     query: { disableCookieCache: true },
   })
-}
-
-export async function uploadRouteAvatar({
-  url,
-  bucket,
-  path,
-  secretKey,
-  file,
-}: AvatarUploadRequest) {
-  const encodedBucket = encodeURIComponent(bucket)
-  const encodedPath = encodePathSegments(path)
-  const response = await fetcher<unknown, ArrayBuffer>({
-    url: `${url}/storage/v1/object/${encodedBucket}/${encodedPath}`,
-    method: "POST",
-    body: await file.arrayBuffer(),
-    headers: {
-      apikey: secretKey,
-      "Content-Type": file.type,
-      "x-upsert": "false",
-      ...(secretKey.startsWith("eyJ")
-        ? { Authorization: `Bearer ${secretKey}` }
-        : {}),
-    },
-    validateStatus: () => true,
-  })
-
-  return {
-    encodedBucket,
-    encodedPath,
-    response: toWebResponse(response),
-  }
 }
 
 export async function signOutRouteSession({

@@ -136,11 +136,31 @@ export interface OAuthResource {
   accessTokenTtl: number | null
   refreshTokenTtl: number | null
   signingAlgorithm: string | null
+  signingKeyId: string | null
   allowedScopes: string[] | null
   dpopBoundAccessTokensRequired: boolean
   disabled: boolean
   createdAt: string
   updatedAt: string
+  policyVersion: number
+  application: string | null
+}
+
+export interface OAuthResourcePayload {
+  identifier: string
+  name: string
+  accessTokenTtl: number | null
+  refreshTokenTtl: number | null
+  signingAlgorithm: "RS256" | "PS256" | "ES256" | "ES512" | "EdDSA" | null
+  signingKeyId: string | null
+  allowedScopes: string[] | null
+  dpopBoundAccessTokensRequired: boolean
+  disabled: boolean
+}
+
+export interface UpdateOAuthResourceRequest {
+  id: string
+  payload: OAuthResourcePayload
 }
 
 export interface OAuthResourcesRequest extends Record<string, unknown> {
@@ -166,10 +186,46 @@ export interface OAuthConsent {
   userId: string | null
   userName: string | null
   userEmail: string | null
+  referenceId: string | null
   resources: string[] | null
   scopes: string[]
   createdAt: string | null
   updatedAt: string | null
+}
+
+export interface AdminSecurityRequest extends Record<string, unknown> {
+  page: number
+  limit: number
+  search?: string
+  userId?: string
+  clientId?: string
+  actorUserId?: string
+  outcome?: "success" | "failure"
+  resourceType?: string
+  from?: string
+  to?: string
+}
+export interface AdminSecurityPage<T> {
+  items: T[]
+  total: number
+  page: number
+  limit: number
+}
+export interface AdminAuditLog {
+  id: string
+  actorUserId: string | null
+  actorName: string | null
+  actorEmail: string | null
+  action: string
+  outcome: "success" | "failure"
+  resourceType: string | null
+  resourceId: string | null
+  requestId: string | null
+  phase: string | null
+  status: string | null
+  subjectUserId: string | null
+  clientId: string | null
+  createdAt: string
 }
 
 export const ssoApplicationsQueryKey = ["admin", "sso-application"] as const
@@ -177,6 +233,7 @@ export const usersQueryKey = ["admin", "user"] as const
 export const sessionsQueryKey = ["admin", "session"] as const
 export const oauthResourcesQueryKey = ["admin", "oauth-resource"] as const
 export const oauthConsentsQueryKey = ["admin", "oauth-consent"] as const
+export const auditLogsQueryKey = ["admin", "audit-log"] as const
 
 const applicationsService = useQuery<
   SsoApplicationsResponse,
@@ -245,7 +302,7 @@ const createUserService = useMutation<AdminUser, AdminUserPayload>({
     credentials: "include",
     body,
   }),
-  invalidates: [usersQueryKey],
+  invalidates: [usersQueryKey, auditLogsQueryKey],
 })
 
 const updateUserService = useMutation<AdminUser, UpdateAdminUserRequest>({
@@ -256,17 +313,21 @@ const updateUserService = useMutation<AdminUser, UpdateAdminUserRequest>({
     credentials: "include",
     body: payload,
   }),
-  invalidates: [usersQueryKey],
+  invalidates: [usersQueryKey, auditLogsQueryKey],
 })
 
-const sessionsService = useQuery<AdminSession[], undefined>({
-  queryKey: sessionsQueryKey,
-  query: {
+const sessionsService = useQuery<
+  AdminSecurityPage<AdminSession>,
+  AdminSecurityRequest
+>({
+  queryKey: (request) => [...sessionsQueryKey, request],
+  query: (request) => ({
     url: "/admin/gateway/session",
     method: "GET",
     baseURL: null,
     credentials: "include",
-  },
+    params: request,
+  }),
 })
 
 const oauthResourcesService = useQuery<
@@ -289,15 +350,119 @@ const oauthResourcesService = useQuery<
   },
 })
 
-const oauthConsentsService = useQuery<OAuthConsent[], undefined>({
-  queryKey: oauthConsentsQueryKey,
-  query: {
+const oauthResourceService = useQuery<OAuthResource, string>({
+  queryKey: (id) => [...oauthResourcesQueryKey, id] as const,
+  query: (id) => ({
+    url: `/admin/gateway/oauth-resource/${encodeURIComponent(id)}`,
+    method: "GET",
+    baseURL: null,
+    credentials: "include",
+  }),
+  queryOptions: (id) => ({ enabled: Boolean(id) }),
+})
+
+const createOAuthResourceService = useMutation<
+  OAuthResource,
+  OAuthResourcePayload
+>({
+  query: (body) => ({
+    url: "/admin/gateway/oauth-resource",
+    method: "POST",
+    baseURL: null,
+    credentials: "include",
+    body,
+  }),
+  invalidates: [oauthResourcesQueryKey, auditLogsQueryKey],
+})
+
+const updateOAuthResourceService = useMutation<
+  OAuthResource,
+  UpdateOAuthResourceRequest
+>({
+  query: ({ id, payload }) => ({
+    url: `/admin/gateway/oauth-resource/${encodeURIComponent(id)}`,
+    method: "PATCH",
+    baseURL: null,
+    credentials: "include",
+    body: payload,
+  }),
+  invalidates: [oauthResourcesQueryKey, auditLogsQueryKey],
+})
+
+const deleteOAuthResourceService = useMutation<{ id: string }, string>({
+  query: (id) => ({
+    url: `/admin/gateway/oauth-resource/${encodeURIComponent(id)}`,
+    method: "DELETE",
+    baseURL: null,
+    credentials: "include",
+  }),
+  invalidates: [oauthResourcesQueryKey, auditLogsQueryKey],
+})
+
+const oauthConsentsService = useQuery<
+  AdminSecurityPage<OAuthConsent>,
+  AdminSecurityRequest
+>({
+  queryKey: (request) => [...oauthConsentsQueryKey, request],
+  query: (request) => ({
     url: "/admin/gateway/oauth-consent",
     method: "GET",
     baseURL: null,
     credentials: "include",
-  },
+    params: request,
+  }),
 })
+
+const auditLogsService = useQuery<
+  AdminSecurityPage<AdminAuditLog>,
+  AdminSecurityRequest
+>({
+  queryKey: (request) => [...auditLogsQueryKey, request],
+  query: (request) => ({
+    url: "/admin/gateway/audit-log",
+    method: "GET",
+    baseURL: null,
+    credentials: "include",
+    params: request,
+  }),
+})
+const revokeAdminSessionService = useMutation<{ id: string }, string>({
+  query: (id) => ({
+    url: `/admin/gateway/session/${encodeURIComponent(id)}`,
+    method: "DELETE",
+    baseURL: null,
+    credentials: "include",
+  }),
+  invalidates: [sessionsQueryKey, auditLogsQueryKey],
+})
+const revokeAdminUserSessionsService = useMutation<{ userId: string }, string>({
+  query: (id) => ({
+    url: `/admin/gateway/user/${encodeURIComponent(id)}/session`,
+    method: "DELETE",
+    baseURL: null,
+    credentials: "include",
+  }),
+  invalidates: [sessionsQueryKey, auditLogsQueryKey],
+})
+const revokeOAuthConsentService = useMutation<{ id: string }, string>({
+  query: (id) => ({
+    url: `/admin/gateway/oauth-consent/${encodeURIComponent(id)}`,
+    method: "DELETE",
+    baseURL: null,
+    credentials: "include",
+  }),
+  invalidates: [oauthConsentsQueryKey, auditLogsQueryKey],
+})
+export const useAuditLogsQuery = createQueryService(auditLogsService)
+export const useRevokeAdminSessionMutation = createMutationService(
+  revokeAdminSessionService
+)
+export const useRevokeAdminUserSessionsMutation = createMutationService(
+  revokeAdminUserSessionsService
+)
+export const useRevokeOAuthConsentMutation = createMutationService(
+  revokeOAuthConsentService
+)
 
 const createApplicationService = useMutation<
   SsoApplication,
@@ -310,7 +475,7 @@ const createApplicationService = useMutation<
     credentials: "include",
     body,
   }),
-  invalidates: [ssoApplicationsQueryKey],
+  invalidates: [ssoApplicationsQueryKey, auditLogsQueryKey],
 })
 
 const updateApplicationService = useMutation<
@@ -324,7 +489,7 @@ const updateApplicationService = useMutation<
     credentials: "include",
     body: payload,
   }),
-  invalidates: [ssoApplicationsQueryKey],
+  invalidates: [ssoApplicationsQueryKey, auditLogsQueryKey],
 })
 
 const deleteApplicationService = useMutation<{ id: string }, string>({
@@ -334,7 +499,7 @@ const deleteApplicationService = useMutation<{ id: string }, string>({
     baseURL: null,
     credentials: "include",
   }),
-  invalidates: [ssoApplicationsQueryKey],
+  invalidates: [ssoApplicationsQueryKey, auditLogsQueryKey],
 })
 
 export const useSsoApplicationsQuery = createQueryService(applicationsService)
@@ -345,6 +510,16 @@ export const useCreateUserMutation = createMutationService(createUserService)
 export const useUpdateUserMutation = createMutationService(updateUserService)
 export const useAdminSessionsQuery = createQueryService(sessionsService)
 export const useOAuthResourcesQuery = createQueryService(oauthResourcesService)
+export const useOAuthResourceQuery = createQueryService(oauthResourceService)
+export const useCreateOAuthResourceMutation = createMutationService(
+  createOAuthResourceService
+)
+export const useUpdateOAuthResourceMutation = createMutationService(
+  updateOAuthResourceService
+)
+export const useDeleteOAuthResourceMutation = createMutationService(
+  deleteOAuthResourceService
+)
 export const useOAuthConsentsQuery = createQueryService(oauthConsentsService)
 export const useCreateSsoApplicationMutation = createMutationService(
   createApplicationService

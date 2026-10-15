@@ -144,7 +144,7 @@ export function UserForm({ user }: { user?: AdminUser }) {
           }).unwrap()
         : await createUser(payload).unwrap()
 
-      router.replace(`/admin/users/edit/${saved.id}`)
+      router.replace(`/admin/user/edit/${saved.id}`)
       router.refresh()
     } catch {
       // Caller exposes the normalized error through the mutation result.
@@ -305,7 +305,7 @@ export function UserForm({ user }: { user?: AdminUser }) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/admin/users")}
+            onClick={() => router.push("/admin/user")}
           >
             Cancel
           </Button>

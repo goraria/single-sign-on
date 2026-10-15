@@ -1,6 +1,18 @@
 import { cn } from "@gorth/primitive/cores/cn"
 import { Spinner } from "@gorth/primitive/pattern/spinner"
 
+export function TableLoading() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading data"
+      className="flex min-h-24 items-center justify-center"
+    >
+      <Spinner aria-hidden="true" size={32} variant="infinite" />
+    </div>
+  )
+}
+
 export function LoadingScreen({ className }: { className?: string }) {
   return (
     <div
