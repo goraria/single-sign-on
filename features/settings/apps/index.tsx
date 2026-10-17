@@ -12,11 +12,12 @@ import { Button } from "@gorth/primitive/custom/button"
 import { Input } from "@gorth/primitive/default/input"
 import {
   Select,
+  SelectGroup,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 import { Card, CardContent, CardHeader } from "@gorth/primitive/default/card"
 import { compareText, matchesSearchQuery } from "@/utils/client/formatter"
 import { appConnection } from "@/utils/constant"
@@ -68,9 +69,11 @@ export function Apps() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Apps</SelectItem>
-              <SelectItem value="connected">Connected</SelectItem>
-              <SelectItem value="notConnected">Not Connected</SelectItem>
+              <SelectGroup>
+                <SelectItem value="all">All Apps</SelectItem>
+                <SelectItem value="connected">Connected</SelectItem>
+                <SelectItem value="notConnected">Not Connected</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
           <Select
@@ -83,16 +86,18 @@ export function Apps() {
               </SelectValue>
             </SelectTrigger>
             <SelectContent align="end">
-              <SelectItem value="asc">
-                <span className="flex items-center gap-4">
-                  <ArrowUpAZ className="size-4" /> Ascending
-                </span>
-              </SelectItem>
-              <SelectItem value="desc">
-                <span className="flex items-center gap-4">
-                  <ArrowDownAZ className="size-4" /> Descending
-                </span>
-              </SelectItem>
+              <SelectGroup>
+                <SelectItem value="asc">
+                  <span className="flex items-center gap-4">
+                    <ArrowUpAZ className="size-4" /> Ascending
+                  </span>
+                </SelectItem>
+                <SelectItem value="desc">
+                  <span className="flex items-center gap-4">
+                    <ArrowDownAZ className="size-4" /> Descending
+                  </span>
+                </SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>

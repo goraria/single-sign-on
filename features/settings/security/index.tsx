@@ -31,10 +31,11 @@ import { Label } from "@gorth/primitive/default/label"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 import { Toaster, toast } from "@gorth/primitive/custom/toast"
 import { Spinner } from "@gorth/primitive/pattern/spinner"
 
@@ -397,7 +398,7 @@ function ProfileCard() {
                               field.handleChange(value as DisplayNameFormat)
                             }
                           >
-                            <SelectTrigger id={field.name} className="w-full">
+                            <SelectTrigger id={field.name} size="default" className="w-full">
                               <SelectValue>
                                 {hasFullName
                                   ? formatDisplayName(
@@ -408,24 +409,26 @@ function ProfileCard() {
                               </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="first-last">
-                                {formatDisplayName("first-last", values)}
-                              </SelectItem>
-                              <SelectItem value="last-first">
-                                {formatDisplayName("last-first", values)}
-                              </SelectItem>
-                              <SelectItem value="first">
-                                {formatDisplayName("first", values)}
-                              </SelectItem>
-                              <SelectItem value="last">
-                                {formatDisplayName("last", values)}
-                              </SelectItem>
-                              <SelectItem
-                                disabled={!username.trim()}
-                                value="username"
-                              >
-                                {usernameLabel}
-                              </SelectItem>
+                              <SelectGroup>
+                                <SelectItem value="first-last">
+                                  {formatDisplayName("first-last", values)}
+                                </SelectItem>
+                                <SelectItem value="last-first">
+                                  {formatDisplayName("last-first", values)}
+                                </SelectItem>
+                                <SelectItem value="first">
+                                  {formatDisplayName("first", values)}
+                                </SelectItem>
+                                <SelectItem value="last">
+                                  {formatDisplayName("last", values)}
+                                </SelectItem>
+                                <SelectItem
+                                  disabled={!username.trim()}
+                                  value="username"
+                                >
+                                  {usernameLabel}
+                                </SelectItem>
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                         )

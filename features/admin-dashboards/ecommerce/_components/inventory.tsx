@@ -6,7 +6,7 @@ import {
   PackageX,
   TriangleAlert,
 } from "@gorth/primitive/cores/lucide"
-import { Label, Pie, PieChart } from "recharts"
+import { Label, Pie, PieChart } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,

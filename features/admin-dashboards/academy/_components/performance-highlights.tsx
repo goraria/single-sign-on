@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowRight } from "@gorth/primitive/cores/lucide"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
 
 import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
 import {

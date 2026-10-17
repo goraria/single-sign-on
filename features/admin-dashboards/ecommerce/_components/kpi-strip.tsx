@@ -10,7 +10,7 @@ import {
   ShoppingBag,
   Users,
 } from "@gorth/primitive/cores/lucide"
-import { Area, Bar, CartesianGrid, ComposedChart, XAxis, YAxis } from "recharts"
+import { Area, Bar, CartesianGrid, ComposedChart, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,

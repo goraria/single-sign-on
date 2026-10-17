@@ -30,11 +30,12 @@ import {
 } from "@gorth/primitive/default/popover"
 import {
   Select,
+  SelectGroup,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 import {
   Table,
   TableBody,
@@ -380,11 +381,13 @@ export function ApplicationForm({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {tokenEndpointAuthMethodOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      {tokenEndpointAuthMethodOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </TextField>
@@ -601,12 +604,14 @@ export function OAuthResourceForm({ resource }: { resource?: OAuthResource }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Provider default</SelectItem>
-                  {oauthSigningAlgorithms.map((algorithm) => (
-                    <SelectItem key={algorithm} value={algorithm}>
-                      {algorithm}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    <SelectItem value="default">Provider default</SelectItem>
+                    {oauthSigningAlgorithms.map((algorithm) => (
+                      <SelectItem key={algorithm} value={algorithm}>
+                        {algorithm}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </TextField>

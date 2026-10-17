@@ -8,7 +8,7 @@ import {
   type LabelProps,
   XAxis,
   YAxis,
-} from "recharts"
+} from "@gorth/primitive/cores/recharts"
 import { siEbay, siGoogle, siMeta, siShopify, siTiktok } from "simple-icons"
 
 import { SimpleIcon } from "@/components/dashboard/simple-icon"

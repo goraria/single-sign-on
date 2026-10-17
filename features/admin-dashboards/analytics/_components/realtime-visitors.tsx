@@ -1,7 +1,7 @@
 "use client"
 
 import { Ellipsis } from "@gorth/primitive/cores/lucide"
-import { Bar, BarChart, type BarShapeProps, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, type BarShapeProps, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,

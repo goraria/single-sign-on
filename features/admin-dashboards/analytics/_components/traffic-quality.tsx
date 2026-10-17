@@ -1,7 +1,7 @@
 "use client"
 
 import { Ellipsis } from "@gorth/primitive/cores/lucide"
-import { CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts"
+import { CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,

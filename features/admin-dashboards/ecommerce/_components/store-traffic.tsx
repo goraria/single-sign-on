@@ -4,7 +4,7 @@ import { useState } from "react"
 
 import { format, subMinutes } from "date-fns"
 import { ArrowUpRight } from "@gorth/primitive/cores/lucide"
-import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,

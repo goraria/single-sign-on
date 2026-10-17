@@ -290,7 +290,14 @@ export const visitor = {
   role: "user" as const,
 }
 
+export const primary = []
 export const secondary = [
+  {
+    title: "Home",
+    url: "/",
+    icon: Home,
+    isActive: false,
+  },
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -304,12 +311,6 @@ export const secondary = [
     isActive: false,
   },
   {
-    title: "Home",
-    url: "/",
-    icon: Home,
-    isActive: false,
-  },
-  {
     title: "Demo",
     url: "/demo",
     icon: FileBox,
@@ -317,6 +318,27 @@ export const secondary = [
     isActive: false,
   },
 ]
+export const tertiary = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+    isActive: false,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Bolt,
+    isActive: false,
+  },
+]
+export const quaternary = []
+export const quinary = []
+export const senary = []
+export const septenary = []
+export const octonary = []
+export const nonary = []
+export const denary = []
 
 export const oauthAdminPaths = {
   client: "/admin/oauth/client",
@@ -437,13 +459,7 @@ export const adminSidebar = {
   ],
   navSecondary: secondary,
   projects: [],
-  navDropdown: [
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Bolt,
-    },
-  ],
+  navDropdown: tertiary,
   navSignal: [
     {
       title: "Sign In",
@@ -534,7 +550,7 @@ export const settingsSidebar = {
 
   navSecondary: secondary,
   projects: [],
-  navDropdown: [{ title: "Settings", url: "/settings", icon: Bolt }],
+  navDropdown: tertiary,
   navSignal: adminSidebar.navSignal,
 }
 
@@ -586,18 +602,7 @@ export const mainHeader = {
     },
   ],
   navSecondary: secondary,
-  navDropdown: [
-    {
-      title: "Account",
-      url: "/admin",
-      icon: BadgeCheck,
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Bolt,
-    },
-  ],
+  navDropdown: tertiary,
   navSignal: [
     {
       title: "Sign In",

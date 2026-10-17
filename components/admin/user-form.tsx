@@ -8,11 +8,12 @@ import { Input } from "@gorth/primitive/default/input"
 import { Label } from "@gorth/primitive/default/label"
 import {
   Select,
+  SelectGroup,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 import { PasswordInput } from "@gorth/primitive/custom/input-password"
 import { LoadingScreen } from "@/features/shared/loading"
 import { userRoles } from "@/utils/renderer"
@@ -233,11 +234,13 @@ export function UserForm({ user }: { user?: AdminUser }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {userRoles.map((role) => (
-                  <SelectItem key={role.value} value={role.value}>
-                    {role.label}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {userRoles.map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </TextField>

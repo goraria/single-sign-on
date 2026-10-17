@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowRight } from "@gorth/primitive/cores/lucide"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,

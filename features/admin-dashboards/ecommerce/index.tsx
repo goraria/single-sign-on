@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 import { Separator } from "@gorth/primitive/default/separator"
 
 import { CustomerReviews } from "./_components/customer-reviews"

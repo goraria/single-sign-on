@@ -6,11 +6,12 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@gorth/primitive/cores/cn"
 import {
   Select,
+  SelectGroup,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 import { ScrollArea } from "@gorth/primitive/default/scroll-area"
 
 export interface PreferenceNavItem {
@@ -36,14 +37,16 @@ export function SidebarNav({ items }: { items: PreferenceNavItem[] }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {items.map((item) => (
-              <SelectItem key={item.href} value={item.href}>
-                <span className="flex gap-x-4 px-2 py-1">
-                  <item.icon className="size-4" />
-                  <span className="text-base">{item.title}</span>
-                </span>
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {items.map((item) => (
+                <SelectItem key={item.href} value={item.href}>
+                  <span className="flex gap-x-4 px-2 py-1">
+                    <item.icon className="size-4" />
+                    <span className="text-base">{item.title}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

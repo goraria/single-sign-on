@@ -1,4 +1,4 @@
-import { CartesianGrid, Line, LineChart, YAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, YAxis } from "@gorth/primitive/cores/recharts"
 
 import {
   type ChartConfig,

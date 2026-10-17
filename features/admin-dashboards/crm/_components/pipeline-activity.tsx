@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,
@@ -23,7 +23,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 
 const pipelineChartValues = [
   34, 38, 31, 47, 42, 51, 44, 40, 58, 46, 43, 49,

@@ -46,25 +46,25 @@ export function DashboardShell({ children, section }: DashboardShellProps) {
   const sidebar = {
     ...data,
     user,
-    navDropdown: [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      ...data.navDropdown.filter((item) => item.url !== "/dashboard"),
-    ],
+    // navDropdown: [
+    //   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    //   ...data.navDropdown.filter((item) => item.url !== "/dashboard"),
+    // ],
     navMain:
       user.role === "master"
         ? [
-            ...data.navMain,
-            {
-              title: "Role dashboards",
-              url: "#",
-              icon: adminSidebar.navMain[0].icon,
-              items: [
-                { title: "User", url: "/user" },
-                { title: "Vice", url: "/vice" },
-                { title: "Admin", url: "/admin" },
-              ],
-            },
-          ]
+          ...data.navMain,
+          {
+            title: "Role dashboards",
+            url: "#",
+            icon: adminSidebar.navMain[0].icon,
+            items: [
+              { title: "User", url: "/user" },
+              { title: "Vice", url: "/vice" },
+              { title: "Admin", url: "/admin" },
+            ],
+          },
+        ]
         : data.navMain,
   }
 

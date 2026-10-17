@@ -1,7 +1,7 @@
 "use client"
 
 import { addHours, endOfToday, format, parseISO, subHours } from "date-fns"
-import { Area, CartesianGrid, ComposedChart, Line, XAxis } from "recharts"
+import { Area, CartesianGrid, ComposedChart, Line, XAxis } from "@gorth/primitive/cores/recharts"
 
 import { Button } from "@gorth/primitive/custom/button"
 import {
@@ -28,7 +28,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 
 const chartValues = [
   { newCustomers: 23840, activeAccounts: 6630, returningUsers: 4880 },

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-import { Label, Pie, PieChart } from "recharts"
+import { Label, Pie, PieChart } from "@gorth/primitive/cores/recharts"
 
 import {
   Card,
@@ -24,7 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/default/select"
+} from "@gorth/primitive/custom/select"
 import { formatCurrency } from "@/utils/currency"
 
 type BalanceKey = "investment" | "main" | "reserve" | "savings"

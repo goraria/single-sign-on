@@ -57,7 +57,7 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
             secondary: [],
           }}
           top={
-            <Link href="/" aria-label="Gorth home" className="block size-24">
+            <Link href="/" aria-label="Gorth home" className="flex items-center gap-3">
               <Image
                 src={gorthLogo}
                 alt="Gorth"
@@ -65,6 +65,9 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
                 height={96}
                 className="size-24 object-contain"
               />
+              <span className="truncate text-2xl font-bold tracking-tight text-foreground">
+                Gorth
+              </span>
             </Link>
           }
           middle={

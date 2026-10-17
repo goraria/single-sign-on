@@ -18,31 +18,30 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@better-auth/infra": "0.4.19",
-    "@better-auth/oauth-provider": "1.7.9",
-    "@better-auth/sso": "1.7.9",
+    "@better-auth/infra": "0.4.20",
+    "@better-auth/oauth-provider": "1.7.10",
+    "@better-auth/sso": "1.7.10",
     "@faker-js/faker": "^10.6.0",
     "@gorth/primitive": "github:gorth-io/base-primitive",
     "@gorth/principle": "github:gorth-io/base-principle",
     "@gorth/structure": "github:gorth-io/base-structure",
     "@hono/vercel": "^1.0.1",
     "@vercel/functions": "^3.10.1",
-    "better-auth": "1.7.9",
+    "better-auth": "1.7.10",
     "d3-geo": "^3.1.1",
     "date-fns": "^4.4.0",
     "drizzle-orm": "1.0.0-rc.4",
     "hono": "^4.13.13",
-    "next": "16.4.1",
+    "next": "16.4.2",
     "next-themes": "^0.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "recharts": "^3.10.1",
     "server-only": "^0.0.1",
     "simple-icons": "^16.35.0",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
-    "@next/env": "16.4.1",
+    "@next/env": "16.4.2",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/d3-geo": "^3.1.1",
     "@types/node": "^26.6.5",
@@ -51,12 +50,12 @@
     "@types/topojson-client": "^3.1.5",
     "drizzle-kit": "1.0.0-rc.4",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.4.1",
+    "eslint-config-next": "16.4.2",
     "postcss": "^8.5.30",
     "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.5"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

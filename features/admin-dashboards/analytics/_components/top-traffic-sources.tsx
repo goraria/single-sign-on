@@ -9,7 +9,7 @@ import {
   type LabelProps,
   XAxis,
   YAxis,
-} from "recharts"
+} from "@gorth/primitive/cores/recharts"
 
 import {
   Card,
