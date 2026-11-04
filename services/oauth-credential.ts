@@ -1,0 +1,130 @@
+import "server-only"
+import { and, eq, isNull, sql } from "drizzle-orm"
+import { database } from "@/database"
+import { oauthClient, oauthClientResource } from "@/database/schema"
+import { getAuth } from "@/lib/auth/server"
+import {
+  checkSsoApplicationExists,
+  createServiceError,
+} from "@/services/helper"
+import { oauthManagementReference } from "@/utils/oauth-management"
+
+export async function rotateSsoApplicationCredential(
+  id: string,
+  headers: Headers
+) {
+  const current = await checkSsoApplicationExists(id)
+  if (
+    current.referenceId !== oauthManagementReference ||
+    current.public ||
+    !["client_secret_post", "client_secret_basic"].includes(
+      current.tokenEndpointAuthMethod ?? ""
+    )
+  )
+    throw createServiceError("managed_confidential_client_required", 403)
+  const auth = await getAuth()
+  const [credential] = await database
+    .select({
+      present: sql<boolean>`${oauthClient.clientSecret} IS NOT NULL AND ${oauthClient.clientSecret}<>''`,
+    })
+    .from(oauthClient)
+    .where(eq(oauthClient.id, id))
+    .limit(1)
+  if (!credential) throw createServiceError("client_not_found", 404)
+  if (credential.present) {
+    const result = await auth.api.rotateClientSecret({
+      headers,
+      body: { client_id: current.clientId },
+    })
+    return {
+      id,
+      clientId: result.client_id,
+      clientSecret: result.client_secret,
+    }
+  }
+  // Register a disabled draft through the provider. Never invent a secret/hash
+  // to make a registry draft look like an already provisioned OAuth client.
+  if (!current.disabled)
+    throw createServiceError("disable_unprovisioned_client_first", 409)
+  if (
+    current.clientId !== "gorth-media-storage" ||
+    current.grantTypes?.length !== 1 ||
+    current.grantTypes[0] !== "client_credentials"
+  )
+    throw createServiceError("native_machine_registration_draft_required", 409)
+  const links = await database
+    .select({ identifier: oauthClientResource.resourceId })
+    .from(oauthClientResource)
+    .where(eq(oauthClientResource.clientId, current.clientId))
+  const claimed = await database
+    .update(oauthClient)
+    .set({
+      metadata: sql`coalesce(${oauthClient.metadata},'{}'::jsonb)||'{"credentialProvisioning":true}'::jsonb`,
+    })
+    .where(
+      and(
+        eq(oauthClient.id, id),
+        eq(oauthClient.disabled, true),
+        isNull(oauthClient.clientSecret),
+        sql`coalesce(${oauthClient.metadata}->>'credentialProvisioning','false')<>'true'`
+      )
+    )
+    .returning({ id: oauthClient.id })
+  if (!claimed.length)
+    throw createServiceError("credential_provisioning_in_progress", 409)
+  let created:
+    Awaited<ReturnType<typeof auth.api.adminCreateOAuthClient>> | undefined
+  try {
+    created = await auth.api.adminCreateOAuthClient({
+      headers,
+      body: {
+        client_name: current.name ?? current.clientId,
+        token_endpoint_auth_method: current.tokenEndpointAuthMethod as
+          "client_secret_post" | "client_secret_basic",
+        grant_types: current.grantTypes ?? ["client_credentials"],
+        response_types: current.responseTypes ?? [],
+        scope: (current.scopes ?? []).join(" "),
+        client_credentials_scopes: current.clientCredentialsScopes,
+        resources: links.map((r) => r.identifier),
+        ...(current.redirectUris.length
+          ? { redirect_uris: current.redirectUris }
+          : {}),
+        metadata: {
+          ...(current.metadata &&
+          typeof current.metadata === "object" &&
+          !Array.isArray(current.metadata)
+            ? (current.metadata as Record<string, unknown>)
+            : {}),
+          credentialProvisioning: false,
+          storageCredentialReader: "commerce-applications",
+        },
+      },
+    })
+    const [registered] = await database
+      .update(oauthClient)
+      .set({ disabled: true })
+      .where(eq(oauthClient.clientId, created.client_id))
+      .returning({ id: oauthClient.id })
+    if (!registered || !created.client_secret)
+      throw createServiceError("credential_provisioning_failed", 503)
+    await auth.api.deleteOAuthClient({
+      headers,
+      body: { client_id: current.clientId },
+    })
+    return {
+      id: registered.id,
+      clientId: created.client_id,
+      clientSecret: created.client_secret,
+    }
+  } catch (error) {
+    if (created)
+      await auth.api
+        .deleteOAuthClient({ headers, body: { client_id: created.client_id } })
+        .catch(() => undefined)
+    await database
+      .update(oauthClient)
+      .set({ metadata: sql`${oauthClient.metadata}-'credentialProvisioning'` })
+      .where(eq(oauthClient.id, id))
+    throw error
+  }
+}

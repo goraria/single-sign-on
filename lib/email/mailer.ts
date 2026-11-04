@@ -1,5 +1,5 @@
 import "server-only"
-import nodemailer from "@gorth/principle/cores/nodemailer"
+import nodemailer from "@gorth-io/principle/cores/nodemailer"
 
 import {
   emailFrom,

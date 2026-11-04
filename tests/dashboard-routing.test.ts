@@ -10,9 +10,9 @@ import {
   oauthAdminPaths,
 } from "@/utils/constant"
 import { canAccessDashboard, getDashboardPath } from "@/utils/dashboard"
-import { NavDropdownItem } from "@gorth/primitive/dashboard/nav-user"
-import { DropdownMenu } from "@gorth/primitive/custom/dropdown"
-import { LayoutDashboard } from "@gorth/primitive/cores/lucide"
+import { NavDropdownItem } from "@gorth-io/primitive/dashboard/nav-user"
+import { DropdownMenu } from "@gorth-io/primitive/custom/dropdown"
+import { LayoutDashboard } from "@gorth-io/primitive/cores/lucide"
 
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
@@ -80,6 +80,7 @@ it("groups OAuth management under admin and replaces static service pages with r
   ).toEqual([
     oauthAdminPaths.client,
     oauthAdminPaths.resource,
+    oauthAdminPaths.scope,
     oauthAdminPaths.consent,
   ])
   expect(adminSidebar.navMain.some((item) => item.title === "Services")).toBe(
@@ -119,7 +120,7 @@ it("groups OAuth management under admin and replaces static service pages with r
     oauth && "items" in oauth
       ? (oauth.items ?? []).map((item) => item.title)
       : []
-  ).toEqual(["Client", "Resource", "Consent"])
+  ).toEqual(["Client", "Resource", "Scope", "Consent"])
   for (const path of [
     "users",
     "users/create",

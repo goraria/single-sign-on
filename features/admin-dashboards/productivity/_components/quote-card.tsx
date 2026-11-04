@@ -1,4 +1,4 @@
-import { Quote } from "@gorth/primitive/cores/lucide"
+import { Quote } from "@gorth-io/primitive/cores/lucide"
 
 export function QuoteCard() {
   return (

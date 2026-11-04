@@ -1,6 +1,6 @@
-import { TrendingUp } from "@gorth/primitive/cores/lucide"
+import { TrendingUp } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Item,
   ItemActions,
@@ -8,7 +8,7 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@gorth/primitive/default/item"
+} from "@gorth-io/primitive/default/item"
 
 export function FinanceNotification() {
   return (

@@ -17,7 +17,7 @@ describe("shared role data-table", () => {
       ),
       "utf8"
     )
-    expect(source).toContain('from "@gorth/primitive/custom/data-table"')
+    expect(source).toContain('from "@gorth-io/primitive/custom/data-table"')
     expect(source).toContain("<DataTable")
     expect(source).toContain("{...table.props}")
     expect(source).not.toContain("RolesTable")

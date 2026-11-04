@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Separator } from "@gorth/primitive/default/separator"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 export function ContentSection({
   title,

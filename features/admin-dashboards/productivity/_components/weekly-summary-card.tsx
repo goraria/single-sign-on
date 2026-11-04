@@ -1,12 +1,12 @@
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Progress } from "@gorth/primitive/default/progress"
+} from "@gorth-io/primitive/default/card"
+import { Progress } from "@gorth-io/primitive/default/progress"
 
 export function WeeklySummaryCard() {
   return (

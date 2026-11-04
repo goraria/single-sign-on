@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import type { Store } from "@gorth/principle/cores/hono/rate-limiter"
+import type { Store } from "@gorth-io/principle/cores/hono/rate-limiter"
 
 import { database } from "@/database"
 

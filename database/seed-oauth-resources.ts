@@ -1,44 +1,15 @@
-import { database, pool } from "@/database"
-import { oauthClientResource, oauthResource } from "@/database/schema"
-import {
-  oauthClientResourceSeeds,
-  oauthResourceSeeds,
-} from "@/database/seeds/oauth-resources"
+import { pool } from "@/database"
+import { bootstrapOAuthResources } from "@/database/bootstrap-oauth-resources"
+import { oauthResourceSeeds } from "@/database/seeds/oauth-resources"
 
 async function seedOAuthResources() {
-  for (const resource of oauthResourceSeeds) {
-    await database
-      .insert(oauthResource)
-      .values({
-        ...resource,
-        dpopBoundAccessTokensRequired: false,
-        disabled: false,
-        policyVersion: 1,
-      })
-      .onConflictDoUpdate({
-        target: oauthResource.identifier,
-        set: {
-          name: resource.name,
-          accessTokenTtl: resource.accessTokenTtl,
-          allowedScopes: resource.allowedScopes,
-          metadata: resource.metadata,
-          disabled: false,
-          updatedAt: new Date(),
-        },
-      })
-  }
-
-  for (const client of oauthClientResourceSeeds) {
-    for (const resourceId of client.resourceIds) {
-      await database
-        .insert(oauthClientResource)
-        .values({ clientId: client.clientId, resourceId })
-        .onConflictDoNothing()
-    }
-  }
-
+  if (!process.argv.includes("--local"))
+    throw new Error(
+      "Local bootstrap requires --local; manage production resources through the dashboard"
+    )
+  await bootstrapOAuthResources(oauthResourceSeeds)
   console.info(
-    `Seeded ${oauthResourceSeeds.length} OAuth resources and linked ${oauthClientResourceSeeds.length} clients`
+    "OAuth resource bootstrap completed; existing policies and links preserved"
   )
 }
 

@@ -4,7 +4,7 @@ import {
   AuthError,
   createIdentityCache,
   createOAuthIdentityValidator,
-} from "@gorth/structure/modules/auth/server"
+} from "@gorth-io/structure/modules/auth/server"
 
 const read = (path: string) =>
   readFileSync(new URL("../" + path, import.meta.url), "utf8")
@@ -16,7 +16,7 @@ it("limits the fullstack workspace to the app root, not the archived pkg", () =>
 
 it("keeps Better Auth app-owned and uses public Structure infrastructure exports", () => {
   expect(manifest.dependencies["better-auth"]).toBeTruthy()
-  expect(manifest.dependencies["@gorth/structure"]).toBeTruthy()
+  expect(manifest.dependencies["@gorth-io/structure"]).toBeTruthy()
   for (const dependency of [
     "axios",
     "zod",
@@ -38,7 +38,7 @@ it("keeps Better Auth app-owned and uses public Structure infrastructure exports
 
 it("uses Structure PG directly while keeping SSO plugins owned by SSO", () => {
   expect(read("database/index.ts")).toContain(
-    'from "@gorth/structure/cores/pg"'
+    'from "@gorth-io/structure/cores/pg"'
   )
   expect(read("database/index.ts")).not.toContain("@/lib/structure")
   for (const dependency of [

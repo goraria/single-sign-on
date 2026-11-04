@@ -2,25 +2,25 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
 import {
   DataTable,
   DataTableColumnHeader,
-} from "@gorth/primitive/custom/data-table"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+} from "@gorth-io/primitive/custom/data-table"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 import type {
   PaginationState,
   SortingState,
-} from "@gorth/primitive/cores/tanstack/table"
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Button } from "@gorth/primitive/custom/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+} from "@gorth-io/primitive/cores/tanstack/table"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   type SsoApplication,
   useDeleteSsoApplicationMutation,

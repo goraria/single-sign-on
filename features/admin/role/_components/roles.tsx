@@ -1,21 +1,21 @@
 "use client"
 
-import { AlertTriangle, ChevronRight } from "@gorth/primitive/cores/lucide"
+import { AlertTriangle, ChevronRight } from "@gorth-io/primitive/cores/lucide"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@gorth/primitive/default/alert"
-import { Button } from "@gorth/primitive/custom/button"
-import { DataTable } from "@gorth/primitive/custom/data-table"
-import { toast } from "@gorth/primitive/custom/toast"
+} from "@gorth-io/primitive/default/alert"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { DataTable } from "@gorth-io/primitive/custom/data-table"
+import { toast } from "@gorth-io/primitive/custom/toast"
 import { useLocalDataTable } from "@/hooks/use-local-data-table"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@gorth/primitive/custom/tabs"
+} from "@gorth-io/primitive/custom/tabs"
 import { rolesColumns } from "./roles-table/columns"
 import type { Role } from "./roles-table/data"
 

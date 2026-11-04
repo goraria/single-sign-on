@@ -1,22 +1,22 @@
 "use client"
 
 import { faker } from "@faker-js/faker"
-import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
-import { toast } from "@gorth/primitive/custom/toast"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
+import { toast } from "@gorth-io/primitive/custom/toast"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   DataTable,
   DataTableColumnHeader,
-} from "@gorth/primitive/custom/data-table"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+} from "@gorth-io/primitive/custom/data-table"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 import { useLocalDataTable } from "@/hooks/use-local-data-table"
 import {
   renderTaskPriority,

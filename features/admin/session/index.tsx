@@ -3,18 +3,18 @@
 import { TableLoading } from "@/features/shared/loading"
 
 import { useMemo } from "react"
-import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
-import { DataTable } from "@gorth/primitive/custom/data-table"
-import { Button } from "@gorth/primitive/custom/button"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
+import { DataTable } from "@gorth-io/primitive/custom/data-table"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { toast } from "@gorth/primitive/custom/toast"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+} from "@gorth-io/primitive/custom/dropdown"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { toast } from "@gorth-io/primitive/custom/toast"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 import { useAdminTable } from "@/hooks/use-admin-table"
 import { formatDateTime } from "@/utils/client/formatter"
 import {

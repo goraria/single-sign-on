@@ -1,10 +1,10 @@
-import { CartesianGrid, Line, LineChart, YAxis } from "@gorth/primitive/cores/recharts"
+import { CartesianGrid, Line, LineChart, YAxis } from "@gorth-io/primitive/cores/recharts"
 
 import {
   type ChartConfig,
   ChartContainer,
-} from "@gorth/primitive/default/chart"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/default/chart"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import { getVerticalGridCoordinates } from "./chart-grid"
 

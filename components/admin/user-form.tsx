@@ -2,10 +2,10 @@
 
 import { type FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@gorth/primitive/custom/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
-import { Input } from "@gorth/primitive/default/input"
-import { Label } from "@gorth/primitive/default/label"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
+import { Input } from "@gorth-io/primitive/default/input"
+import { Label } from "@gorth-io/primitive/default/label"
 import {
   Select,
   SelectGroup,
@@ -13,8 +13,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
-import { PasswordInput } from "@gorth/primitive/custom/input-password"
+} from "@gorth-io/primitive/custom/select"
+import { PasswordInput } from "@gorth-io/primitive/custom/input-password"
 import { LoadingScreen } from "@/features/shared/loading"
 import { userRoles } from "@/utils/renderer"
 import {

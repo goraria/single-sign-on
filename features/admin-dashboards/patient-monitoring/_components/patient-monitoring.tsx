@@ -7,17 +7,17 @@ import {
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from "@gorth/primitive/default/alert"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
-import { Separator } from "@gorth/primitive/default/separator"
+} from "@gorth-io/primitive/default/alert"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Separator } from "@gorth-io/primitive/default/separator"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@gorth/primitive/custom/tabs"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/custom/tabs"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import type { PatientRecord } from "./data"
 import { PatientCard } from "./patient-card"

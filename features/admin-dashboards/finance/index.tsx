@@ -1,13 +1,13 @@
 import { format } from "date-fns"
-import { Download, RotateCw, Settings2 } from "@gorth/primitive/cores/lucide"
+import { Download, RotateCw, Settings2 } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@gorth/primitive/custom/tabs"
+} from "@gorth-io/primitive/custom/tabs"
 
 import { BalanceDistributionCard } from "./_components/balance-distribution-card"
 import { FinanceNotification } from "./_components/finance-notification"

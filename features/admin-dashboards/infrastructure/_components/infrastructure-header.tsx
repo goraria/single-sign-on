@@ -7,16 +7,16 @@ import {
   Search,
   Server,
   Settings,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@gorth/primitive/default/input-group"
-import { Kbd } from "@gorth/primitive/default/kbd"
+} from "@gorth-io/primitive/default/input-group"
+import { Kbd } from "@gorth-io/primitive/default/kbd"
 
 export function InfrastructureHeader() {
   return (

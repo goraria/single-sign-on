@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { AuthLayout } from "@/layouts/auth"
 import { auth } from "@/lib/auth/client"
 import { parseSpaceSeparatedValues } from "@/utils/client/formatter"
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 
 export default function ConsentPage() {
   const searchParams = useSearchParams()

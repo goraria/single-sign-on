@@ -1,14 +1,14 @@
 "use client"
 
-import { MonitorSmartphone, Trash2 } from "@gorth/primitive/cores/lucide"
-import { Button } from "@gorth/primitive/custom/button"
+import { MonitorSmartphone, Trash2 } from "@gorth-io/primitive/cores/lucide"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { toast } from "@gorth/primitive/custom/toast"
+} from "@gorth-io/primitive/default/card"
+import { toast } from "@gorth-io/primitive/custom/toast"
 import { formatDateTime } from "@/utils/client/formatter"
 import {
   useAccountSessionsQuery,

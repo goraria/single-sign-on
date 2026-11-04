@@ -4,8 +4,8 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { expect, it, vi } from "vitest"
 import { TableLoading } from "@/features/shared/loading"
 import Loading from "@/app/(dashboard)/settings/task/loading"
-import { ProgressProvider } from "@gorth/primitive/cores/progress/react"
-import { DataTable } from "@gorth/primitive/custom/data-table"
+import { ProgressProvider } from "@gorth-io/primitive/cores/progress/react"
+import { DataTable } from "@gorth-io/primitive/custom/data-table"
 
 it("uses an inline infinite spinner while waiting for the task route", () => {
   expect(Loading().type).toBe(TableLoading)

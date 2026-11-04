@@ -31,6 +31,7 @@ function isNativeAdminMutation(context: {
       "/oauth2/update-client",
       "/oauth2/delete-client",
       "/oauth2/rotate-client-secret",
+      "/oauth2/client/rotate-secret",
     ].includes(context.path ?? "")
   )
 }

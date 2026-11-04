@@ -1,22 +1,22 @@
 "use client"
 
 import { useLayoutEffect, useRef } from "react"
-import { useForm } from "@gorth/primitive/cores/tanstack/form"
+import { useForm } from "@gorth-io/primitive/cores/tanstack/form"
 import {
   Camera,
   RotateCcw,
   Save,
   ShieldCheck,
   Trash2,
-} from "@gorth/primitive/cores/lucide"
-import { NavProfile } from "@gorth/primitive/dashboard/nav-user"
-import { Button } from "@gorth/primitive/custom/button"
+} from "@gorth-io/primitive/cores/lucide"
+import { NavProfile } from "@gorth-io/primitive/dashboard/nav-user"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@gorth/primitive/default/accordion"
+} from "@gorth-io/primitive/default/accordion"
 import {
   Card,
   CardContent,
@@ -24,10 +24,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
-import { Input } from "@gorth/primitive/default/input"
-import { Label } from "@gorth/primitive/default/label"
+} from "@gorth-io/primitive/default/card"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
+import { Input } from "@gorth-io/primitive/default/input"
+import { Label } from "@gorth-io/primitive/default/label"
 import {
   Select,
   SelectContent,
@@ -35,9 +35,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
-import { Toaster, toast } from "@gorth/primitive/custom/toast"
-import { Spinner } from "@gorth/primitive/pattern/spinner"
+} from "@gorth-io/primitive/custom/select"
+import { Toaster, toast } from "@gorth-io/primitive/custom/toast"
+import { Spinner } from "@gorth-io/primitive/pattern/spinner"
 
 import { ChangePasswordForm } from "@/components/auth/change-password-form"
 import { FieldError } from "@/components/auth/field-error"

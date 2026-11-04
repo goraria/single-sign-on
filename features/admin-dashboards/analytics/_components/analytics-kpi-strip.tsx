@@ -2,16 +2,16 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Ellipsis,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 export function AnalyticsKpiStrip() {
   return (

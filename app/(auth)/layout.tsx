@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Floating3DParticles } from "@gorth/primitive/background/floating"
+import { Floating3DParticles } from "@gorth-io/primitive/background/floating"
 
 export default function AuthRouteLayout({ children }: { children: ReactNode }) {
   return (

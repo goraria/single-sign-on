@@ -30,7 +30,7 @@ it("leaves hover and tooltip props unset on every SSO identity", () => {
         if (
           !ts.isImportDeclaration(node) ||
           !ts.isStringLiteral(node.moduleSpecifier) ||
-          node.moduleSpecifier.text !== "@gorth/primitive/dashboard/nav-user"
+          node.moduleSpecifier.text !== "@gorth-io/primitive/dashboard/nav-user"
         )
           continue
         const bindings = node.importClause?.namedBindings

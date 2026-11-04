@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { useSearchParams } from "next/navigation"
 
-import { cn } from "@gorth/primitive/cores/cn"
+import { cn } from "@gorth-io/primitive/cores/cn"
 import { additionalAccountAuth, auth } from "@/lib/auth/client"
 import { resolveInternalPath } from "@/utils/client/formatter"
 import { defaultAuthRedirect } from "@/utils/constant"
@@ -13,7 +13,7 @@ import {
   hasOAuthQuery,
   isExternalRedirect,
 } from "@/utils/client/temp"
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 
 export function SocialForm({
   className,

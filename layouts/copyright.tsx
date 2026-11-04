@@ -1,11 +1,11 @@
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   AtSign,
   CodeXml,
   LinkIcon,
   MessageCircle,
   Play,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 import { appGlobal } from "@/utils/constant"
 
 export function Copyright() {

@@ -2,12 +2,12 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@gorth/primitive/default/button"
-import { Badge } from "@gorth/primitive/default/badge"
-import { Input } from "@gorth/primitive/default/input"
-import { cn } from "@gorth/primitive/cores/cn"
-import { toast } from "@gorth/primitive/custom/toast"
-import { useProgress } from "@gorth/primitive/cores/progress/next"
+import { Button } from "@gorth-io/primitive/default/button"
+import { Badge } from "@gorth-io/primitive/default/badge"
+import { Input } from "@gorth-io/primitive/default/input"
+import { cn } from "@gorth-io/primitive/cores/cn"
+import { toast } from "@gorth-io/primitive/custom/toast"
+import { useProgress } from "@gorth-io/primitive/cores/progress/next"
 import {
   useHealthQuery,
   useParamQuery,

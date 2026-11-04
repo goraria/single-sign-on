@@ -1,6 +1,6 @@
 import { auth, additionalAccountAuth } from "@/lib/auth/client"
 import { signInSchema, usernameSchema } from "@/schemas/auth"
-import type { z } from "@gorth/structure/cores/zod"
+import type { z } from "@gorth-io/structure/cores/zod"
 
 // Only UI dispatch lives here; credential verification, cookies and sessions
 // remain owned by Better Auth. Do not resolve a username to an email ourselves.

@@ -5,8 +5,8 @@ import * as React from "react"
 import { startOfMonth, startOfToday } from "date-fns"
 import { enGB } from "date-fns/locale"
 
-import { Calendar } from "@gorth/primitive/default/calendar"
-import { Card, CardContent } from "@gorth/primitive/default/card"
+import { Calendar } from "@gorth-io/primitive/default/calendar"
+import { Card, CardContent } from "@gorth-io/primitive/default/card"
 
 export function CalendarPanel() {
   const today = startOfToday()

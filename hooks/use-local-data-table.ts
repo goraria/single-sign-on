@@ -11,14 +11,14 @@ import {
   type PaginationState,
   type RowData,
   type SortingState,
-} from "@gorth/primitive/cores/tanstack/table"
-import { dataTableFeatures } from "@gorth/primitive/custom/data-table"
+} from "@gorth-io/primitive/cores/tanstack/table"
+import { dataTableFeatures } from "@gorth-io/primitive/custom/data-table"
 import type {
   DataTableFilter,
   DataTableFilterOption,
   DataTableProps,
   DataTableSearch,
-} from "@gorth/primitive/utils/interface"
+} from "@gorth-io/primitive/utils/interface"
 
 const localFeatures = tableFeatures({
   ...dataTableFeatures,

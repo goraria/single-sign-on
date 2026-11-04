@@ -2,15 +2,15 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { Loader2, Send } from "@gorth/primitive/cores/lucide"
+import { useForm } from "@gorth-io/primitive/cores/tanstack/form"
+import { Loader2, Send } from "@gorth-io/primitive/cores/lucide"
 
 import { auth } from "@/lib/auth/client"
 import { setPendingVerification } from "@/lib/auth/client/pending-verification"
 import { forgotPasswordSchema } from "@/schemas/auth"
-import { Button } from "@gorth/primitive/custom/button"
-import { StatusInput as Input } from "@gorth/primitive/custom/input-status"
-import { Label } from "@gorth/primitive/default/label"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { StatusInput as Input } from "@gorth-io/primitive/custom/input-status"
+import { Label } from "@gorth-io/primitive/default/label"
 
 export function ForgotPasswordForm() {
   const [submitError, setSubmitError] = useState<string | null>(null)

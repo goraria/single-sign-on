@@ -1,20 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { BellRing, Save } from "@gorth/primitive/cores/lucide"
-import { Button } from "@gorth/primitive/custom/button"
+import { BellRing, Save } from "@gorth-io/primitive/cores/lucide"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+} from "@gorth-io/primitive/default/card"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import {
   NativeSelect,
   NativeSelectOption,
-} from "@gorth/primitive/default/native-select"
+} from "@gorth-io/primitive/default/native-select"
 
 const notificationRows = [
   "New products and offers",

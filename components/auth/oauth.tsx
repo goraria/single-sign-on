@@ -2,8 +2,8 @@
 
 import { type FormEvent, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@gorth/primitive/custom/button"
-import { Badge } from "@gorth/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import {
   Card,
   CardAction,
@@ -11,8 +11,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+} from "@gorth-io/primitive/default/card"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import {
   Command,
   CommandEmpty,
@@ -20,14 +20,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@gorth/primitive/custom/command"
-import { StatusInput as Input } from "@gorth/primitive/custom/input-status"
-import { Label } from "@gorth/primitive/default/label"
+} from "@gorth-io/primitive/custom/command"
+import { StatusInput as Input } from "@gorth-io/primitive/custom/input-status"
+import { Label } from "@gorth-io/primitive/default/label"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@gorth/primitive/default/popover"
+} from "@gorth-io/primitive/default/popover"
 import {
   Select,
   SelectGroup,
@@ -35,7 +35,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
+} from "@gorth-io/primitive/custom/select"
 import {
   Table,
   TableBody,
@@ -43,19 +43,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
-import { Textarea } from "@gorth/primitive/default/textarea"
+} from "@gorth-io/primitive/default/table"
+import { Textarea } from "@gorth-io/primitive/default/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@gorth-io/primitive/default/dialog"
 import {
   Check,
   ChevronDown,
   Plus,
   Trash2,
   X,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 import { LoadingScreen } from "@/features/shared/loading"
 import {
+  useAdoptOAuthClientMutation,
+  useOAuthScopeRegistryQuery,
   type SsoApplication,
   useCreateSsoApplicationMutation,
+  useRotateSsoApplicationCredentialMutation,
   useDeleteSsoApplicationMutation,
   useSsoApplicationQuery,
   useUpdateSsoApplicationMutation,
@@ -69,6 +73,7 @@ import {
   toSsoApplicationPayload,
   type SsoApplicationFormState,
 } from "@/utils/client/temp"
+import { OAuthClientResources } from "@/components/admin/oauth-client-resources"
 import { oauthAdminPaths } from "@/utils/constant"
 import {
   oauthSigningAlgorithms,
@@ -81,11 +86,14 @@ const emptyApplication: SsoApplicationFormState = {
   id: "",
   clientId: "",
   name: "",
+  environment: "production",
   description: "",
   homepageUrl: "",
   icon: "",
   redirectUris: [""],
   postLogoutRedirectUris: [],
+  backchannelLogoutUri: "",
+  clientCredentialsScopes: [],
   scopes: ["openid", "profile", "email", "offline_access"],
   grantTypes: ["authorization_code", "refresh_token"],
   responseTypes: ["code"],
@@ -95,25 +103,6 @@ const emptyApplication: SsoApplicationFormState = {
   skipConsent: true,
   disabled: false,
 }
-
-const scopeOptions = [
-  "openid",
-  "profile",
-  "email",
-  "offline_access",
-  "chat:read",
-  "chat:write",
-  "video:read",
-  "video:write",
-  "reader:read",
-  "reader:write",
-  "social:read",
-  "social:write",
-  "task:read",
-  "task:write",
-  "marketplace:read",
-  "marketplace:write",
-] as const
 
 const grantTypeOptions = [
   "authorization_code",
@@ -150,25 +139,39 @@ export function ApplicationForm({
 }: {
   application?: SsoApplication
 }) {
+  const registry = useOAuthScopeRegistryQuery()
+  const scopeOptions = registry.data?.active.scopes ?? []
   const router = useRouter()
   const [form, setForm] = useState(() =>
     application ? toSsoApplicationFormState(application) : emptyApplication
   )
+  const [createdCredential, setCreatedCredential] = useState<{
+    id: string
+    clientId?: string
+    secret: string
+  } | null>(null)
+  const [adopt, adoption] = useAdoptOAuthClientMutation()
   const [createApplication, createResult] = useCreateSsoApplicationMutation()
+  const [rotateCredential, rotateResult] = useRotateSsoApplicationCredentialMutation()
+  const [confirmRotation, setConfirmRotation] = useState(false)
   const [updateApplication, updateResult] = useUpdateSsoApplicationMutation()
   const [deleteApplication, deleteResult] = useDeleteSsoApplicationMutation()
   const saving =
-    createResult.isLoading || updateResult.isLoading || deleteResult.isLoading
-  const error = createResult.error ?? updateResult.error ?? deleteResult.error
+    createResult.isLoading || updateResult.isLoading || deleteResult.isLoading || rotateResult.isLoading
+  const error = createResult.error ?? updateResult.error ?? deleteResult.error ?? rotateResult.error
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
+    if (createdCredential) return
     try {
       const payload = toSsoApplicationPayload(form)
       const saved = application
         ? await updateApplication({ id: application.id, payload }).unwrap()
         : await createApplication(payload).unwrap()
+      if (saved.clientSecret) {
+        setCreatedCredential({ id: saved.id, clientId: saved.clientId, secret: saved.clientSecret })
+        return
+      }
       router.replace(`${oauthAdminPaths.client}/edit/${saved.id}`)
       router.refresh()
     } catch {
@@ -247,7 +250,13 @@ export function ApplicationForm({
                 Delete
               </Button>
             ) : null}
-            <Button type="submit" disabled={saving}>
+            {application && ["client_secret_post", "client_secret_basic"].includes(application.tokenEndpointAuthMethod) && !createdCredential && (
+              <Button type="button" variant="outline" disabled={saving || !application.centrallyManaged} onClick={() => setConfirmRotation(true)}>Generate / rotate secret</Button>
+            )}
+            <Button
+              type="submit"
+              disabled={saving || Boolean(createdCredential)}
+            >
               {saving
                 ? "Saving..."
                 : application
@@ -263,13 +272,78 @@ export function ApplicationForm({
           </div>
         ) : null}
 
+        {createdCredential ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Save the client secret</CardTitle>
+              <CardDescription>
+                This credential is shown once. Store it in the application
+                server secret manager before continuing.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              {createdCredential.clientId && <Input aria-label="OAuth client ID" readOnly value={createdCredential.clientId} />}
+              <Input
+                aria-label="New client secret"
+                readOnly
+                value={createdCredential.secret}
+                autoComplete="off"
+              />
+              <Button
+                type="button"
+                onClick={() =>
+                  router.replace(
+                    `${oauthAdminPaths.client}/edit/${createdCredential.id}`
+                  )
+                }
+              >
+                Continue to client settings
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+        <Dialog open={confirmRotation} onOpenChange={open => !saving && setConfirmRotation(open)}>
+          <DialogContent><DialogHeader><DialogTitle>Generate a new client secret?</DialogTitle><DialogDescription>The current credential will stop working. The new secret is shown once; copy it to the service backend before enabling the client.</DialogDescription></DialogHeader>
+            <Button type="button" disabled={saving} onClick={async () => {
+              if (!application) return
+              try {
+                const result = await rotateCredential({ id: application.id }).unwrap()
+                setCreatedCredential({ id: result.id, clientId: result.clientId, secret: result.clientSecret })
+                setConfirmRotation(false)
+              } catch { /* The caller exposes the normalized native error. */ }
+            }}>Confirm rotation</Button>
+          </DialogContent>
+        </Dialog>
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]">
           <div className="grid min-w-0 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Application details</CardTitle>
+                {application && !application.centrallyManaged ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={adoption.isLoading}
+                    onClick={() => {
+                      void adopt(application.id)
+                        .unwrap()
+                        .then(() => router.refresh())
+                        .catch(() => undefined)
+                    }}
+                  >
+                    Adopt for central management (master)
+                  </Button>
+                ) : null}
+                {adoption.error ? (
+                  <p role="alert">
+                    Unable to transfer client ownership. Master access is
+                    required.
+                  </p>
+                ) : null}
                 <CardDescription>
                   Basic client information shown throughout the SSO dashboard.
+                  Adopting a client transfers ownership to SSO administrators
+                  and trusts its registered web origins.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-2">
@@ -279,6 +353,27 @@ export function ApplicationForm({
                     placeholder="Generated by Better Auth"
                     disabled
                   />
+                </TextField>
+                <TextField label="Environment">
+                  <Select
+                    value={form.environment}
+                    onValueChange={(value) =>
+                      update(
+                        "environment",
+                        value === "local" ? "local" : "production"
+                      )
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="production">Production</SelectItem>
+                        <SelectItem value="local">Local</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </TextField>
                 <TextField label="Name">
                   <Input
@@ -293,6 +388,15 @@ export function ApplicationForm({
                     value={form.homepageUrl}
                     onChange={(event) =>
                       update("homepageUrl", event.target.value)
+                    }
+                  />
+                </TextField>
+                <TextField label="Backchannel logout URL">
+                  <Input
+                    type="url"
+                    value={form.backchannelLogoutUri}
+                    onChange={(event) =>
+                      update("backchannelLogoutUri", event.target.value)
                     }
                   />
                 </TextField>
@@ -313,6 +417,7 @@ export function ApplicationForm({
               </CardContent>
             </Card>
 
+            {application ? <OAuthClientResources id={application.id} /> : null}
             <UriTableField
               title="Redirect URIs"
               description="Allowed callback destinations after authorization."
@@ -354,6 +459,17 @@ export function ApplicationForm({
                 value={form.scopes}
                 onChange={(value) => update("scopes", value)}
               />
+              <MultiSelectField
+                label="Machine scopes (master only)"
+                placeholder="No machine access"
+                options={scopeOptions}
+                value={form.clientCredentialsScopes}
+                onChange={(value) => update("clientCredentialsScopes", value)}
+              />
+              <p className="text-sm text-muted-foreground">
+                Use a separate client for each environment. Machine scopes
+                require a confidential client and master approval.
+              </p>
               <MultiSelectField
                 label="Grant types"
                 placeholder="Select grant types"
@@ -470,6 +586,8 @@ export function OAuthResourceEditor({ id }: { id: string }) {
 }
 
 export function OAuthResourceForm({ resource }: { resource?: OAuthResource }) {
+  const registry = useOAuthScopeRegistryQuery()
+  const scopeOptions = registry.data?.active.scopes ?? []
   const router = useRouter()
   const [form, setForm] = useState(() => toOAuthResourceFormState(resource))
   const [createResource, createResult] = useCreateOAuthResourceMutation()
@@ -643,12 +761,7 @@ export function OAuthResourceForm({ resource }: { resource?: OAuthResource }) {
               <MultiSelectField
                 label="Allowed scopes"
                 placeholder="Select scopes"
-                options={[
-                  ...scopeOptions,
-                  "sso:read",
-                  "sso:write",
-                  "storage:sso:credential",
-                ]}
+                options={scopeOptions}
                 value={form.allowedScopes}
                 onChange={(value) => update("allowedScopes", value)}
               />

@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 
-import { Star } from "@gorth/primitive/cores/lucide"
+import { Star } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
@@ -12,8 +12,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/default/card"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import { type FileManagerFile, fileIcons, fileKindLabels } from "./data"
 import { FileActions } from "./file-actions"

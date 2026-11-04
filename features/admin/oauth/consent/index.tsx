@@ -3,27 +3,27 @@
 import { TableLoading } from "@/features/shared/loading"
 
 import { useMemo, useState } from "react"
-import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
-import { DataTable } from "@gorth/primitive/custom/data-table"
-import { Button } from "@gorth/primitive/custom/button"
-import { Input } from "@gorth/primitive/default/input"
-import { Badge } from "@gorth/primitive/custom/badge"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
+import { DataTable } from "@gorth-io/primitive/custom/data-table"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Input } from "@gorth-io/primitive/default/input"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@gorth/primitive/default/dialog"
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { toast } from "@gorth/primitive/custom/toast"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+} from "@gorth-io/primitive/default/dialog"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { toast } from "@gorth-io/primitive/custom/toast"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 import { useAdminTable } from "@/hooks/use-admin-table"
 import { formatDateTime } from "@/utils/client/formatter"
 import {

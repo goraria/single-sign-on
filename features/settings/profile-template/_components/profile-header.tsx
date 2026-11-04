@@ -6,11 +6,11 @@ import {
   Mail,
   Pencil,
   UserRoundX,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { NavProfile } from "@gorth/primitive/dashboard/nav-user"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
+import { NavProfile } from "@gorth-io/primitive/dashboard/nav-user"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 
 import type { ProfileRecord } from "./profile-data"
 

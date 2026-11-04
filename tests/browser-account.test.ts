@@ -10,14 +10,17 @@ vi.mock("server-only", () => ({}))
 vi.mock("@/utils/environment", () => ({
   appUrl: "http://localhost:3300",
 }))
-vi.mock("@/lib/auth/server/index", () => ({
-  auth: {
-    handler: async (request: Request) => {
-      upstream.paths.push(new URL(request.url).pathname)
-      return upstream.handler!(request)
+vi.mock("@/lib/auth/server/index", async () => {
+  const authModule = await (() => ({
+    auth: {
+      handler: async (request: Request) => {
+        upstream.paths.push(new URL(request.url).pathname)
+        return upstream.handler!(request)
+      },
     },
-  },
-}))
+  }))()
+  return { ...authModule, getAuth: async () => authModule.auth }
+})
 vi.mock("@/services/route", () => ({
   validateOAuthRedirectPolicy: async () => false,
   signOutRouteSession: async ({

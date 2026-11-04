@@ -1,4 +1,4 @@
-import { z } from "@gorth/structure/cores/zod"
+import { z } from "@gorth-io/structure/cores/zod"
 
 // Private upstream shape. Tokens never leave the Next.js boundary in this UI.
 export const deviceSessionSchema = z.object({

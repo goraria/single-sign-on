@@ -1,4 +1,4 @@
-import z from "@gorth/structure/cores/zod"
+import z from "@gorth-io/structure/cores/zod"
 
 const opportunitySchema = z.object({
   id: z.string(),

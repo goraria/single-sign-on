@@ -1,8 +1,8 @@
 "use client"
 
-import { Download } from "@gorth/primitive/cores/lucide"
+import { Download } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 import customersData from "./data.json"
 import type { RecentCustomerRow } from "./recent-customers-table/schema"

@@ -1,6 +1,6 @@
 "use client"
 
-import { Ellipsis } from "@gorth/primitive/cores/lucide"
+import { Ellipsis } from "@gorth-io/primitive/cores/lucide"
 import {
   Bar,
   BarChart,
@@ -9,7 +9,7 @@ import {
   type LabelProps,
   XAxis,
   YAxis,
-} from "@gorth/primitive/cores/recharts"
+} from "@gorth-io/primitive/cores/recharts"
 
 import {
   Card,
@@ -17,19 +17,19 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@gorth/primitive/default/chart"
+} from "@gorth-io/primitive/default/chart"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@gorth/primitive/custom/tabs"
+} from "@gorth-io/primitive/custom/tabs"
 
 const chartConfig = {
   visitors: {

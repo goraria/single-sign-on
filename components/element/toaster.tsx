@@ -1,4 +1,4 @@
-import { toast } from "@gorth/primitive/custom/toast"
+import { toast } from "@gorth-io/primitive/custom/toast"
 
 export function showSubmittedData(
   data: unknown,

@@ -1,14 +1,14 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { Badge } from "@gorth/primitive/custom/badge"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@gorth/primitive/default/dialog"
+} from "@gorth-io/primitive/default/dialog"
 import type { OAuthResource, SsoApplication } from "@/services/client/admin"
 import { ServiceOverview } from "@/features/admin/oauth/resource/service-overview"
 import { getOAuthResourceService } from "@/utils/client/oauth"

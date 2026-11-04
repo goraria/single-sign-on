@@ -4,9 +4,9 @@ import {
   FileUp,
   RefreshCw,
   Share2,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   Select,
   SelectContent,
@@ -23,7 +23,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
+} from "@gorth-io/primitive/custom/select"
 
 export function AnalyticsToolbar() {
   return (

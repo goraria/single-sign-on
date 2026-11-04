@@ -1,6 +1,6 @@
 # Multi-account SSO
 
-Implementation follows Better Auth 1.7.7, imported only through the installed public `@gorth/structure` exports:
+Implementation follows Better Auth 1.7.7, imported only through the installed public `@gorth-io/structure` exports:
 
 - [Multi Session](https://better-auth.com/docs/plugins/multi-session)
 - [OAuth select-account screen](https://better-auth.com/docs/plugins/oauth-provider#select-account-screen)

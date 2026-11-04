@@ -1,7 +1,7 @@
 "use client"
 
-import { Ellipsis } from "@gorth/primitive/cores/lucide"
-import { Bar, BarChart, type BarShapeProps, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
+import { Ellipsis } from "@gorth-io/primitive/cores/lucide"
+import { Bar, BarChart, type BarShapeProps, XAxis, YAxis } from "@gorth-io/primitive/cores/recharts"
 
 import {
   Card,
@@ -9,13 +9,13 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@gorth/primitive/default/chart"
+} from "@gorth-io/primitive/default/chart"
 
 const realtimeData = [
   { minute: 1, visitors: 0 },

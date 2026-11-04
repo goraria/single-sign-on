@@ -1,12 +1,12 @@
 "use client"
 
-import { Header } from "@gorth/primitive/layouts/header"
+import { Header } from "@gorth-io/primitive/layouts/header"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@gorth/primitive/default/tooltip"
-import { SidebarTrigger } from "@gorth/primitive/custom/sidebar"
+} from "@gorth-io/primitive/default/tooltip"
+import { SidebarTrigger } from "@gorth-io/primitive/custom/sidebar"
 import { HeaderActions } from "@/components/dashboard/header-actions"
 import { mainHeader } from "@/utils/constant"
 import type { AuthContextProps } from "@/hooks/use-auth"

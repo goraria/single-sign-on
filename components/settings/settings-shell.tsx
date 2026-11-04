@@ -9,9 +9,9 @@ import {
   Palette,
   UserCog,
   Wrench,
-} from "@gorth/primitive/cores/lucide"
-import { Separator } from "@gorth/primitive/default/separator"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/cores/lucide"
+import { Separator } from "@gorth-io/primitive/default/separator"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 const settingItems = [
   { title: "Profile", href: "/settings/profile", icon: UserCog },

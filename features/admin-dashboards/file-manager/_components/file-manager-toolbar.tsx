@@ -2,9 +2,9 @@ import {
   ArrowUpDown,
   Search,
   SlidersHorizontal,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +17,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@gorth/primitive/default/input-group"
+} from "@gorth-io/primitive/default/input-group"
 
 export function FileManagerToolbar() {
   return (

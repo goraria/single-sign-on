@@ -8,11 +8,11 @@ import {
   ShieldCheck,
   Sparkles,
   Dot,
-} from "@gorth/primitive/cores/lucide"
-import { Button } from "@gorth/primitive/custom/button"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Card } from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/cores/lucide"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Card } from "@gorth-io/primitive/default/card"
 
 const features = [
   {

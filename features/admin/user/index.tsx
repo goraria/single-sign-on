@@ -3,25 +3,25 @@
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
 import type {
   PaginationState,
   SortingState,
-} from "@gorth/primitive/cores/tanstack/table"
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Button } from "@gorth/primitive/custom/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+} from "@gorth-io/primitive/cores/tanstack/table"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   DataTable,
   DataTableColumnHeader,
-} from "@gorth/primitive/custom/data-table"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+} from "@gorth-io/primitive/custom/data-table"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 import { type AdminUser, useUsersQuery } from "@/services/client/admin"
 import { formatDate } from "@/utils/client/formatter"
 import { TableLoading } from "@/features/shared/loading"

@@ -1,5 +1,5 @@
 import nextEnv from "@next/env"
-import { Pool } from "@gorth/structure/cores/pg"
+import { Pool } from "@gorth-io/structure/cores/pg"
 
 nextEnv.loadEnvConfig(process.cwd())
 const { databaseUrl } = await import("../utils/environment.ts")

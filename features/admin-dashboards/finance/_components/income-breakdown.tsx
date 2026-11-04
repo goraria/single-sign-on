@@ -3,8 +3,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Separator } from "@gorth/primitive/default/separator"
+} from "@gorth-io/primitive/default/card"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 export function IncomeBreakdown() {
   return (

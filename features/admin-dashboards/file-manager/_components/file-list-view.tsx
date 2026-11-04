@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 
-import { Star } from "@gorth/primitive/cores/lucide"
+import { Star } from "@gorth-io/primitive/cores/lucide"
 
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Table,
   TableBody,
@@ -14,8 +14,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/default/table"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import { type FileManagerFile, fileIcons } from "./data"
 import { FileActions } from "./file-actions"

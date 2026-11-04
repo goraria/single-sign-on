@@ -14,7 +14,7 @@ import {
   Star,
   Thermometer,
   Truck,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
 export type ShipmentStatus =
   | "Scheduled"

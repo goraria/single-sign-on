@@ -11,8 +11,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/default/card"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 export interface AuthLayoutProps {
   children: ReactNode

@@ -1,6 +1,6 @@
 import { HTTPException } from "hono/http-exception"
 import { isAPIError } from "better-auth/api"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { finishAvatarUpload } from "@/services/media"
 import { mediaAssetIdSchema } from "@/schemas/media"
 
@@ -24,7 +24,9 @@ async function handle(
     )
   }
   try {
-    const session = await auth.api.getSession({
+    const session = await (
+      await getAuth()
+    ).api.getSession({
       headers: request.headers,
       query: { disableCookieCache: true },
     })

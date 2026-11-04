@@ -37,7 +37,14 @@ import { getUserProfileClaims } from "@/services/user"
 import { sendVerificationOtpEmail } from "@/lib/email/mailer"
 import { adminAccessControl, adminRoles } from "@/lib/auth/server/access"
 import { mediaAccess } from "@/lib/auth/server/media-access"
+import { commerceTeamAccess } from "@/lib/auth/server/commerce-access"
+import { commerceOrganization } from "@/lib/auth/server/commerce-organization"
 import { adminAudit } from "@/lib/auth/server/admin-audit"
+import { loadOAuthScopeRevision } from "@/services/oauth-registry"
+import { oauthManagementReference } from "@/utils/oauth-management"
+import { getOAuthAdministratorRole } from "@/services/oauth-management"
+import { oidcScopes } from "@/schemas/oauth-registry"
+import { onceAsync } from "@/utils/server/once"
 
 const gorthAppClaim = "https://gorth-auth.vercel.app/claims/app"
 const accessTokenExpiresIn = 60 * 10
@@ -110,282 +117,258 @@ async function getGorthUserInfoClaims(
   }
 }
 
-export const auth = betterAuth({
-  basePath: "/auth",
-  baseURL: betterAuthUrl,
-  // Better Auth reads BETTER_AUTH_SECRET directly. Keep its existing value;
-  // this application does not configure versioned secret rotation.
-  disabledPaths: ["/token"],
-  // Initialization has no request and must not query the DB during a build.
-  // Real requests still validate against the registered OAuth client origins.
-  trustedOrigins: (request) =>
-    request ? getOAuthClientOrigins(getCorsOrigins()) : getCorsOrigins(),
-  plugins: [
-    multiSession(),
-    username({
-      minUsernameLength: 5,
-      maxUsernameLength: 32,
-      displayUsername: false,
-      usernameValidator: (value) => /^[a-z0-9._]+$/.test(value),
-    }),
-    admin({
-      ac: adminAccessControl,
-      roles: adminRoles,
-      adminRoles: ["admin", "master"],
+export function createAuth(scopes: string[]) {
+  const auth = betterAuth({
+    basePath: "/auth",
+    baseURL: betterAuthUrl,
+    // Better Auth reads BETTER_AUTH_SECRET directly. Keep its existing value;
+    // this application does not configure versioned secret rotation.
+    disabledPaths: ["/token"],
+    // Initialization has no request and must not query the DB during a build.
+    // Real requests still validate against the registered OAuth client origins.
+    trustedOrigins: (request) =>
+      request ? getOAuthClientOrigins(getCorsOrigins()) : getCorsOrigins(),
+    plugins: [
+      multiSession(),
+      username({
+        minUsernameLength: 5,
+        maxUsernameLength: 32,
+        displayUsername: false,
+        usernameValidator: (value) => /^[a-z0-9._]+$/.test(value),
+      }),
+      admin({
+        ac: adminAccessControl,
+        roles: adminRoles,
+        adminRoles: ["admin", "master"],
+      }),
+
+      // Reuse the same JWKS/signing configuration for OAuth and Media delegation.
+      jwt(jwtOptions),
+      mediaAccess(jwtOptions),
+      adminAudit(),
+      oauthProvider({
+        loginPage: "/auth/sign-in",
+        consentPage: "/auth/consent",
+        selectAccount: {
+          page: "/auth/select-account",
+          shouldRedirect: async ({ headers }): Promise<boolean> => {
+            const sessions = await auth.api.listDeviceSessions({ headers })
+            return sessions.length > 1
+          },
+        },
+        signup: {
+          page: "/auth/sign-up",
+        },
+        scopes,
+        clientRegistrationDefaultScopes: [...oidcScopes],
+        clientRegistrationAllowedScopes: scopes,
+        // Protected resources are persisted in oauth_resource. Bootstrap data
+        // is idempotently seeded; later changes use the OAuth Provider resource
+        // API. Runtime instances never rebuild the registry from environment.
+        enforcePerClientResources: true,
+
+        // Machine scope ceilings are administrative policy, never user consent.
+        resourcePrivileges: async ({ user }) =>
+          Boolean(await getOAuthAdministratorRole(user?.id)),
+        clientReference: async ({ user }) =>
+          (await getOAuthAdministratorRole(user?.id))
+            ? oauthManagementReference
+            : undefined,
+        clientPrivileges: async ({ action, user }) => {
+          const role = await getOAuthAdministratorRole(user?.id)
+          return action === "configure-client-credentials-scopes"
+            ? role === "master"
+            : Boolean(role)
+        },
+
+        allowPublicClientPrelogin: true,
+        accessTokenExpiresIn,
+        m2mAccessTokenExpiresIn: accessTokenExpiresIn,
+        refreshTokenExpiresIn,
+        // A short grace window makes concurrent refreshes idempotent across
+        // Vercel instances while preserving refresh-token rotation/replay checks.
+        refreshTokenReuseInterval: 30,
+        idTokenExpiresIn: 60 * 60 * 10,
+        codeExpiresIn: 120,
+        customIdTokenClaims: async ({ user, scopes }) =>
+          scopes.includes("profile") ? getUserProfileClaims(user.id) : {},
+        customUserInfoClaims: ({ jwt, scopes }) =>
+          getGorthUserInfoClaims(jwt, scopes),
+        customTokenResponseFields: () => ({
+          refresh_token_expires_in: refreshTokenExpiresIn,
+        }),
+        rateLimit: {
+          token: { window: 60, max: 30 },
+          authorize: { window: 60, max: 30 },
+          introspect: { window: 60, max: 120 },
+          revoke: { window: 60, max: 60 },
+          register: { window: 60, max: 5 },
+          // Six resource servers validate revocation/ban through UserInfo. Keep
+          // this token-authenticated endpoint above the aggregate serverless
+          // egress rate while the database-backed global limiter remains active.
+          userinfo: { window: 60, max: 1_000 },
+        },
+      }),
+
+      openAPI(),
+
+      dash(),
+
+      sso(),
+
+      organization({
+        teams: {
+          enabled: true,
+        },
+      }),
+      commerceTeamAccess(),
+      commerceOrganization(),
+
+      emailOTP({
+        otpLength: 6,
+        expiresIn: 120,
+        allowedAttempts: 3,
+        storeOTP: "hashed",
+        overrideDefaultEmailVerification: true,
+        sendVerificationOnSignUp: true,
+        resendStrategy: "rotate",
+        rateLimit: {
+          window: 120,
+          max: 3,
+        },
+        async sendVerificationOTP({ email, otp, type }) {
+          const delivery = sendVerificationOtpEmail({ email, otp, type }).catch(
+            (error: unknown) => {
+              console.error(
+                "[verification-email-error]",
+                error instanceof Error ? error.message : "Unknown email error"
+              )
+            }
+          )
+
+          waitUntil(delivery)
+        },
+      }),
+    ],
+
+    rateLimit: {
+      enabled: isProduction,
+      window: 60,
+      max: 100,
+      storage: "database",
+      customRules: {
+        "/oauth2/userinfo": { window: 60, max: 1_000 },
+        "/auth/oauth2/userinfo": { window: 60, max: 1_000 },
+      },
+    },
+
+    database: drizzleAdapter(database, {
+      provider: "pg",
+      // usePlural: true,
+      schema: betterAuthSchema,
     }),
 
-    // Reuse the same JWKS/signing configuration for OAuth and Media delegation.
-    jwt(jwtOptions),
-    mediaAccess(jwtOptions),
-    adminAudit(),
-    oauthProvider({
-      loginPage: "/auth/sign-in",
-      consentPage: "/auth/consent",
-      selectAccount: {
-        page: "/auth/select-account",
-        shouldRedirect: async ({ headers }): Promise<boolean> => {
-          const sessions = await auth.api.listDeviceSessions({ headers })
-          return sessions.length > 1
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user) => ({ data: synchronizeUserProfile(user) }),
+        },
+        update: {
+          before: async (user) => ({ data: synchronizeUserProfile(user) }),
         },
       },
-      signup: {
-        page: "/auth/sign-up",
-      },
-      scopes: [
-        "openid",
-        "profile",
-        "email",
-        "offline_access",
-        "sso:read",
-        "sso:write",
-        "storage:sso:credential",
-        "chat:read",
-        "chat:write",
-        "video:read",
-        "video:write",
-        "reader:read",
-        "reader:write",
-        "social:read",
-        "social:write",
-        "task:read",
-        "task:write",
-        "marketplace:read",
-        "marketplace:write",
-      ],
-      // Protected resources are persisted in oauth_resource. Bootstrap data
-      // is idempotently seeded; later changes use the OAuth Provider resource
-      // API. Runtime instances never rebuild the registry from environment.
-      enforcePerClientResources: true,
+    },
 
-      // Optional: automatically link these seven services to every NEW client
-      // registered through Better Auth (including adminCreateOAuthClient and M2M).
-      // Existing clients are NOT backfilled; app env changes do not create links.
-      // Before enabling, also declare these identifiers in `resources`, using
-      // resourceSeedMode: "insertOnly" to preserve database-managed policies.
-      // URLs below are development examples; use registered HTTPS URLs in prod.
-      // Never include the private storage-credential resource in this list.
-      // This creates registration links, not token audiences or granted scopes;
-      // apps must still request the appropriate resource indicators and scopes.
-      // clientRegistrationDefaultResources: [
-      //   "http://localhost:5052", // Notification
-      //   "http://localhost:5053", // Resource
-      //   "http://localhost:5054", // Discovery
-      //   "http://localhost:5055", // Payment
-      //   "http://localhost:5056", // Billing
-      //   "http://localhost:5057", // Media
-      //   "http://localhost:5058", // Insight
-      // ],
+    session: {
+      expiresIn: 60 * 60 * 24,
 
-      // Alternative: replace the active `true` above with `false` to allow ALL
-      // registered clients to request ANY enabled resource without a client link.
-      // This is global, not limited to the seven services, and does not register
-      // resources, discover endpoints, or bypass scopes and API authorization.
-      // Review private-resource/M2M protections before enabling this alternative.
-      // Keep the provider schema and the links used by storage authorization.
-      // enforcePerClientResources: false,
-
-      // Machine scope ceilings are administrative policy, never user consent.
-      clientPrivileges: ({ action, user }) =>
-        action === "configure-client-credentials-scopes"
-          ? user?.role === "master"
-          : Boolean(user),
-
-      allowPublicClientPrelogin: true,
-      accessTokenExpiresIn,
-      refreshTokenExpiresIn,
-      // A short grace window makes concurrent refreshes idempotent across
-      // Vercel instances while preserving refresh-token rotation/replay checks.
-      refreshTokenReuseInterval: 30,
-      idTokenExpiresIn: 60 * 60 * 10,
-      codeExpiresIn: 120,
-      customIdTokenClaims: async ({ user, scopes }) =>
-        scopes.includes("profile") ? getUserProfileClaims(user.id) : {},
-      customUserInfoClaims: ({ jwt, scopes }) =>
-        getGorthUserInfoClaims(jwt, scopes),
-      customTokenResponseFields: () => ({
-        refresh_token_expires_in: refreshTokenExpiresIn,
-      }),
-      rateLimit: {
-        token: { window: 60, max: 30 },
-        authorize: { window: 60, max: 30 },
-        introspect: { window: 60, max: 120 },
-        revoke: { window: 60, max: 60 },
-        register: { window: 60, max: 5 },
-        // Six resource servers validate revocation/ban through UserInfo. Keep
-        // this token-authenticated endpoint above the aggregate serverless
-        // egress rate while the database-backed global limiter remains active.
-        userinfo: { window: 60, max: 1_000 },
-      },
-    }),
-
-    openAPI(),
-
-    dash(),
-
-    sso(),
-
-    organization({
-      teams: {
+      cookieCache: {
         enabled: true,
+        maxAge: 120,
       },
-    }),
-
-    emailOTP({
-      otpLength: 6,
-      expiresIn: 120,
-      allowedAttempts: 3,
-      storeOTP: "hashed",
-      overrideDefaultEmailVerification: true,
-      sendVerificationOnSignUp: true,
-      resendStrategy: "rotate",
-      rateLimit: {
-        window: 120,
-        max: 3,
-      },
-      async sendVerificationOTP({ email, otp, type }) {
-        const delivery = sendVerificationOtpEmail({ email, otp, type }).catch(
-          (error: unknown) => {
-            console.error(
-              "[verification-email-error]",
-              error instanceof Error ? error.message : "Unknown email error"
-            )
-          }
-        )
-
-        waitUntil(delivery)
-      },
-    }),
-  ],
-
-  rateLimit: {
-    enabled: isProduction,
-    window: 60,
-    max: 100,
-    storage: "database",
-    customRules: {
-      "/oauth2/userinfo": { window: 60, max: 1_000 },
-      "/auth/oauth2/userinfo": { window: 60, max: 1_000 },
     },
-  },
 
-  database: drizzleAdapter(database, {
-    provider: "pg",
-    // usePlural: true,
-    schema: betterAuthSchema,
-  }),
+    advanced: {
+      backgroundTasks: {
+        handler: (promise) => waitUntil(promise),
+      },
+      trustedProxyHeaders: isProduction,
+      ipAddress: {
+        ipAddressHeaders: ["x-real-ip"],
+      },
+      database: {
+        generateId: false,
+      },
 
-  databaseHooks: {
+      useSecureCookies: isProduction,
+      defaultCookieAttributes: {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        // A partitioned cookie created while SSO is top-level is not available
+        // when another Vercel app calls SSO cross-site. SameSite=None + Secure
+        // already provides the credentialed CORS behavior used by this system.
+        partitioned: false,
+        path: "/",
+      },
+
+      cookiePrefix,
+    },
+
+    emailAndPassword: {
+      enabled: true,
+      autoSignIn: true,
+      requireEmailVerification: true,
+      revokeSessionsOnPasswordReset: true,
+      customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
+        ...coreFields,
+        // Admin plugin fields must be present on the synthetic user used by
+        // requireEmailVerification before the persistent user is created.
+        role: "user",
+        banned: false,
+        banReason: null,
+        banExpires: null,
+        ...additionalFields,
+        id,
+      }),
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      sendOnSignIn: true,
+      autoSignInAfterVerification: true,
+    },
+    socialProviders: {
+      google: {
+        clientId: googleClientId ?? "",
+        clientSecret: googleClientSecret,
+      },
+    },
+    account: {
+      encryptOAuthTokens: true,
+      accountLinking: {
+        enabled: true,
+        trustedProviders: ["google"],
+      },
+    },
     user: {
-      create: {
-        before: async (user) => ({ data: synchronizeUserProfile(user) }),
-      },
-      update: {
-        before: async (user) => ({ data: synchronizeUserProfile(user) }),
-      },
-    },
-  },
-
-  session: {
-    expiresIn: 60 * 60 * 24,
-
-    cookieCache: {
-      enabled: true,
-      maxAge: 120,
-    },
-  },
-
-  advanced: {
-    backgroundTasks: {
-      handler: (promise) => waitUntil(promise),
-    },
-    trustedProxyHeaders: isProduction,
-    ipAddress: {
-      ipAddressHeaders: ["x-real-ip"],
-    },
-    database: {
-      generateId: false,
-    },
-
-    useSecureCookies: isProduction,
-    defaultCookieAttributes: {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-      // A partitioned cookie created while SSO is top-level is not available
-      // when another Vercel app calls SSO cross-site. SameSite=None + Secure
-      // already provides the credentialed CORS behavior used by this system.
-      partitioned: false,
-      path: "/",
-    },
-
-    cookiePrefix,
-  },
-
-  emailAndPassword: {
-    enabled: true,
-    autoSignIn: true,
-    requireEmailVerification: true,
-    revokeSessionsOnPasswordReset: true,
-    customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
-      ...coreFields,
-      // Admin plugin fields must be present on the synthetic user used by
-      // requireEmailVerification before the persistent user is created.
-      role: "user",
-      banned: false,
-      banReason: null,
-      banExpires: null,
-      ...additionalFields,
-      id,
-    }),
-  },
-  emailVerification: {
-    sendOnSignUp: true,
-    sendOnSignIn: true,
-    autoSignInAfterVerification: true,
-  },
-  socialProviders: {
-    google: {
-      clientId: googleClientId ?? "",
-      clientSecret: googleClientSecret,
-    },
-  },
-  account: {
-    encryptOAuthTokens: true,
-    accountLinking: {
-      enabled: true,
-      trustedProviders: ["google"],
-    },
-  },
-  user: {
-    additionalFields: {
-      firstName: {
-        type: "string",
-        required: false,
-      },
-      lastName: {
-        type: "string",
-        required: false,
+      additionalFields: {
+        firstName: {
+          type: "string",
+          required: false,
+        },
+        lastName: {
+          type: "string",
+          required: false,
+        },
       },
     },
-  },
-})
+  })
+
+  return auth
+}
+
+// One immutable policy snapshot and one Better Auth instance per runtime.
+// Failed startup can retry; publishing never silently replaces a live instance.
+export const getAuth = onceAsync(async () =>
+  createAuth((await loadOAuthScopeRevision()).scopes)
+)

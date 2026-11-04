@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { PaginationState } from "@gorth/primitive/cores/tanstack/table"
+import type { PaginationState } from "@gorth-io/primitive/cores/tanstack/table"
 
 export function useAdminTable() {
   const [pagination, setPagination] = useState<PaginationState>({

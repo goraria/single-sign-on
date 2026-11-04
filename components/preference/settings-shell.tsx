@@ -6,8 +6,8 @@ import {
   Palette,
   UserCog,
   Wrench,
-} from "@gorth/primitive/cores/lucide"
-import { Separator } from "@gorth/primitive/default/separator"
+} from "@gorth-io/primitive/cores/lucide"
+import { Separator } from "@gorth-io/primitive/default/separator"
 import { SidebarNav, type PreferenceNavItem } from "./sidebar-nav"
 
 const preferenceItems: PreferenceNavItem[] = [

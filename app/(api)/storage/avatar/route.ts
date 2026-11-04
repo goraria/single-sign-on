@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { HTTPException } from "hono/http-exception"
 import { isAPIError } from "better-auth/api"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { getNoStoreHeaders } from "@/utils/client/formatter"
 import { matchesAvatarSignature } from "@/utils/server/formatter"
 import { uploadAvatar } from "@/services/media"
@@ -59,7 +59,9 @@ export async function POST(request: Request) {
   if (declaredSize > maxImageSize + 65_536)
     return NextResponse.json({ error: "image_too_large" }, { status: 413 })
   try {
-    const session = await auth.api.getSession({
+    const session = await (
+      await getAuth()
+    ).api.getSession({
       headers: request.headers,
       query: { disableCookieCache: true },
     })

@@ -3,7 +3,7 @@ import { betterAuth } from "better-auth"
 import { memoryAdapter } from "better-auth/adapters/memory"
 import { jwt } from "better-auth/plugins/jwt"
 import { oauthProvider } from "@better-auth/oauth-provider"
-import { createLocalJWKSet, jwtVerify } from "@gorth/principle/cores/jose"
+import { createLocalJWKSet, jwtVerify } from "@gorth-io/principle/cores/jose"
 import { beforeEach, expect, it, vi } from "vitest"
 const state = vi.hoisted(() => ({
   status: "active",

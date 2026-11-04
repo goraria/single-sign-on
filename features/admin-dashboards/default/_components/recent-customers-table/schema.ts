@@ -1,4 +1,4 @@
-import z from "@gorth/structure/cores/zod"
+import z from "@gorth-io/structure/cores/zod"
 
 export const recentCustomersSchema = z.object({
   id: z.string(),

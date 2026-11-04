@@ -5,8 +5,8 @@ import {
   PackageCheck,
   PackageX,
   TriangleAlert,
-} from "@gorth/primitive/cores/lucide"
-import { Label, Pie, PieChart } from "@gorth/primitive/cores/recharts"
+} from "@gorth-io/primitive/cores/lucide"
+import { Label, Pie, PieChart } from "@gorth-io/primitive/cores/recharts"
 
 import {
   Card,
@@ -15,12 +15,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
-} from "@gorth/primitive/default/chart"
-import { Separator } from "@gorth/primitive/default/separator"
+} from "@gorth-io/primitive/default/chart"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 const chartData = [
   { month: "current", "in-stock": 760, "low-stock": 320, "out-of-stock": 160 },

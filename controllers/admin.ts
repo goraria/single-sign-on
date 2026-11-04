@@ -1,4 +1,5 @@
 import type { Context } from "hono"
+import { rotateSsoApplicationCredential as rotateSsoApplicationCredentialServices } from "@/services/oauth-credential"
 
 import {
   adminIdParamsSchema,
@@ -75,9 +76,14 @@ export async function updateSsoApplication(context: Context) {
 export async function deleteSsoApplication(context: Context) {
   const { id } = adminIdParamsSchema.parse(context.req.param())
   return context.json({
-    data: await deleteSsoApplicationServices(id),
+    data: await deleteSsoApplicationServices(id, context.req.raw.headers),
     message: "SSO application deleted",
   })
+}
+export async function rotateSsoApplicationCredential(context: Context) {
+  const { id } = adminIdParamsSchema.parse(context.req.param())
+  context.header("Cache-Control", "no-store, private")
+  return context.json({ data: await rotateSsoApplicationCredentialServices(id,context.req.raw.headers) },200)
 }
 
 export async function listUsers(context: Context) {

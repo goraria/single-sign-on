@@ -2,7 +2,7 @@
 
 import { type PropsWithChildren, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { useProgress } from "@gorth/primitive/cores/progress/next"
+import { useProgress } from "@gorth-io/primitive/cores/progress/next"
 import {
   AuthContext,
   type AuthContextProps,

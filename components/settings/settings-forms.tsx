@@ -2,16 +2,16 @@
 
 import { FormEvent, useState } from "react"
 import { useTheme } from "next-themes"
-import { Button } from "@gorth/primitive/default/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
-import { Input } from "@gorth/primitive/default/input"
-import { Label } from "@gorth/primitive/default/label"
+import { Button } from "@gorth-io/primitive/default/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
+import { Input } from "@gorth-io/primitive/default/input"
+import { Label } from "@gorth-io/primitive/default/label"
 import {
   RadioGroup,
   RadioGroupItem,
-} from "@gorth/primitive/default/radio-group"
-import { Switch } from "@gorth/primitive/default/switch"
-import { Textarea } from "@gorth/primitive/default/textarea"
+} from "@gorth-io/primitive/default/radio-group"
+import { Switch } from "@gorth-io/primitive/default/switch"
+import { Textarea } from "@gorth-io/primitive/default/textarea"
 import { ContentSection } from "@/components/settings/content-section"
 
 function FormNotice({ visible }: { visible: boolean }) {

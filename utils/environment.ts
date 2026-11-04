@@ -26,3 +26,7 @@ export const smtpPassword = process.env.SMTP_PASS
 export const emailFrom = process.env.EMAIL_FROM
 export const emailFromName = process.env.EMAIL_FROM_NAME
 export const emailReplyTo = process.env.EMAIL_REPLY_TO
+
+export const oauthScopeRevision = Number(
+  process.env.NEXT_OAUTH_SCOPE_REVISION ?? "1"
+)

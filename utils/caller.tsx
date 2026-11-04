@@ -7,8 +7,8 @@ import axios, {
   type AxiosResponse,
   type Method,
   type ResponseType,
-} from "@gorth/structure/cores/axios"
-import { toast } from "@gorth/primitive/custom/toast"
+} from "@gorth-io/structure/cores/axios"
+import { toast } from "@gorth-io/primitive/custom/toast"
 import {
   useMutation as useMutationDefault,
   useQuery as useQueryDefault,
@@ -18,8 +18,8 @@ import {
   type UseMutationResult,
   type UseQueryOptions,
   type UseQueryResult,
-} from "@gorth/primitive/cores/tanstack/query"
-import type { ZodType } from "@gorth/structure/cores/zod"
+} from "@gorth-io/primitive/cores/tanstack/query"
+import type { ZodType } from "@gorth-io/structure/cores/zod"
 import { withAuthRetry } from "@/lib/auth/client/retry"
 
 export type HttpMethod =

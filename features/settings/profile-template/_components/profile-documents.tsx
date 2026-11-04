@@ -1,7 +1,7 @@
-import { Download, FileText, LockKeyhole } from "@gorth/primitive/cores/lucide"
+import { Download, FileText, LockKeyhole } from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
+} from "@gorth-io/primitive/default/table"
 
 import type { ProfileDocument } from "./profile-data"
 

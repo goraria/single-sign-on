@@ -1,4 +1,4 @@
-import { cn } from "@gorth/primitive/cores/cn"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import type { PatientRecord } from "./data"
 import {

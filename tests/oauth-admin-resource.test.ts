@@ -2,7 +2,7 @@ import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 import { PgDialect } from "drizzle-orm/pg-core"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import z from "@gorth/structure/cores/zod"
+import z from "@gorth-io/structure/cores/zod"
 
 const state = vi.hoisted(() => ({
   role: "admin",
@@ -16,19 +16,22 @@ const state = vi.hoisted(() => ({
 }))
 vi.mock("server-only", () => ({}))
 vi.mock("@/utils/environment", () => ({ isProduction: true }))
-vi.mock("@/lib/auth/server/index", () => ({
-  auth: {
-    api: {
-      getSession: async () =>
-        state.authenticated
-          ? { user: { id: "admin-id", role: state.role } }
-          : null,
-      adminCreateOAuthResource: state.create,
-      adminUpdateOAuthResource: state.update,
-      adminDeleteOAuthResource: state.remove,
+vi.mock("@/lib/auth/server/index", async () => {
+  const authModule = await (() => ({
+    auth: {
+      api: {
+        getSession: async () =>
+          state.authenticated
+            ? { user: { id: "admin-id", role: state.role } }
+            : null,
+        adminCreateOAuthResource: state.create,
+        adminUpdateOAuthResource: state.update,
+        adminDeleteOAuthResource: state.remove,
+      },
     },
-  },
-}))
+  }))()
+  return { ...authModule, getAuth: async () => authModule.auth }
+})
 vi.mock("@/database", async () => {
   const { oauthResource } = await import("@/database/schema")
   return {
@@ -68,6 +71,13 @@ vi.mock("@/database", async () => {
     },
   }
 })
+
+vi.mock("@/services/oauth-registry", () => ({
+  loadOAuthScopeRevision: async () => ({
+    revision: 1,
+    scopes: ["openid", "task:read"],
+  }),
+}))
 
 import adminRoutes from "@/routes/admin"
 import {

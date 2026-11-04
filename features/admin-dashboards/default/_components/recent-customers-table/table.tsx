@@ -8,7 +8,7 @@ import {
   type PaginationState,
   type SortingState,
   useTable,
-} from "@gorth/primitive/cores/tanstack/table"
+} from "@gorth-io/primitive/cores/tanstack/table"
 import {
   ArrowUpDown,
   CalendarDays,
@@ -19,18 +19,18 @@ import {
   CreditCard,
   Search,
   UsersRound,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
-import { Input } from "@gorth/primitive/default/input"
-import { Label } from "@gorth/primitive/default/label"
+} from "@gorth-io/primitive/custom/dropdown"
+import { Input } from "@gorth-io/primitive/default/input"
+import { Label } from "@gorth-io/primitive/default/label"
 import {
   Select,
   SelectContent,
@@ -38,7 +38,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
+} from "@gorth-io/primitive/custom/select"
 import {
   Table,
   TableBody,
@@ -46,7 +46,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
+} from "@gorth-io/primitive/default/table"
 import { dataTableFeatures } from "@/utils/data-table-features"
 
 import { recentCustomersColumns } from "./columns"

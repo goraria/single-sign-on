@@ -4,16 +4,13 @@ import {
   oauthProviderOpenIdConfigMetadata,
 } from "@better-auth/oauth-provider"
 
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { appUrl } from "@/utils/environment"
 import { oauthTimeoutSchema } from "@/schemas/oauth-timeout"
 import { prepareOAuthTimeout as prepareOAuthTimeoutServices } from "@/services/oauth-timeout"
 
-const oauthAuthServerMetadata = oauthProviderAuthServerMetadata(auth)
-const openIdConfigMetadata = oauthProviderOpenIdConfigMetadata(auth)
-
-export function splat(context: Context) {
-  return auth.handler(context.req.raw)
+export async function splat(context: Context) {
+  return (await getAuth()).handler(context.req.raw)
 }
 
 export async function prepareOAuthTimeout(context: Context) {
@@ -43,10 +40,10 @@ export async function prepareOAuthTimeout(context: Context) {
   }
 }
 
-export function oauthAuthorizationServerMetadata(context: Context) {
-  return oauthAuthServerMetadata(context.req.raw)
+export async function oauthAuthorizationServerMetadata(context: Context) {
+  return oauthProviderAuthServerMetadata(await getAuth())(context.req.raw)
 }
 
-export function openIdConfigurationMetadata(context: Context) {
-  return openIdConfigMetadata(context.req.raw)
+export async function openIdConfigurationMetadata(context: Context) {
+  return oauthProviderOpenIdConfigMetadata(await getAuth())(context.req.raw)
 }

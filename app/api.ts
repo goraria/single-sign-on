@@ -1,8 +1,8 @@
 import "server-only"
 import { Hono } from "hono"
-import { configureHono } from "@gorth/principle/configs/hono"
+import { configureHono } from "@gorth-io/principle/configs/hono"
 import { HTTPException } from "hono/http-exception"
-import z from "@gorth/structure/cores/zod"
+import z from "@gorth-io/structure/cores/zod"
 
 import { isDevelopment, isProduction } from "@/utils/environment"
 import { getCorsOrigins } from "@/utils/server/formatter"

@@ -1,5 +1,5 @@
-import { Badge } from "@gorth/primitive/custom/badge"
-import { cn } from "@gorth/primitive/cores/cn"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import type { PatientRecord } from "./data"
 import { usePatientWaveformSeries } from "./use-patient-vital-series"

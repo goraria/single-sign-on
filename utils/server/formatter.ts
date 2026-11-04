@@ -1,15 +1,25 @@
 import { AuthProvider } from "@/utils/server/interface"
 import { type AdminSsoApplicationRecord } from "@/schemas/admin"
 import { oauthClientMetadataSchema } from "@/schemas/database"
+import { oauthManagementReference } from "@/utils/oauth-management"
 import { appUrl } from "@/utils/environment"
 export { formatCodeDate, formatDate } from "@/utils/server/temp"
 
 export function matchesAvatarSignature(bytes: Uint8Array, contentType: string) {
-  const starts = (expected: number[]) => expected.every((byte, index) => bytes[index] === byte)
-  if (contentType === "image/png") return starts([137, 80, 78, 71, 13, 10, 26, 10])
+  const starts = (expected: number[]) =>
+    expected.every((byte, index) => bytes[index] === byte)
+  if (contentType === "image/png")
+    return starts([137, 80, 78, 71, 13, 10, 26, 10])
   if (contentType === "image/jpeg") return starts([255, 216, 255])
-  if (contentType === "image/gif") return starts([71, 73, 70, 56]) && [55, 57].includes(bytes[4]) && bytes[5] === 97
-  if (contentType === "image/webp") return starts([82, 73, 70, 70]) && [87, 69, 66, 80].every((byte, index) => bytes[index + 8] === byte)
+  if (contentType === "image/gif")
+    return (
+      starts([71, 73, 70, 56]) && [55, 57].includes(bytes[4]) && bytes[5] === 97
+    )
+  if (contentType === "image/webp")
+    return (
+      starts([82, 73, 70, 70]) &&
+      [87, 69, 66, 80].every((byte, index) => bytes[index + 8] === byte)
+    )
   return false
 }
 
@@ -70,7 +80,12 @@ export function normalizeOrigin(value: string | undefined | null) {
   }
 
   try {
-    return new URL(value).origin
+    const url = new URL(value)
+    return ["http:", "https:"].includes(url.protocol) &&
+      !url.username &&
+      !url.password
+      ? url.origin
+      : null
   } catch {
     return null
   }
@@ -100,11 +115,18 @@ export function formatSsoApplication(application: AdminSsoApplicationRecord) {
     id: application.id,
     clientId: application.clientId,
     name: application.name ?? application.clientId,
+    centrallyManaged: application.referenceId === oauthManagementReference,
     description: getSsoApplicationDescription(application.metadata),
+    environment:
+      getOAuthClientMetadata(application.metadata).environment === "local"
+        ? "local"
+        : "production",
     homepageUrl: application.uri,
     icon: application.icon,
     redirectUris: application.redirectUris,
     postLogoutRedirectUris: application.postLogoutRedirectUris ?? [],
+    backchannelLogoutUri: application.backchannelLogoutUri ?? null,
+    clientCredentialsScopes: application.clientCredentialsScopes ?? [],
     scopes: application.scopes ?? [],
     grantTypes: application.grantTypes ?? [],
     responseTypes: application.responseTypes ?? [],

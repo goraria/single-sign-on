@@ -1,4 +1,5 @@
-import z from "@gorth/structure/cores/zod"
+import { oauthScopeNameSchema as oauthScopeSchema } from "@/schemas/oauth-registry"
+import z from "@gorth-io/structure/cores/zod"
 import {
   createInsertSchema,
   createSelectSchema,
@@ -45,24 +46,7 @@ export const oauthSubjectTypeSchema = createSelectSchema(oauthSubjectType)
 export const oauthApplicationTypeSchema =
   createSelectSchema(oauthApplicationType)
 
-export const oauthScopeSchema = z.enum([
-  "openid",
-  "profile",
-  "email",
-  "offline_access",
-  "chat:read",
-  "chat:write",
-  "video:read",
-  "video:write",
-  "reader:read",
-  "reader:write",
-  "social:read",
-  "social:write",
-  "task:read",
-  "task:write",
-  "marketplace:read",
-  "marketplace:write",
-])
+export { oauthScopeSchema }
 
 export const oauthClientMetadataSchema = z
   .object({

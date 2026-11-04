@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { Loader2, UserPlus } from "@gorth/primitive/cores/lucide"
+import { useForm } from "@gorth-io/primitive/cores/tanstack/form"
+import { Loader2, UserPlus } from "@gorth-io/primitive/cores/lucide"
 
-import { PasswordInput } from "@gorth/primitive/custom/input-password"
+import { PasswordInput } from "@gorth-io/primitive/custom/input-password"
 import { SocialForm } from "@/components/auth/social-form"
 import { useAuth } from "@/hooks/use-auth"
 import { auth } from "@/lib/auth/client"
@@ -26,9 +26,9 @@ import {
   hasOAuthQuery,
   isExternalRedirect,
 } from "@/utils/client/temp"
-import { Button } from "@gorth/primitive/custom/button"
-import { StatusInput as Input } from "@gorth/primitive/custom/input-status"
-import { Label } from "@gorth/primitive/default/label"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { StatusInput as Input } from "@gorth-io/primitive/custom/input-status"
+import { Label } from "@gorth-io/primitive/default/label"
 
 export function SignUpForm() {
   const [submitError, setSubmitError] = useState<string | null>(null)

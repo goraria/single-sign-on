@@ -1,7 +1,7 @@
 "use client"
 
-import type { ColumnDef } from "@gorth/primitive/cores/tanstack/table"
-import { Subscribe } from "@gorth/primitive/cores/tanstack/table"
+import type { ColumnDef } from "@gorth-io/primitive/cores/tanstack/table"
+import { Subscribe } from "@gorth-io/primitive/cores/tanstack/table"
 import {
   addMinutes,
   differenceInCalendarDays,
@@ -14,11 +14,11 @@ import {
   CircleCheckIcon,
   Clock3Icon,
   LoaderIcon,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import type { DataTableFeatures } from "@/utils/data-table-features"
 
 import type { RecentCustomerRow } from "./schema"

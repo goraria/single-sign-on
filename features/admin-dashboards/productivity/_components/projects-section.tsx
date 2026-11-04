@@ -4,10 +4,10 @@ import {
   Globe,
   Orbit,
   Plus,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
@@ -15,8 +15,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Progress } from "@gorth/primitive/default/progress"
+} from "@gorth-io/primitive/default/card"
+import { Progress } from "@gorth-io/primitive/default/progress"
 import {
   Select,
   SelectContent,
@@ -24,7 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
+} from "@gorth-io/primitive/custom/select"
 
 const today = new Date()
 

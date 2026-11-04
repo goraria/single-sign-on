@@ -1,4 +1,4 @@
-@gorth/sso
+@gorth-io/sso
 single-sign-on
 ├── authentication
 │   ├── sign-up

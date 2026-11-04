@@ -1,14 +1,14 @@
 import { format } from "date-fns"
-import { Network, Printer, Volume2 } from "@gorth/primitive/cores/lucide"
+import { Network, Printer, Volume2 } from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
-import { Separator } from "@gorth/primitive/default/separator"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Separator } from "@gorth-io/primitive/default/separator"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@gorth/primitive/default/tooltip"
+} from "@gorth-io/primitive/default/tooltip"
 
 import { patients } from "./_components/data"
 import { PatientMonitoring } from "./_components/patient-monitoring"

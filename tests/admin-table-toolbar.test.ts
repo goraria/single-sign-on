@@ -1,23 +1,23 @@
 import { createElement, isValidElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, expect, it, vi } from "vitest"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 
 const state = vi.hoisted(() => ({
   props: null as DataTableProps<Record<string, unknown>> | null,
   notify: vi.fn(),
   refetch: vi.fn(),
 }))
-vi.mock("@gorth/primitive/custom/data-table", async (importOriginal) => ({
+vi.mock("@gorth-io/primitive/custom/data-table", async (importOriginal) => ({
   ...(await importOriginal<
-    typeof import("@gorth/primitive/custom/data-table")
+    typeof import("@gorth-io/primitive/custom/data-table")
   >()),
   DataTable: (props: DataTableProps<Record<string, unknown>>) => {
     state.props = props
     return null
   },
 }))
-vi.mock("@gorth/primitive/custom/toast", () => ({
+vi.mock("@gorth-io/primitive/custom/toast", () => ({
   toast: { add: state.notify },
 }))
 vi.mock("@/services/client/admin", () => {

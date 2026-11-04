@@ -4,7 +4,7 @@ import type * as React from "react"
 
 import type { SimpleIcon as SimpleIconType } from "simple-icons"
 
-import { cn } from "@gorth/primitive/cores/cn"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 type SimpleIconProps = {
   icon: SimpleIconType

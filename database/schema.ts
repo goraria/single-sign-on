@@ -3,6 +3,7 @@ import { relations } from "drizzle-orm/_relations"
 import {
   bigint,
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -57,8 +58,8 @@ export const oauthApplicationType = pgEnum("oauth_application_type_enum", [
 
 export const auditOutcome = pgEnum("audit_outcome_enum", ["success", "failure"])
 
-export const authenticationEventType = pgEnum(
-  "authentication_event_type_enum",
+export const eventLogType = pgEnum(
+  "event_log_type_enum",
   [
     "sign_up",
     "sign_in",
@@ -472,7 +473,7 @@ export const organization = pgTable(
 )
 
 export const team = pgTable(
-  "auth_team",
+  "team",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
@@ -483,11 +484,11 @@ export const team = pgTable(
     createdAt: timestamp("created_at", timestampConfig).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", timestampConfig),
   },
-  (table) => [index("auth_team_organization_id_idx").on(table.organizationId)]
+  (table) => [index("team_organization_id_idx").on(table.organizationId)]
 )
 
 export const teamMember = pgTable(
-  "auth_team_member",
+  "teamMember",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     teamId: uuid("team_id")
@@ -497,11 +498,12 @@ export const teamMember = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     membershipKey: text("membership_key").unique(),
+    role: text("role").notNull().default("member"),
     createdAt: timestamp("created_at", timestampConfig).defaultNow(),
   },
   (table) => [
-    index("auth_team_member_team_id_idx").on(table.teamId),
-    index("auth_team_member_user_id_idx").on(table.userId),
+    index("teamMember_team_id_idx").on(table.teamId),
+    index("teamMember_user_id_idx").on(table.userId),
   ]
 )
 
@@ -538,9 +540,8 @@ export const invitation = pgTable(
     email: text("email").notNull(),
     role: text("role"),
     status: text("status").notNull().default("pending"),
-    teamId: uuid("team_id").references(() => team.id, {
-      onDelete: "set null",
-    }),
+    // Native Better Auth supports multiple team IDs in one invitation.
+    teamId: text("team_id"),
     expiresAt: timestamp("expires_at", timestampConfig).notNull(),
     createdAt: timestamp("created_at", timestampConfig).notNull().defaultNow(),
     inviterId: uuid("inviter_id")
@@ -632,45 +633,6 @@ export const rolePermission = pgTable(
   (table) => [primaryKey({ columns: [table.roleId, table.permissionId] })]
 )
 
-export const legacyTeam = pgTable(
-  "team",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organization.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 255 }).notNull(),
-    slug: varchar("slug", { length: 128 }).notNull(),
-    metadata: jsonb("metadata").notNull().default(sql.raw("'{}'::jsonb")),
-    createdAt: timestamp("created_at", timestampConfig).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", timestampConfig).notNull().defaultNow(),
-  },
-  (table) => [
-    uniqueIndex("team_organization_slug_key").on(
-      table.organizationId,
-      table.slug
-    ),
-    index("team_organization_id_idx").on(table.organizationId),
-  ]
-)
-
-export const legacyTeamMember = pgTable(
-  "team_member",
-  {
-    teamId: uuid("team_id").references(() => legacyTeam.id, {
-      onDelete: "cascade",
-    }),
-    memberId: uuid("member_id").references(() => member.id, {
-      onDelete: "cascade",
-    }),
-    createdAt: timestamp("created_at", timestampConfig).notNull().defaultNow(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.teamId, table.memberId] }),
-    index("team_member_member_id_idx").on(table.memberId),
-  ]
-)
-
 export const auditLog = pgTable(
   "audit_log",
   {
@@ -697,8 +659,8 @@ export const auditLog = pgTable(
   ]
 )
 
-export const authenticationEvent = pgTable(
-  "authentication_event",
+export const eventLog = pgTable(
+  "event_log",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: uuid("user_id").references(() => user.id, {
@@ -707,7 +669,7 @@ export const authenticationEvent = pgTable(
     sessionId: uuid("session_id").references(() => session.id, {
       onDelete: "set null",
     }),
-    type: authenticationEventType("type").notNull(),
+    type: eventLogType("type").notNull(),
     provider: varchar("provider", { length: 128 }),
     success: boolean("success").notNull().default(true),
     failureReason: text("failure_reason"),
@@ -717,8 +679,8 @@ export const authenticationEvent = pgTable(
     createdAt: timestamp("created_at", timestampConfig).notNull().defaultNow(),
   },
   (table) => [
-    index("authentication_event_user_id_idx").on(table.userId),
-    index("authentication_event_created_at_idx").on(table.createdAt),
+    index("event_log_user_id_idx").on(table.userId),
+    index("event_log_created_at_idx").on(table.createdAt),
   ]
 )
 
@@ -778,7 +740,6 @@ export const teamRelations = relations(team, ({ one, many }) => ({
     references: [organization.id],
   }),
   members: many(teamMember),
-  invitations: many(invitation),
 }))
 
 export const teamMemberRelations = relations(teamMember, ({ one }) => ({
@@ -811,10 +772,6 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
   inviter: one(user, {
     fields: [invitation.inviterId],
     references: [user.id],
-  }),
-  team: one(team, {
-    fields: [invitation.teamId],
-    references: [team.id],
   }),
 }))
 
@@ -875,3 +832,19 @@ export type OAuthTokenEndpointAuthMethod =
 export type OAuthSubjectType = (typeof oauthSubjectType.enumValues)[number]
 export type OAuthApplicationType =
   (typeof oauthApplicationType.enumValues)[number]
+
+// Gorth publication history; OAuth clients/resources remain Better Auth owned.
+export const oauthScopeRevision = pgTable(
+  "oauth_scope_revision",
+  {
+    revision: integer("revision").primaryKey(),
+    scopes: text("scopes").array().notNull(),
+    createdAt: timestamp("created_at", timestampConfig).defaultNow().notNull(),
+    createdBy: uuid("created_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+  },
+  (table) => [
+    check("oauth_scope_revision_positive", sql`${table.revision} > 0`),
+  ]
+)

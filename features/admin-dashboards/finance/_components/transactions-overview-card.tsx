@@ -1,6 +1,6 @@
 "use client"
 
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "@gorth-io/primitive/cores/recharts"
 
 import {
   Card,
@@ -8,13 +8,13 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@gorth/primitive/default/chart"
+} from "@gorth-io/primitive/default/chart"
 import {
   Select,
   SelectContent,
@@ -22,7 +22,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
+} from "@gorth-io/primitive/custom/select"
 import { formatCurrency } from "@/utils/currency"
 
 const DAY_MS = 24 * 60 * 60 * 1000

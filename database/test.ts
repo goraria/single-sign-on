@@ -12,7 +12,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
-import { v4 } from "@gorth/structure/cores/uuid"
+import { v4 } from "@gorth-io/structure/cores/uuid"
 
 export const categoryValues = [
   "FOLLOWING",

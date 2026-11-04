@@ -1,14 +1,14 @@
 "use client"
 
-import type { ColumnDef } from "@gorth/primitive/cores/tanstack/table"
-import { Subscribe } from "@gorth/primitive/cores/tanstack/table"
-import { Pencil } from "@gorth/primitive/cores/lucide"
+import type { ColumnDef } from "@gorth-io/primitive/cores/tanstack/table"
+import { Subscribe } from "@gorth-io/primitive/cores/tanstack/table"
+import { Pencil } from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import type { DataTableFeatures } from "@/utils/data-table-features"
-import { cn } from "@gorth/primitive/cores/cn"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import type { OpportunityRow } from "./schema"
 

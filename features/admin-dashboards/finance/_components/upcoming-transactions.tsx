@@ -1,7 +1,7 @@
 "use client"
 
 import { addDays, format, set } from "date-fns"
-import { ChevronRight, Zap } from "@gorth/primitive/cores/lucide"
+import { ChevronRight, Zap } from "@gorth-io/primitive/cores/lucide"
 import { siClaude, siLinear, siResend } from "simple-icons"
 
 import { SimpleIcon } from "@/components/dashboard/simple-icon"
@@ -10,7 +10,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   Item,
   ItemActions,
@@ -19,7 +19,7 @@ import {
   ItemGroup,
   ItemMedia,
   ItemTitle,
-} from "@gorth/primitive/default/item"
+} from "@gorth-io/primitive/default/item"
 
 const transactions = [
   {

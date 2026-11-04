@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { Loader2, LogIn } from "@gorth/primitive/cores/lucide"
+import { useForm } from "@gorth-io/primitive/cores/tanstack/form"
+import { Loader2, LogIn } from "@gorth-io/primitive/cores/lucide"
 
-import { PasswordInput } from "@gorth/primitive/custom/input-password"
+import { PasswordInput } from "@gorth-io/primitive/custom/input-password"
 import { SocialForm } from "@/components/auth/social-form"
 import { useAuth } from "@/hooks/use-auth"
 import { signInWithIdentifier } from "@/lib/auth/client/username"
@@ -20,10 +20,10 @@ import {
 } from "@/utils/client/temp"
 import { resolveInternalPath } from "@/utils/client/formatter"
 import { defaultAuthRedirect } from "@/utils/constant"
-import { Button } from "@gorth/primitive/custom/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
-import { StatusInput as Input } from "@gorth/primitive/custom/input-status"
-import { Label } from "@gorth/primitive/default/label"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
+import { StatusInput as Input } from "@gorth-io/primitive/custom/input-status"
+import { Label } from "@gorth-io/primitive/default/label"
 
 export function LoginForm({ addAccount = false }: { addAccount?: boolean }) {
   const [submitError, setSubmitError] = useState<string | null>(null)

@@ -1,6 +1,6 @@
 import "server-only"
 import { eq, sql } from "drizzle-orm"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { storageCredentialAudience } from "@/lib/auth/server/storage-access"
 import { database } from "@/database"
 import { oauthClient, oauthResource } from "@/database/schema"
@@ -8,7 +8,9 @@ import { createServiceError } from "@/services/helper"
 
 // Operator-only provisioning. Better Auth creates/hashes the secret; never hand-roll it.
 export async function registerMediaStorageClient(headers: Headers) {
-  const session = await auth.api.getSession({
+  const session = await (
+    await getAuth()
+  ).api.getSession({
     headers,
     query: { disableCookieCache: true },
   })
@@ -30,7 +32,9 @@ export async function registerMediaStorageClient(headers: Headers) {
     .where(eq(oauthResource.identifier, identifier))
     .limit(1)
   if (resource) {
-    await auth.api.adminUpdateOAuthResource({
+    await (
+      await getAuth()
+    ).api.adminUpdateOAuthResource({
       headers,
       params: { identifier },
       body: {
@@ -41,7 +45,9 @@ export async function registerMediaStorageClient(headers: Headers) {
       },
     })
   } else {
-    await auth.api.adminCreateOAuthResource({
+    await (
+      await getAuth()
+    ).api.adminCreateOAuthResource({
       headers,
       body: {
         identifier,
@@ -52,7 +58,9 @@ export async function registerMediaStorageClient(headers: Headers) {
       },
     })
   }
-  const client = await auth.api.adminCreateOAuthClient({
+  const client = await (
+    await getAuth()
+  ).api.adminCreateOAuthClient({
     headers,
     body: {
       client_name: "Media storage credential reader",
@@ -65,7 +73,9 @@ export async function registerMediaStorageClient(headers: Headers) {
   try {
     if (!client.client_secret)
       throw createServiceError("media_client_secret_missing", 503)
-    await auth.api.adminLinkClientResource({
+    await (
+      await getAuth()
+    ).api.adminLinkClientResource({
       headers,
       params: { identifier, client_id: client.client_id },
     })
@@ -73,7 +83,9 @@ export async function registerMediaStorageClient(headers: Headers) {
     // A secret is not recoverable from its hash. Clean up failed provisioning
     // through Better Auth itself so a subsequent operator retry can succeed.
     try {
-      await auth.api.deleteOAuthClient({
+      await (
+        await getAuth()
+      ).api.deleteOAuthClient({
         headers,
         body: { client_id: client.client_id },
       })

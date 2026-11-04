@@ -6,7 +6,7 @@ import { oauthResourceSeeds } from "@/database/seeds/oauth-resources"
 import { adminServices } from "@/utils/constant"
 import type { OAuthResource } from "@/services/client/admin"
 
-vi.mock("@gorth/primitive/default/dialog", () => {
+vi.mock("@gorth-io/primitive/default/dialog", () => {
   const element = ({ children }: { children: ReactNode }) =>
     createElement("div", null, children)
   return {
@@ -103,7 +103,7 @@ it("uses matching dropdown trigger sizes and removes page headers and the old fo
     expect(source).toContain('variant="ghost"')
     expect(source).toContain('size="icon"')
     expect(source).toContain(
-      'import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"'
+      'import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"'
     )
     expect(source).toContain("<NavIdentity")
     expect(source).toContain("name: row.original.name")

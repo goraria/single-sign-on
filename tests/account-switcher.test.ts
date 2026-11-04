@@ -4,11 +4,11 @@ import { expect, it, vi } from "vitest"
 import {
   DropdownMenu,
   DropdownMenuItem,
-} from "@gorth/primitive/custom/dropdown"
-import { AccountSwitcherItems } from "@gorth/primitive/dashboard/account-switcher"
+} from "@gorth-io/primitive/custom/dropdown"
+import { AccountSwitcherItems } from "@gorth-io/primitive/dashboard/account-switcher"
 import type { BrowserAccount } from "@/schemas/browser-account"
-import { SidebarProvider } from "@gorth/primitive/custom/sidebar"
-import { NavAccount } from "@gorth/primitive/dashboard/nav-user"
+import { SidebarProvider } from "@gorth-io/primitive/custom/sidebar"
+import { NavAccount } from "@gorth-io/primitive/dashboard/nav-user"
 
 vi.mock("@/services/client/browser-account", () => ({
   listBrowserAccounts: vi.fn(),

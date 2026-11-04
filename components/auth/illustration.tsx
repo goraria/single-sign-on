@@ -1,6 +1,6 @@
 "use client"
 
-import { Orbit } from "@gorth/primitive/illustration/orbit"
+import { Orbit } from "@gorth-io/primitive/illustration/orbit"
 import { authOrbitData } from "@/utils/constant"
 
 export function AuthIllustration() {

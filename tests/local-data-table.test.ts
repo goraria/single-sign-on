@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { beforeEach, expect, it, vi } from "vitest"
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 
 // A synchronous state driver lets us exercise controlled updates and row models
 // without introducing a DOM/test-renderer dependency.

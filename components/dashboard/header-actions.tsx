@@ -1,10 +1,10 @@
 "use client"
 
 import type { ComponentProps } from "react"
-import type { Header } from "@gorth/primitive/layouts/header"
-import { ModeSwitcher } from "@gorth/primitive/element/mode-toggle"
-import { Customizer } from "@gorth/primitive/element/customizer"
-import { Shortcut } from "@gorth/primitive/element/shortcut"
+import type { Header } from "@gorth-io/primitive/layouts/header"
+import { ModeSwitcher } from "@gorth-io/primitive/element/mode-toggle"
+import { Customizer } from "@gorth-io/primitive/element/customizer"
+import { Shortcut } from "@gorth-io/primitive/element/shortcut"
 import { NavUser } from "@/components/dashboard/nav-user"
 
 export function HeaderActions({

@@ -27,11 +27,9 @@
     "software_version": null,
     "software_statement": null,
     "redirect_uris": [
-      "http://localhost:3030/auth/callback/gorth",
       "https://gorth-interactive-messaging-client.vercel.app/auth/callback/gorth"
     ],
     "post_logout_redirect_uris": [
-      "http://localhost:3030",
       "https://gorth-interactive-messaging-client.vercel.app"
     ],
     "backchannel_logout_uri": "https://gorth-interactive-messaging-client.vercel.app/auth/backchannel-logout",
@@ -46,9 +44,57 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-interactive-messaging-portal",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "OAuth client for Gorth Interactive Messaging Portal."
+      "description": "OAuth client for Gorth Interactive Messaging Portal.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_id": "gorth-interactive-messaging-portal-local",
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": null,
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+      "chat:read",
+      "chat:write"
+    ],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "name": "Gorth Interactive Messaging Portal (Local)",
+    "uri": "http://localhost:3030",
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "redirect_uris": ["http://localhost:3030/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["http://localhost:3030"],
+    "backchannel_logout_uri": "http://localhost:3030/auth/backchannel-logout",
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": null,
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "OAuth client for Gorth Interactive Messaging Portal.",
+      "environment": "local"
     }
   },
   {
@@ -79,11 +125,9 @@
     "software_version": null,
     "software_statement": null,
     "redirect_uris": [
-      "http://localhost:3031/auth/callback/gorth",
       "https://gorth-video-streaming-platform-client.vercel.app/auth/callback/gorth"
     ],
     "post_logout_redirect_uris": [
-      "http://localhost:3031",
       "https://gorth-video-streaming-platform-client.vercel.app"
     ],
     "backchannel_logout_uri": "https://gorth-video-streaming-platform-client.vercel.app/auth/backchannel-logout",
@@ -98,9 +142,57 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-video-streaming-platform",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "OAuth client for Gorth Video Streaming Platform."
+      "description": "OAuth client for Gorth Video Streaming Platform.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_id": "gorth-video-streaming-platform-local",
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": null,
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+      "video:read",
+      "video:write"
+    ],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "name": "Gorth Video Streaming Platform (Local)",
+    "uri": "http://localhost:3031",
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "redirect_uris": ["http://localhost:3031/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["http://localhost:3031"],
+    "backchannel_logout_uri": "http://localhost:3031/auth/backchannel-logout",
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": null,
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "OAuth client for Gorth Video Streaming Platform.",
+      "environment": "local"
     }
   },
   {
@@ -131,11 +223,9 @@
     "software_version": null,
     "software_statement": null,
     "redirect_uris": [
-      "http://localhost:3032/auth/callback/gorth",
       "https://gorth-content-reader-platform-client.vercel.app/auth/callback/gorth"
     ],
     "post_logout_redirect_uris": [
-      "http://localhost:3032",
       "https://gorth-content-reader-platform-client.vercel.app"
     ],
     "backchannel_logout_uri": "https://gorth-content-reader-platform-client.vercel.app/auth/backchannel-logout",
@@ -150,9 +240,57 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-content-reader-platform",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "OAuth client for Gorth Content Reader Platform."
+      "description": "OAuth client for Gorth Content Reader Platform.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_id": "gorth-content-reader-platform-local",
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": null,
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+      "reader:read",
+      "reader:write"
+    ],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "name": "Gorth Content Reader Platform (Local)",
+    "uri": "http://localhost:3032",
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "redirect_uris": ["http://localhost:3032/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["http://localhost:3032"],
+    "backchannel_logout_uri": "http://localhost:3032/auth/backchannel-logout",
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": null,
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "OAuth client for Gorth Content Reader Platform.",
+      "environment": "local"
     }
   },
   {
@@ -183,11 +321,9 @@
     "software_version": null,
     "software_statement": null,
     "redirect_uris": [
-      "http://localhost:3033/auth/callback/gorth",
       "https://gorth-social-networking-portal-client.vercel.app/auth/callback/gorth"
     ],
     "post_logout_redirect_uris": [
-      "http://localhost:3033",
       "https://gorth-social-networking-portal-client.vercel.app"
     ],
     "backchannel_logout_uri": "https://gorth-social-networking-portal-client.vercel.app/auth/backchannel-logout",
@@ -202,9 +338,57 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-social-networking-portal",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "OAuth client for Gorth Social Networking Portal."
+      "description": "OAuth client for Gorth Social Networking Portal.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_id": "gorth-social-networking-portal-local",
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": null,
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+      "social:read",
+      "social:write"
+    ],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "name": "Gorth Social Networking Portal (Local)",
+    "uri": "http://localhost:3033",
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "redirect_uris": ["http://localhost:3033/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["http://localhost:3033"],
+    "backchannel_logout_uri": "http://localhost:3033/auth/backchannel-logout",
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": null,
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "OAuth client for Gorth Social Networking Portal.",
+      "environment": "local"
     }
   },
   {
@@ -235,11 +419,9 @@
     "software_version": null,
     "software_statement": null,
     "redirect_uris": [
-      "http://localhost:3034/auth/callback/gorth",
       "https://gorth-task-productivity-suite-client.vercel.app/auth/callback/gorth"
     ],
     "post_logout_redirect_uris": [
-      "http://localhost:3034",
       "https://gorth-task-productivity-suite-client.vercel.app"
     ],
     "backchannel_logout_uri": "https://gorth-task-productivity-suite-client.vercel.app/auth/backchannel-logout",
@@ -254,9 +436,57 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-task-productivity-suite",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "OAuth client for Gorth Task Productivity Suite."
+      "description": "OAuth client for Gorth Task Productivity Suite.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_id": "gorth-task-productivity-suite-local",
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": null,
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+      "task:read",
+      "task:write"
+    ],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "name": "Gorth Task Productivity Suite (Local)",
+    "uri": "http://localhost:3034",
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "redirect_uris": ["http://localhost:3034/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["http://localhost:3034"],
+    "backchannel_logout_uri": "http://localhost:3034/auth/backchannel-logout",
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": null,
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "OAuth client for Gorth Task Productivity Suite.",
+      "environment": "local"
     }
   },
   {
@@ -287,11 +517,9 @@
     "software_version": null,
     "software_statement": null,
     "redirect_uris": [
-      "http://localhost:3035/auth/callback/gorth",
       "https://gorth-online-marketplace-solution-client.vercel.app/auth/callback/gorth"
     ],
     "post_logout_redirect_uris": [
-      "http://localhost:3035",
       "https://gorth-online-marketplace-solution-client.vercel.app"
     ],
     "backchannel_logout_uri": "https://gorth-online-marketplace-solution-client.vercel.app/auth/backchannel-logout",
@@ -306,9 +534,57 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-online-marketplace-solution",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "OAuth client for Gorth Online Marketplace Solution."
+      "description": "OAuth client for Gorth Online Marketplace Solution.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_id": "gorth-online-marketplace-solution-local",
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": null,
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+      "marketplace:read",
+      "marketplace:write"
+    ],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "name": "Gorth Online Marketplace Solution (Local)",
+    "uri": "http://localhost:3035",
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "redirect_uris": ["http://localhost:3035/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["http://localhost:3035"],
+    "backchannel_logout_uri": "http://localhost:3035/auth/backchannel-logout",
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": null,
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "OAuth client for Gorth Online Marketplace Solution.",
+      "environment": "local"
     }
   },
   {
@@ -345,7 +621,7 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-browser",
+    "reference_id": "sso-administration",
     "metadata": {
       "description": "Public native OAuth client for Gorth Browser."
     }
@@ -384,7 +660,7 @@
     "type": null,
     "require_pkce": true,
     "dpop_bound_access_tokens": false,
-    "reference_id": "sso_application:gorth-launcher",
+    "reference_id": "sso-administration",
     "metadata": {
       "description": "Public native OAuth client for Gorth Launcher."
     }
@@ -419,13 +695,54 @@
     "dpop_bound_access_tokens": false,
     "client_id": "gorth-browser-website",
     "name": "Gorth Browser Website",
+    "uri": "https://gorth-browser.vercel.app",
+    "redirect_uris": ["https://gorth-browser.vercel.app/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["https://gorth-browser.vercel.app"],
+    "backchannel_logout_uri": "https://gorth-browser.vercel.app/auth/backchannel-logout",
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "Browser website OAuth client with exact local and production redirect allowlists.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": "public",
+    "scopes": ["openid", "profile", "email", "offline_access"],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": "web",
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "client_id": "gorth-browser-website-local",
+    "name": "Gorth Browser Website (Local)",
     "uri": "http://localhost:5503",
     "redirect_uris": ["http://localhost:5503/auth/callback/gorth"],
     "post_logout_redirect_uris": ["http://localhost:5503"],
     "backchannel_logout_uri": "http://localhost:5503/auth/backchannel-logout",
-    "reference_id": "sso_application:gorth-browser-website",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "Local web OAuth client; add production origins explicitly before deployment."
+      "description": "Browser website OAuth client with exact local and production redirect allowlists.",
+      "environment": "local"
     }
   },
   {
@@ -458,13 +775,54 @@
     "dpop_bound_access_tokens": false,
     "client_id": "gorth-launcher-website",
     "name": "Gorth Launcher Website",
+    "uri": "https://gorth-launcher.vercel.app",
+    "redirect_uris": ["https://gorth-launcher.vercel.app/auth/callback/gorth"],
+    "post_logout_redirect_uris": ["https://gorth-launcher.vercel.app"],
+    "backchannel_logout_uri": "https://gorth-launcher.vercel.app/auth/backchannel-logout",
+    "reference_id": "sso-administration",
+    "metadata": {
+      "description": "Launcher website OAuth client with exact local and production redirect allowlists.",
+      "environment": "production"
+    }
+  },
+  {
+    "client_secret": null,
+    "client_discovery_id": null,
+    "disabled": false,
+    "skip_consent": true,
+    "enable_end_session": true,
+    "subject_type": "public",
+    "scopes": ["openid", "profile", "email", "offline_access"],
+    "client_credentials_scopes": [],
+    "user_id": null,
+    "icon": null,
+    "contacts": null,
+    "tos": null,
+    "policy": null,
+    "software_id": null,
+    "software_version": null,
+    "software_statement": null,
+    "backchannel_logout_session_required": true,
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "application_type": "web",
+    "jwks": null,
+    "jwks_uri": null,
+    "public": true,
+    "type": null,
+    "require_pkce": true,
+    "dpop_bound_access_tokens": false,
+    "client_id": "gorth-launcher-website-local",
+    "name": "Gorth Launcher Website (Local)",
     "uri": "http://localhost:5504",
     "redirect_uris": ["http://localhost:5504/auth/callback/gorth"],
     "post_logout_redirect_uris": ["http://localhost:5504"],
     "backchannel_logout_uri": "http://localhost:5504/auth/backchannel-logout",
-    "reference_id": "sso_application:gorth-launcher-website",
+    "reference_id": "sso-administration",
     "metadata": {
-      "description": "Local web OAuth client; add production origins explicitly before deployment."
+      "description": "Launcher website OAuth client with exact local and production redirect allowlists.",
+      "environment": "local"
     }
   }
 ]

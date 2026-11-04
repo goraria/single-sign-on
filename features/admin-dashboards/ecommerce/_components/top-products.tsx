@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "@gorth/primitive/cores/lucide"
+import { ArrowUpRight } from "@gorth-io/primitive/cores/lucide"
 
 import {
   Card,
@@ -7,8 +7,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Separator } from "@gorth/primitive/default/separator"
+} from "@gorth-io/primitive/default/card"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 const categories = [
   {

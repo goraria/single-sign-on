@@ -2,7 +2,7 @@ import { Geist_Mono, Inter } from "next/font/google"
 import type { Metadata } from "next"
 
 import "@/styles/globals.css"
-import { ApplicationLayout } from "@gorth/primitive/layouts/application"
+import { ApplicationLayout } from "@gorth-io/primitive/layouts/application"
 
 import { appGlobal } from "@/utils/constant"
 import { AuthProvider } from "@/providers/auth"

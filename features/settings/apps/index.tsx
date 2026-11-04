@@ -7,9 +7,9 @@ import {
   SlidersHorizontal,
   Share2,
   Waypoints,
-} from "@gorth/primitive/cores/lucide"
-import { Button } from "@gorth/primitive/custom/button"
-import { Input } from "@gorth/primitive/default/input"
+} from "@gorth-io/primitive/cores/lucide"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Input } from "@gorth-io/primitive/default/input"
 import {
   Select,
   SelectGroup,
@@ -17,8 +17,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
-import { Card, CardContent, CardHeader } from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/custom/select"
+import { Card, CardContent, CardHeader } from "@gorth-io/primitive/default/card"
 import { compareText, matchesSearchQuery } from "@/utils/client/formatter"
 import { appConnection } from "@/utils/constant"
 

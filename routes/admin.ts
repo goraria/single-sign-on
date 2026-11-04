@@ -2,6 +2,7 @@ import { Hono } from "hono"
 
 import {
   createSsoApplication,
+  rotateSsoApplicationCredential,
   createUser,
   deleteSsoApplication,
   getSsoApplication,
@@ -25,9 +26,51 @@ import {
 import { requireAdmin } from "@/middlewares/admin"
 import { auditAdminMutation } from "@/middlewares/admin-audit"
 
+import {
+  adoptOAuthClient,
+  listOAuthScopeRevisions,
+  publishOAuthScopeRevision,
+} from "@/controllers/oauth-registry"
+import {
+  listOAuthClientResources,
+  linkOAuthClientResource,
+  unlinkOAuthClientResource,
+} from "@/controllers/oauth-client-resource"
+
 const router = new Hono()
+router.post(
+  "/sso-application/:id/management",
+  requireAdmin(),
+  auditAdminMutation("oauth-client", "oauth-client.adopt"),
+  adoptOAuthClient
+)
+router.get("/oauth-scope", requireAdmin(), listOAuthScopeRevisions)
+router.post(
+  "/oauth-scope",
+  requireAdmin(),
+  auditAdminMutation("oauth-scope", "oauth-scope.publish"),
+  publishOAuthScopeRevision
+)
+router.get(
+  "/sso-application/:id/resource",
+  requireAdmin(),
+  listOAuthClientResources
+)
+router.post(
+  "/sso-application/:id/resource/:resourceId",
+  requireAdmin(),
+  auditAdminMutation("client-resource"),
+  linkOAuthClientResource
+)
+router.delete(
+  "/sso-application/:id/resource/:resourceId",
+  requireAdmin(),
+  auditAdminMutation("client-resource"),
+  unlinkOAuthClientResource
+)
 
 router.get("/user", requireAdmin(), listUsers)
+router.post("/sso-application/:id/credential", requireAdmin(), auditAdminMutation("oauth-client", "oauth-client.credential.rotate"), rotateSsoApplicationCredential)
 router.get("/user/:id", requireAdmin(), getUserById)
 router.post("/user", requireAdmin(), auditAdminMutation("user"), createUser)
 router.patch(

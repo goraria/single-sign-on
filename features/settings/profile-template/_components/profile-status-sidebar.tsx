@@ -2,9 +2,9 @@ import {
   CalendarDays,
   CircleCheck,
   Clock3,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Separator } from "@gorth/primitive/default/separator"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 import type { ProfileRecord } from "./profile-data"
 

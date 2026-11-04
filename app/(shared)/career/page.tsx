@@ -1,13 +1,13 @@
 import Link from "next/link"
 import type { Metadata } from "next"
-import { ArrowRight } from "@gorth/primitive/cores/lucide"
-import { Button } from "@gorth/primitive/custom/button"
+import { ArrowRight } from "@gorth-io/primitive/cores/lucide"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 export const metadata: Metadata = { title: "Careers" }
 

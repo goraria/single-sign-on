@@ -13,16 +13,16 @@ import {
   Settings,
   SquareTerminal,
   Terminal,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
 import { SimpleIcon } from "@/components/dashboard/simple-icon"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@gorth/primitive/custom/collapsible"
+} from "@gorth-io/primitive/custom/collapsible"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   Table,
   TableBody,
@@ -38,8 +38,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/default/table"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 import type {
   InfrastructureEnvironment,

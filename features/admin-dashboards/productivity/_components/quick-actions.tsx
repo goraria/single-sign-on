@@ -4,9 +4,9 @@ import {
   Focus,
   Orbit,
   Upload,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 
 const quickActions = [
   { label: "New Note", icon: FileText },

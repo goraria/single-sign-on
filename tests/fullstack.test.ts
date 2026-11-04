@@ -16,17 +16,20 @@ vi.mock("@/utils/environment", () => ({
   isProduction: true,
 }))
 vi.mock("@/database", () => ({ database: { select: state.databaseQuery } }))
-vi.mock("@/lib/auth/server/index", () => ({
-  auth: {
-    get $context() {
-      return state.auth!.$context
+vi.mock("@/lib/auth/server/index", async () => {
+  const authModule = await (() => ({
+    auth: {
+      get $context() {
+        return state.auth!.$context
+      },
+      handler: (request: Request) => state.auth!.handler(request),
+      get api() {
+        return state.auth!.api
+      },
     },
-    handler: (request: Request) => state.auth!.handler(request),
-    get api() {
-      return state.auth!.api
-    },
-  },
-}))
+  }))()
+  return { ...authModule, getAuth: async () => authModule.auth }
+})
 vi.mock("@/services/oauth-client", () => ({
   getOAuthClientOrigins: async () => ["http://localhost:3300"],
 }))

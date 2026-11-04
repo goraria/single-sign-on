@@ -1,7 +1,7 @@
-import { LockKeyhole } from "@gorth/primitive/cores/lucide"
+import { LockKeyhole } from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Separator } from "@gorth/primitive/default/separator"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 import type { ProfileRecord } from "./profile-data"
 

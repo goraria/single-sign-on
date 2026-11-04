@@ -7,8 +7,9 @@ export default defineConfig({
   test: {
     environment: "node",
     // Bundle UI exports so Next's extensionless subpaths resolve as they do in Next.js.
-    server: { deps: { inline: ["@gorth/primitive"] } },
+    server: { deps: { inline: ["@gorth-io/primitive"] } },
     include: ["tests/**/*.test.ts"],
+    exclude: ["tests/*.cloud.test.ts"],
     restoreMocks: true,
     fileParallelism: false,
     testTimeout: 15_000,

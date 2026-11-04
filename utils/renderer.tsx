@@ -12,8 +12,8 @@ import {
   ShieldCheck,
   Timer,
   User,
-} from "@gorth/primitive/cores/lucide"
-import { Badge } from "@gorth/primitive/custom/badge"
+} from "@gorth-io/primitive/cores/lucide"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import type { User as SsoUser } from "@/schemas/users"
 
 export interface RenderAuthStateMeta {

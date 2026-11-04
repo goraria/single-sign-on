@@ -1,6 +1,6 @@
-import { BookOpenCheck, Megaphone, Plus } from "@gorth/primitive/cores/lucide"
+import { BookOpenCheck, Megaphone, Plus } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 
 import { AssignmentStatus } from "./_components/assignment-status"
 import { ClassSchedule } from "./_components/class-schedule"

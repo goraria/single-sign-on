@@ -1,5 +1,5 @@
-import { cn } from "@gorth/primitive/cores/cn"
-import { Spinner } from "@gorth/primitive/pattern/spinner"
+import { cn } from "@gorth-io/primitive/cores/cn"
+import { Spinner } from "@gorth-io/primitive/pattern/spinner"
 
 export function TableLoading() {
   return (

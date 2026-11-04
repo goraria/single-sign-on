@@ -1,5 +1,5 @@
 import "server-only"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { fetchApi } from "@/lib/hono"
 import { isOAuthClientRedirectAllowed } from "@/services/oauth-client"
 import { appUrl } from "@/utils/environment"
@@ -35,7 +35,7 @@ function getSsoServerBaseUrl() {
 }
 
 export async function getRouteSession(cookie: string) {
-  return auth.api.getSession({
+  return (await getAuth()).api.getSession({
     headers: new Headers({ Cookie: cookie }),
     query: { disableCookieCache: true },
   })
@@ -45,7 +45,7 @@ export async function signOutRouteSession({
   cookie,
   origin,
 }: SignOutRouteRequest) {
-  return auth.handler(
+  return (await getAuth()).handler(
     new Request(new URL("/auth/sign-out", getSsoServerBaseUrl()), {
       method: "POST",
       headers: {

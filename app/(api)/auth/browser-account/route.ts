@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { assertMutationOrigin } from "@gorth/structure/modules/auth/server"
+import { assertMutationOrigin } from "@gorth-io/structure/modules/auth/server"
 import { applySetCookies } from "better-auth/cookies"
 import { browserAccountActionSchema } from "@/schemas/browser-account"
 import {

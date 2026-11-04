@@ -3,7 +3,7 @@
 import type { ComponentType, SVGProps } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { cn } from "@gorth/primitive/cores/cn"
+import { cn } from "@gorth-io/primitive/cores/cn"
 import {
   Select,
   SelectGroup,
@@ -11,8 +11,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
-import { ScrollArea } from "@gorth/primitive/default/scroll-area"
+} from "@gorth-io/primitive/custom/select"
+import { ScrollArea } from "@gorth-io/primitive/default/scroll-area"
 
 export interface PreferenceNavItem {
   title: string

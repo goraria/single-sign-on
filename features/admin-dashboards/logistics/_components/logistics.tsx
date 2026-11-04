@@ -8,7 +8,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@gorth/primitive/custom/sheet"
+} from "@gorth-io/primitive/custom/sheet"
 
 import { shipments } from "./shipment-data"
 import { ShipmentDetails } from "./shipment-details"

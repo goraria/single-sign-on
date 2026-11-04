@@ -4,7 +4,7 @@ import {
   FileChartColumn,
   FileImage,
   FileText,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
 export type FileKind = "document" | "spreadsheet" | "design" | "pdf" | "archive"
 export type FileManagerView = "grid" | "list"

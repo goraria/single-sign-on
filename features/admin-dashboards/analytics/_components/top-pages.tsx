@@ -1,4 +1,4 @@
-import { Ellipsis } from "@gorth/primitive/cores/lucide"
+import { Ellipsis } from "@gorth-io/primitive/cores/lucide"
 
 import {
   Card,
@@ -6,7 +6,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
+} from "@gorth-io/primitive/default/table"
 
 const pages = [
   { bounce: "24%", path: "/dashboard", time: "3m 12s", views: "64.2k" },

@@ -1,7 +1,7 @@
 import { PgDialect } from "drizzle-orm/pg-core"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
-import z from "@gorth/structure/cores/zod"
+import z from "@gorth-io/structure/cores/zod"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const state = vi.hoisted(() => ({
@@ -24,18 +24,21 @@ const state = vi.hoisted(() => ({
 }))
 vi.mock("server-only", () => ({}))
 vi.mock("@/utils/environment", () => ({ isProduction: true }))
-vi.mock("@/lib/auth/server/index", () => ({
-  auth: {
-    api: {
-      revokeUserSession: state.revokeSession,
-      revokeUserSessions: state.revokeSessions,
-      getSession: async () =>
-        state.authenticated
-          ? { user: { id: "c50d1ac3-bc90-4b7d-8efa-c81b67f0c3ed" } }
-          : null,
+vi.mock("@/lib/auth/server/index", async () => {
+  const authModule = await (() => ({
+    auth: {
+      api: {
+        revokeUserSession: state.revokeSession,
+        revokeUserSessions: state.revokeSessions,
+        getSession: async () =>
+          state.authenticated
+            ? { user: { id: "c50d1ac3-bc90-4b7d-8efa-c81b67f0c3ed" } }
+            : null,
+      },
     },
-  },
-}))
+  }))()
+  return { ...authModule, getAuth: async () => authModule.auth }
+})
 vi.mock("@/database", async () => {
   const schema = await import("@/database/schema")
   function select(selection: unknown) {

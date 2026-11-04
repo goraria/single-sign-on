@@ -1,10 +1,10 @@
 "use client"
 
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
-import { MoreVertical } from "@gorth/primitive/cores/lucide"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
+import { MoreVertical } from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 
 import type { Role } from "./data"
 

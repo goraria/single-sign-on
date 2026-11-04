@@ -11,13 +11,19 @@ import {
 import type { User } from "@/schemas/users"
 
 export interface SsoApplication {
+  /** Returned only once by client creation; never by list/get. */
+  clientSecret?: string
   id: string
   clientId: string
+  centrallyManaged?: boolean
   name: string
+  environment?: "local" | "production"
   description: string | null
   homepageUrl: string | null
   icon: string | null
   redirectUris: string[]
+  backchannelLogoutUri?: string | null
+  clientCredentialsScopes?: string[]
   postLogoutRedirectUris: string[]
   scopes: string[]
   grantTypes: string[]
@@ -33,10 +39,13 @@ export interface SsoApplication {
 
 export interface SsoApplicationPayload {
   name: string
+  environment?: "local" | "production"
   description?: string | null
   homepageUrl?: string | null
   icon?: string | null
   redirectUris: string[]
+  backchannelLogoutUri?: string | null
+  clientCredentialsScopes?: string[]
   postLogoutRedirectUris: string[]
   scopes: string[]
   grantTypes: string[]
@@ -524,9 +533,90 @@ export const useOAuthConsentsQuery = createQueryService(oauthConsentsService)
 export const useCreateSsoApplicationMutation = createMutationService(
   createApplicationService
 )
+// Native Better Auth owns generation, hashing, authorization and rotation.
+export const useRotateSsoApplicationCredentialMutation = createMutationService(
+  useMutation<{ id: string; clientId: string; clientSecret: string }, { id: string }>({
+    query: ({ id }) => ({
+      url: `/admin/gateway/sso-application/${encodeURIComponent(id)}/credential`,
+      method: "POST",
+      body: {},
+    }),
+  })
+)
 export const useUpdateSsoApplicationMutation = createMutationService(
   updateApplicationService
 )
 export const useDeleteSsoApplicationMutation = createMutationService(
   deleteApplicationService
 )
+
+export interface OAuthScopeRegistry {
+  active: { revision: number; scopes: string[] }
+  revisions: { revision: number; scopes: string[]; createdAt: string }[]
+}
+const scopeRegistryService = useQuery<OAuthScopeRegistry, void>({
+  queryKey: () => ["admin", "oauth-scope"],
+  query: () => ({
+    url: "/admin/gateway/oauth-scope",
+    baseURL: null,
+    credentials: "include",
+  }),
+})
+const publishScopeService = useMutation<
+  unknown,
+  { baseRevision: number; scopes: string[] }
+>({
+  query: (body) => ({
+    url: "/admin/gateway/oauth-scope",
+    method: "POST",
+    body,
+    baseURL: null,
+    credentials: "include",
+  }),
+  invalidates: [["admin", "oauth-scope"], auditLogsQueryKey],
+})
+const clientResourcesService = useQuery<
+  { resourceIdentifier: string }[],
+  string
+>({
+  queryKey: (id) => ["admin", "client-resource", id],
+  query: (id) => ({
+    url: `/admin/gateway/sso-application/${encodeURIComponent(id)}/resource`,
+    baseURL: null,
+    credentials: "include",
+  }),
+})
+const changeClientResourceService = useMutation<
+  unknown,
+  { id: string; resourceId: string; linked: boolean }
+>({
+  query: ({ id, resourceId, linked }) => ({
+    url: `/admin/gateway/sso-application/${encodeURIComponent(id)}/resource/${encodeURIComponent(resourceId)}`,
+    method: linked ? "POST" : "DELETE",
+    baseURL: null,
+    credentials: "include",
+  }),
+  invalidates: [["admin", "client-resource"], auditLogsQueryKey],
+})
+export const useOAuthScopeRegistryQuery =
+  createQueryService(scopeRegistryService)
+export const usePublishOAuthScopeMutation =
+  createMutationService(publishScopeService)
+export const useOAuthClientResourcesQuery = createQueryService(
+  clientResourcesService
+)
+export const useChangeOAuthClientResourceMutation = createMutationService(
+  changeClientResourceService
+)
+
+const adoptClientService = useMutation<{ id: string }, string>({
+  query: (id) => ({
+    url: `/admin/gateway/sso-application/${encodeURIComponent(id)}/management`,
+    method: "POST",
+    baseURL: null,
+    credentials: "include",
+  }),
+  invalidates: [ssoApplicationsQueryKey, auditLogsQueryKey],
+})
+export const useAdoptOAuthClientMutation =
+  createMutationService(adoptClientService)

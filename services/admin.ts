@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm"
 
 import { database } from "@/database"
 import { oauthClient, oauthResource, user } from "@/database/schema"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { fromNodeHeaders } from "better-auth/node"
 import { APIError } from "better-auth/api"
 import { formatSsoApplication } from "@/utils/server/formatter"
@@ -28,10 +28,21 @@ import {
   isUniqueViolation,
 } from "@/services/helper"
 
+import { assertOAuthClientEnvironment } from "@/schemas/oauth-client-policy"
+import { loadOAuthScopeRevision } from "@/services/oauth-registry"
+
+async function assertSupportedScopes(scopes: string[]) {
+  const active = await loadOAuthScopeRevision()
+  if (scopes.some((scope) => !active.scopes.includes(scope)))
+    throw createServiceError("oauth_scope_not_active", 400)
+}
+
 const adminRoles = new Set(["admin", "master"])
 
 export async function requireAdminSession(headers: IncomingHttpHeaders) {
-  const session = await auth.api.getSession({
+  const session = await (
+    await getAuth()
+  ).api.getSession({
     headers: fromNodeHeaders(headers),
     query: { disableCookieCache: true },
   })
@@ -201,7 +212,9 @@ export async function createUser(
   headers: IncomingHttpHeaders
 ) {
   try {
-    const result = await auth.api.createUser({
+    const result = await (
+      await getAuth()
+    ).api.createUser({
       headers: fromNodeHeaders(headers),
       body: {
         name: input.name,
@@ -226,7 +239,9 @@ export async function createUser(
           )
         : undefined
 
-      await auth.api.banUser({
+      await (
+        await getAuth()
+      ).api.banUser({
         headers: fromNodeHeaders(headers),
         body: {
           userId: result.user.id,
@@ -271,7 +286,9 @@ export async function updateUser(
     } = input
 
     if (Object.keys(profile).length) {
-      await auth.api.adminUpdateUser({
+      await (
+        await getAuth()
+      ).api.adminUpdateUser({
         headers: authHeaders,
         body: {
           userId: id,
@@ -281,21 +298,27 @@ export async function updateUser(
     }
 
     if (nextRole) {
-      await auth.api.setRole({
+      await (
+        await getAuth()
+      ).api.setRole({
         headers: authHeaders,
         body: { userId: id, role: nextRole },
       })
     }
 
     if (nextPassword) {
-      await auth.api.setUserPassword({
+      await (
+        await getAuth()
+      ).api.setUserPassword({
         headers: authHeaders,
         body: { userId: id, newPassword: nextPassword },
       })
     }
 
     if (nextBanned === false) {
-      await auth.api.unbanUser({
+      await (
+        await getAuth()
+      ).api.unbanUser({
         headers: authHeaders,
         body: { userId: id },
       })
@@ -304,7 +327,9 @@ export async function updateUser(
         ? Math.max(1, Math.ceil((banExpires.getTime() - Date.now()) / 1000))
         : undefined
 
-      await auth.api.banUser({
+      await (
+        await getAuth()
+      ).api.banUser({
         headers: authHeaders,
         body: {
           userId: id,
@@ -382,7 +407,10 @@ export async function createOAuthResource(
   headers: Headers
 ) {
   try {
-    const created = await auth.api.adminCreateOAuthResource({
+    if (input.allowedScopes) await assertSupportedScopes(input.allowedScopes)
+    const created = await (
+      await getAuth()
+    ).api.adminCreateOAuthResource({
       headers,
       body: input,
     })
@@ -406,9 +434,12 @@ export async function updateOAuthResource(
   // Better Auth does not rename identifiers through its resource update API.
   if (input.identifier !== current.identifier)
     throw createServiceError("resource_identifier_immutable", 400)
+  if (input.allowedScopes) await assertSupportedScopes(input.allowedScopes)
   const { identifier, ...policy } = input
   try {
-    await auth.api.adminUpdateOAuthResource({
+    await (
+      await getAuth()
+    ).api.adminUpdateOAuthResource({
       headers,
       params: { identifier: encodeURIComponent(identifier) },
       body: policy,
@@ -425,7 +456,9 @@ export async function updateOAuthResource(
 
 export async function deleteOAuthResource(id: string, headers: Headers) {
   const current = await checkOAuthResourceExists(id)
-  await auth.api.adminDeleteOAuthResource({
+  await (
+    await getAuth()
+  ).api.adminDeleteOAuthResource({
     headers,
     params: { identifier: encodeURIComponent(current.identifier) },
   })
@@ -436,10 +469,26 @@ export async function createSsoApplication(
   input: AdminSsoApplicationPayload,
   headers: Headers
 ) {
-  const created = await auth.api.adminCreateOAuthClient({
+  assertOAuthClientEnvironment(input)
+  await assertSupportedScopes([
+    ...input.scopes,
+    ...(input.clientCredentialsScopes ?? []),
+  ])
+  const created = await (
+    await getAuth()
+  ).api.adminCreateOAuthClient({
     headers,
     body: {
       redirect_uris: input.redirectUris,
+      ...(input.backchannelLogoutUri
+        ? {
+            backchannel_logout_uri: input.backchannelLogoutUri,
+            backchannel_logout_session_required: true,
+          }
+        : {}),
+      ...(input.clientCredentialsScopes?.length
+        ? { client_credentials_scopes: input.clientCredentialsScopes }
+        : {}),
       scope: input.scopes.join(" "),
       client_name: input.name,
       ...(input.homepageUrl ? { client_uri: input.homepageUrl } : {}),
@@ -453,7 +502,10 @@ export async function createSsoApplication(
       skip_consent: input.skipConsent,
       enable_end_session: true,
       require_pkce: input.requirePKCE,
-      metadata: { description: input.description ?? null },
+      metadata: {
+        description: input.description ?? null,
+        environment: input.environment ?? "production",
+      },
     },
   })
 
@@ -471,7 +523,10 @@ export async function createSsoApplication(
     throw createServiceError("sso_application_create_failed", 500)
   }
 
-  return formatSsoApplication(application)
+  return {
+    ...formatSsoApplication(application),
+    ...(created.client_secret ? { clientSecret: created.client_secret } : {}),
+  }
 }
 
 export async function updateSsoApplication(
@@ -506,11 +561,42 @@ export async function updateSsoApplication(
     throw createServiceError("require_pkce_immutable", 400)
   }
 
-  await auth.api.adminUpdateOAuthClient({
+  const metadata =
+    current.metadata && typeof current.metadata === "object"
+      ? (current.metadata as Record<string, unknown>)
+      : {}
+  assertOAuthClientEnvironment({
+    ...current,
+    homepageUrl: current.uri,
+    ...input,
+    environment:
+      input.environment ??
+      (metadata.environment === "local" ? "local" : "production"),
+  })
+  // Sending an unchanged machine ceiling must not require master privileges
+  // merely to edit a client's homepage. Changes still go through native checks.
+  const machineScopesChanged =
+    input.clientCredentialsScopes !== undefined &&
+    JSON.stringify([...input.clientCredentialsScopes].sort()) !==
+      JSON.stringify([...(current.clientCredentialsScopes ?? [])].sort())
+  await assertSupportedScopes([
+    ...(input.scopes ?? []),
+    ...(input.clientCredentialsScopes ?? []),
+  ])
+  await (
+    await getAuth()
+  ).api.adminUpdateOAuthClient({
     headers,
     body: {
       client_id: current.clientId,
       update: {
+        ...(input.backchannelLogoutUri !== undefined
+          ? { backchannel_logout_uri: input.backchannelLogoutUri || undefined }
+          : {}),
+        ...(machineScopesChanged
+          ? { client_credentials_scopes: input.clientCredentialsScopes }
+          : {}),
+        ...(input.disabled !== undefined ? { disabled: input.disabled } : {}),
         ...(input.redirectUris ? { redirect_uris: input.redirectUris } : {}),
         ...(input.scopes ? { scope: input.scopes.join(" ") } : {}),
         ...(input.name ? { client_name: input.name } : {}),
@@ -524,13 +610,18 @@ export async function updateSsoApplication(
         ...(input.skipConsent !== undefined
           ? { skip_consent: input.skipConsent }
           : {}),
-        ...(input.description !== undefined
+        ...(input.description !== undefined || input.environment !== undefined
           ? {
               metadata: {
                 ...(current.metadata && typeof current.metadata === "object"
                   ? current.metadata
                   : {}),
-                description: input.description,
+                ...(input.description !== undefined
+                  ? { description: input.description }
+                  : {}),
+                ...(input.environment !== undefined
+                  ? { environment: input.environment }
+                  : {}),
               },
             }
           : {}),
@@ -541,6 +632,9 @@ export async function updateSsoApplication(
   const [application] = await database
     .update(oauthClient)
     .set({
+      ...(input.backchannelLogoutUri === null
+        ? { backchannelLogoutUri: null }
+        : {}),
       ...(input.homepageUrl === null ? { uri: null } : {}),
       ...(input.icon === null ? { icon: null } : {}),
       ...(input.postLogoutRedirectUris?.length === 0
@@ -559,15 +653,13 @@ export async function updateSsoApplication(
   return formatSsoApplication(application)
 }
 
-export async function deleteSsoApplication(id: string) {
-  if (!id) throw createServiceError("sso_application_id_required", 400)
-
-  const [application] = await database
-    .delete(oauthClient)
-    .where(eq(oauthClient.id, id))
-    .returning({ id: oauthClient.id })
-
-  if (!application) throw createServiceError("sso_application_not_found", 404)
-
-  return application
+export async function deleteSsoApplication(id: string, headers: Headers) {
+  const application = await checkSsoApplicationExists(id)
+  await (
+    await getAuth()
+  ).api.deleteOAuthClient({
+    headers,
+    body: { client_id: application.clientId },
+  })
+  return { id }
 }

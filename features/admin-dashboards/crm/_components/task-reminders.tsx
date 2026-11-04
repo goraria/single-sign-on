@@ -1,14 +1,14 @@
-import { CalendarDays, CalendarRange } from "@gorth/primitive/cores/lucide"
+import { CalendarDays, CalendarRange } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { cn } from "@gorth/primitive/cores/cn"
+} from "@gorth-io/primitive/default/card"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 const proposalSent = 12
 const proposalGoal = 18

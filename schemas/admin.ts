@@ -1,5 +1,5 @@
-import { validate } from "@gorth/structure/cores/uuid"
-import z from "@gorth/structure/cores/zod"
+import { validate } from "@gorth-io/structure/cores/uuid"
+import z from "@gorth-io/structure/cores/zod"
 import { createInsertSchema, createUpdateSchema } from "drizzle-orm/zod"
 import { sql } from "drizzle-orm"
 
@@ -9,7 +9,6 @@ import {
   user,
   type OAuthClient,
 } from "@/database/schema"
-import { isProduction } from "@/utils/environment"
 import {
   oauthGrantTypeSchema,
   oauthResponseTypeSchema,
@@ -40,10 +39,13 @@ export const adminSsoApplicationSelection = {
   clientId: oauthClient.clientId,
   name: oauthClient.name,
   metadata: oauthClient.metadata,
+  referenceId: oauthClient.referenceId,
   uri: oauthClient.uri,
   icon: oauthClient.icon,
   redirectUris: oauthClient.redirectUris,
   postLogoutRedirectUris: oauthClient.postLogoutRedirectUris,
+  backchannelLogoutUri: oauthClient.backchannelLogoutUri,
+  clientCredentialsScopes: oauthClient.clientCredentialsScopes,
   scopes: oauthClient.scopes,
   grantTypes: oauthClient.grantTypes,
   responseTypes: oauthClient.responseTypes,
@@ -89,8 +91,17 @@ function splitStringList(value: unknown) {
 const adminHttpUrlSchema = z
   .string()
   .url()
-  .refine((value) => ["http:", "https:"].includes(new URL(value).protocol))
-  .refine((value) => !isProduction || new URL(value).protocol === "https:")
+  .refine((value) => {
+    const url = new URL(value)
+    return (
+      !url.username &&
+      !url.password &&
+      !value.includes("#") &&
+      (url.protocol === "https:" ||
+        (url.protocol === "http:" &&
+          ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)))
+    )
+  }, "Use HTTPS or a loopback development URL without credentials or fragments")
 
 export const adminUrlListSchema = z.preprocess(
   splitStringList,
@@ -156,11 +167,14 @@ const adminSsoApplicationSchema = z.object({
     .max(128)
     .regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]{2,127}$/),
   name: z.string().trim().min(1),
+  environment: z.enum(["local", "production"]).optional(),
   description: adminOptionalStringSchema.optional(),
   homepageUrl: adminOptionalUrlSchema.optional(),
   icon: adminOptionalStringSchema.optional(),
   redirectUris: adminUrlListSchema,
   postLogoutRedirectUris: adminOptionalUrlListSchema.optional(),
+  backchannelLogoutUri: adminOptionalUrlSchema.optional(),
+  clientCredentialsScopes: adminScopeListSchema.optional(),
   scopes: adminScopeListSchema,
   grantTypes: adminGrantTypeListSchema,
   responseTypes: adminResponseTypeListSchema,
@@ -333,7 +347,7 @@ export const adminOAuthResourcePayloadSchema = z.object({
     .enum(["RS256", "PS256", "ES256", "ES512", "EdDSA"])
     .nullable(),
   signingKeyId: z.string().trim().min(1).max(255).nullable(),
-  allowedScopes: z.array(z.string().trim().min(1).max(128)).max(256).nullable(),
+  allowedScopes: z.array(oauthScopeSchema).max(256).nullable(),
   dpopBoundAccessTokensRequired: z.boolean(),
   disabled: z.boolean(),
 })

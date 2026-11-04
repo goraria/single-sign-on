@@ -1,8 +1,8 @@
-import { Users } from "@gorth/primitive/cores/lucide"
+import { Users } from "@gorth-io/primitive/cores/lucide"
 
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Button } from "@gorth/primitive/custom/button"
-import { Separator } from "@gorth/primitive/default/separator"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 import type { ProfileRecord } from "./profile-data"
 

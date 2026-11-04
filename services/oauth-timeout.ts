@@ -2,11 +2,11 @@ import { eq } from "drizzle-orm"
 import { verifyOAuthQueryParams } from "@better-auth/oauth-provider"
 import { database } from "@/database"
 import { oauthClient } from "@/database/schema"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { oauthTimeoutResult } from "@/lib/auth/server/timeout"
 
 export async function prepareOAuthTimeout(query: string) {
-  const context = await auth.$context
+  const context = await (await getAuth()).$context
   if (!(await verifyOAuthQueryParams(query, context.secret)))
     throw new Error("invalid_oauth_query")
   const params = new URLSearchParams(query)

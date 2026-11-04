@@ -1,6 +1,6 @@
 "use client"
 
-import NotFoundPage from "@gorth/primitive/pages/not-found"
+import NotFoundPage from "@gorth-io/primitive/pages/not-found"
 
 export default function GlobalError({
   error: _error,

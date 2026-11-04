@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "@gorth-io/primitive/cores/recharts"
 
 import {
   Card,
@@ -8,14 +8,14 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@gorth/primitive/default/chart"
-import { Progress } from "@gorth/primitive/default/progress"
+} from "@gorth-io/primitive/default/chart"
+import { Progress } from "@gorth-io/primitive/default/progress"
 import {
   Select,
   SelectContent,
@@ -23,7 +23,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
+} from "@gorth-io/primitive/custom/select"
 
 const pipelineChartValues = [
   34, 38, 31, 47, 42, 51, 44, 40, 58, 46, 43, 49,

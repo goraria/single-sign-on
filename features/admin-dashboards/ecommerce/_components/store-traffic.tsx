@@ -3,8 +3,8 @@
 import { useState } from "react"
 
 import { format, subMinutes } from "date-fns"
-import { ArrowUpRight } from "@gorth/primitive/cores/lucide"
-import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
+import { ArrowUpRight } from "@gorth-io/primitive/cores/lucide"
+import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "@gorth-io/primitive/cores/recharts"
 
 import {
   Card,
@@ -13,7 +13,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
@@ -21,7 +21,7 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@gorth/primitive/default/chart"
+} from "@gorth-io/primitive/default/chart"
 
 const trafficIntervalMinutes = 15
 

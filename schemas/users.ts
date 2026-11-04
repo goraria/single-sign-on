@@ -1,5 +1,5 @@
-import { validate } from "@gorth/structure/cores/uuid"
-import { z } from "@gorth/structure/cores/zod"
+import { validate } from "@gorth-io/structure/cores/uuid"
+import { z } from "@gorth-io/structure/cores/zod"
 
 export const userRoleSchema = z.enum(["user", "admin", "vice", "master"])
 

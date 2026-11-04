@@ -1,5 +1,5 @@
 import { expect, it } from "vitest"
-import { Clapperboard, SatelliteDish, LibraryBig, ListTodo, Store, MessageCircle } from "@gorth/primitive/cores/lucide"
+import { Clapperboard, SatelliteDish, LibraryBig, ListTodo, Store, MessageCircle } from "@gorth-io/primitive/cores/lucide"
 import { authOrbitData } from "@/utils/constant"
 
 it("uses each app's canonical name, Lucide icon and professional background in the orbit", () => {

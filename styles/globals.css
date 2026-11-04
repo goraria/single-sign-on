@@ -1,5 +1,5 @@
 @import "tailwindcss" source(none);
-@import "@gorth/primitive/globals.css";
+@import "@gorth-io/primitive/globals.css";
 
 
 /* Watch source only: a recursive client-root glob includes Next's generated

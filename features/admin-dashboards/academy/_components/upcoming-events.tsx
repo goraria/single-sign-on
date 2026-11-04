@@ -1,14 +1,14 @@
 import { addDays, format } from "date-fns"
-import { ArrowRight } from "@gorth/primitive/cores/lucide"
+import { ArrowRight } from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 const upcomingEvents = [
   {

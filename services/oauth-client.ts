@@ -1,3 +1,4 @@
+import { oauthManagementReference } from "@/utils/oauth-management"
 import { eq } from "drizzle-orm"
 
 import { database } from "@/database"
@@ -54,6 +55,7 @@ export async function getOAuthClientOrigins(baseOrigins: string[] = []) {
   const clients = await database
     .select({
       disabled: oauthClient.disabled,
+      referenceId: oauthClient.referenceId,
       uri: oauthClient.uri,
       redirectUris: oauthClient.redirectUris,
       postLogoutRedirectUris: oauthClient.postLogoutRedirectUris,
@@ -61,7 +63,10 @@ export async function getOAuthClientOrigins(baseOrigins: string[] = []) {
     .from(oauthClient)
 
   const databaseOrigins = clients
-    .filter((client) => !client.disabled)
+    .filter(
+      (client) =>
+        !client.disabled && client.referenceId === oauthManagementReference
+    )
     .flatMap((client) => [
       client.uri,
       ...client.redirectUris,

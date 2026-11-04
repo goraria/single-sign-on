@@ -8,24 +8,24 @@ import {
   QrCode,
   SendHorizontal,
   Smartphone,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Button } from "@gorth/primitive/custom/button"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Field } from "@gorth/primitive/default/field"
+} from "@gorth-io/primitive/default/card"
+import { Field } from "@gorth-io/primitive/default/field"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
-} from "@gorth/primitive/default/input-group"
+} from "@gorth-io/primitive/default/input-group"
 
 const contacts = [
   { id: 1, initials: "AR" },

@@ -1,7 +1,7 @@
 "use client"
 
-import { ArrowRight } from "@gorth/primitive/cores/lucide"
-import { Bar, BarChart, CartesianGrid, XAxis } from "@gorth/primitive/cores/recharts"
+import { ArrowRight } from "@gorth-io/primitive/cores/lucide"
+import { Bar, BarChart, CartesianGrid, XAxis } from "@gorth-io/primitive/cores/recharts"
 
 import {
   Card,
@@ -9,7 +9,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
@@ -17,7 +17,7 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@gorth/primitive/default/chart"
+} from "@gorth-io/primitive/default/chart"
 
 const chartData = [
   { className: "G11A", submitted: 14, pending: 18, overdue: 2 },

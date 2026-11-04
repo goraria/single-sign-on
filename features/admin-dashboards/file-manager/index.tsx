@@ -5,13 +5,13 @@ import {
   Grid2X2,
   List,
   Upload,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@gorth/primitive/default/toggle-group"
+} from "@gorth-io/primitive/default/toggle-group"
 
 import { type FileManagerView, files, folders } from "./_components/data"
 import { FileGridView } from "./_components/file-grid-view"

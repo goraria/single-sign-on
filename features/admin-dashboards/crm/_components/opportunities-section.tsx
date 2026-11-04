@@ -7,10 +7,10 @@ import {
   type ColumnVisibilityState,
   type PaginationState,
   useTable,
-} from "@gorth/primitive/cores/tanstack/table"
-import { ChevronDownIcon, ListFilter } from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/tanstack/table"
+import { ChevronDownIcon, ListFilter } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
@@ -18,15 +18,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
-import { Input } from "@gorth/primitive/default/input"
+} from "@gorth-io/primitive/custom/dropdown"
+import { Input } from "@gorth-io/primitive/default/input"
 import {
   Pagination,
   PaginationContent,
@@ -35,7 +35,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@gorth/primitive/default/pagination"
+} from "@gorth-io/primitive/default/pagination"
 import {
   Table,
   TableBody,
@@ -43,7 +43,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
+} from "@gorth-io/primitive/default/table"
 import { dataTableFeatures } from "@/utils/data-table-features"
 
 import { opportunitiesColumns } from "./opportunities-table/columns"

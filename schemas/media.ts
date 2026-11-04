@@ -1,4 +1,4 @@
-import { z } from "@gorth/structure/cores/zod"
+import { z } from "@gorth-io/structure/cores/zod"
 
 export const mediaUploadSchema = z.object({
   asset: z.object({ id: z.uuid(), objectKey: z.string().min(1) }),

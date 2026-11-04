@@ -2,26 +2,26 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
 import type {
   PaginationState,
   SortingState,
-} from "@gorth/primitive/cores/tanstack/table"
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
-import { Button } from "@gorth/primitive/custom/button"
+} from "@gorth-io/primitive/cores/tanstack/table"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import {
   DataTable,
   DataTableColumnHeader,
-} from "@gorth/primitive/custom/data-table"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+} from "@gorth-io/primitive/custom/data-table"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 import { formatDate } from "@/utils/client/formatter"
 import {
   type OAuthResource,

@@ -1,20 +1,20 @@
 "use client"
 
-import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { KeyRound } from "@gorth/primitive/cores/lucide"
-import { Button } from "@gorth/primitive/custom/button"
+import { useForm } from "@gorth-io/primitive/cores/tanstack/form"
+import { KeyRound } from "@gorth-io/primitive/cores/lucide"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
-import { Label } from "@gorth/primitive/default/label"
-import { toast } from "@gorth/primitive/custom/toast"
-import { Spinner } from "@gorth/primitive/pattern/spinner"
+} from "@gorth-io/primitive/default/card"
+import { Label } from "@gorth-io/primitive/default/label"
+import { toast } from "@gorth-io/primitive/custom/toast"
+import { Spinner } from "@gorth-io/primitive/pattern/spinner"
 
-import { PasswordInput } from "@gorth/primitive/custom/input-password"
+import { PasswordInput } from "@gorth-io/primitive/custom/input-password"
 import { auth } from "@/lib/auth/client"
 import { accountPasswordSchema } from "@/schemas/auth"
 

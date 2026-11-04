@@ -1,15 +1,15 @@
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { expect, it, vi } from "vitest"
-import type { DataTableProps } from "@gorth/primitive/utils/interface"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 
 const state = vi.hoisted(() => ({
   props: null as DataTableProps<{ id: string; title: string }> | null,
   notify: vi.fn(),
 }))
-vi.mock("@gorth/primitive/custom/data-table", async (importOriginal) => ({
+vi.mock("@gorth-io/primitive/custom/data-table", async (importOriginal) => ({
   ...(await importOriginal<
-    typeof import("@gorth/primitive/custom/data-table")
+    typeof import("@gorth-io/primitive/custom/data-table")
   >()),
   DataTable: (props: DataTableProps<{ id: string; title: string }>) => {
     state.props = props
@@ -17,7 +17,7 @@ vi.mock("@gorth/primitive/custom/data-table", async (importOriginal) => ({
   },
   DataTableColumnHeader: () => null,
 }))
-vi.mock("@gorth/primitive/custom/toast", () => ({
+vi.mock("@gorth-io/primitive/custom/toast", () => ({
   toast: { add: state.notify },
 }))
 import { Tasks } from "@/features/settings/tasks"

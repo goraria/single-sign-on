@@ -1,5 +1,5 @@
 import { type SVGProps } from "react"
-import { cn } from "@gorth/primitive/cores/cn"
+import { cn } from "@gorth-io/primitive/cores/cn"
 
 export function IconGithub({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (

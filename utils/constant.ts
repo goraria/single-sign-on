@@ -42,12 +42,12 @@ import {
   CreditCard,
   Receipt,
   Images,
-  Globe,
-  Rocket,
-  FileBox
-} from "@gorth/primitive/cores/lucide"
+  Zap,
+  Box,
+  FileBox,
+} from "@gorth-io/primitive/cores/lucide"
 
-import type { OrbitData } from "@gorth/primitive/illustration/orbit"
+import type { OrbitData } from "@gorth-io/primitive/illustration/orbit"
 
 export const authOrbitData: OrbitData = {
   brand: {
@@ -160,13 +160,13 @@ export const authOrbitData: OrbitData = {
     {
       title: "Browser",
       url: "",
-      icon: Globe,
+      icon: Zap,
       description: "var(--professional-secondary)",
     },
     {
       title: "Launcher",
       url: "",
-      icon: Rocket,
+      icon: Box,
       description: "var(--professional-success)",
     },
   ],
@@ -341,6 +341,7 @@ export const nonary = []
 export const denary = []
 
 export const oauthAdminPaths = {
+  scope: "/admin/oauth/scope",
   client: "/admin/oauth/client",
   resource: "/admin/oauth/resource",
   consent: "/admin/oauth/consent",
@@ -435,6 +436,7 @@ export const adminSidebar = {
       items: [
         { title: "Client", url: oauthAdminPaths.client, icon: AppWindow },
         { title: "Resource", url: oauthAdminPaths.resource, icon: Database },
+        { title: "Scope", url: oauthAdminPaths.scope, icon: ShieldCheck },
         { title: "Consent", url: oauthAdminPaths.consent, icon: ShieldCheck },
       ],
     },

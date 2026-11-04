@@ -2,7 +2,7 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   /* config options here */
-  transpilePackages: ["@gorth/primitive"],
+  transpilePackages: ["@gorth-io/primitive"],
 
   devIndicators: false,
   images: {

@@ -1,8 +1,8 @@
 import "server-only"
-import { z } from "@gorth/structure/cores/zod"
+import { z } from "@gorth-io/structure/cores/zod"
 import { deviceSessionSchema } from "@/schemas/browser-account"
 import { appUrl } from "@/utils/environment"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { requireUrl } from "@/utils/client/formatter"
 
 export async function browserAccountRequest(
@@ -11,7 +11,7 @@ export async function browserAccountRequest(
   origin: string,
   body?: Record<string, string>
 ) {
-  return auth.handler(
+  return (await getAuth()).handler(
     new Request(
       new URL("/auth/" + path, requireUrl(appUrl, "NEXT_PUBLIC_APP_URL")),
       {

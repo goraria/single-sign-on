@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { KeyRound, Loader2 } from "@gorth/primitive/cores/lucide"
+import { useForm } from "@gorth-io/primitive/cores/tanstack/form"
+import { KeyRound, Loader2 } from "@gorth-io/primitive/cores/lucide"
 
-import { PasswordInput } from "@gorth/primitive/custom/input-password"
+import { PasswordInput } from "@gorth-io/primitive/custom/input-password"
 import { auth } from "@/lib/auth/client"
 import {
   clearPendingVerification,
@@ -13,8 +13,8 @@ import {
 } from "@/lib/auth/client/pending-verification"
 import { getFormErrorMessage } from "@/utils/client/formatter"
 import { resetPasswordSchema } from "@/schemas/auth"
-import { Button } from "@gorth/primitive/custom/button"
-import { Label } from "@gorth/primitive/default/label"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Label } from "@gorth-io/primitive/default/label"
 
 export function ResetPasswordForm() {
   const [submitError, setSubmitError] = useState<string | null>(null)

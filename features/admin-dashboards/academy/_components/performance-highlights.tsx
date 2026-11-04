@@ -1,20 +1,20 @@
 "use client"
 
-import { ArrowRight } from "@gorth/primitive/cores/lucide"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "@gorth/primitive/cores/recharts"
+import { ArrowRight } from "@gorth-io/primitive/cores/lucide"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "@gorth-io/primitive/cores/recharts"
 
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
-} from "@gorth/primitive/default/chart"
+} from "@gorth-io/primitive/default/chart"
 
 const performanceHighlights = [
   {

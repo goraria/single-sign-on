@@ -22,18 +22,21 @@ vi.mock("@/utils/environment", () => ({
   betterAuthUrl: "https://sso.example",
   isProduction: true,
 }))
-vi.mock("@/lib/auth/server/index", () => ({
-  auth: {
-    api: {
-      getSession: state.getSession,
-      adminCreateOAuthClient: state.createClient,
-      adminCreateOAuthResource: state.createResource,
-      adminUpdateOAuthResource: state.updateResource,
-      adminLinkClientResource: state.link,
-      deleteOAuthClient: state.deleteClient,
+vi.mock("@/lib/auth/server/index", async () => {
+  const authModule = await (() => ({
+    auth: {
+      api: {
+        getSession: state.getSession,
+        adminCreateOAuthClient: state.createClient,
+        adminCreateOAuthResource: state.createResource,
+        adminUpdateOAuthResource: state.updateResource,
+        adminLinkClientResource: state.link,
+        deleteOAuthClient: state.deleteClient,
+      },
     },
-  },
-}))
+  }))()
+  return { ...authModule, getAuth: async () => authModule.auth }
+})
 import { POST } from "@/app/(api)/admin/media-client/route"
 function request(origin = "https://sso.example") {
   return new Request("https://sso.example/admin/media-client", {

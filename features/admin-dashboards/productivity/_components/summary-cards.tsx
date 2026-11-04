@@ -3,14 +3,14 @@ import {
   Clock3,
   Focus,
   TrendingUp,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 const summaryCards = [
   { title: "Today", value: "4", description: "tasks scheduled", icon: Clock3 },

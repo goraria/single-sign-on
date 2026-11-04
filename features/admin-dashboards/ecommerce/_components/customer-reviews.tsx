@@ -3,11 +3,11 @@ import {
   ArrowRight,
   ArrowUpRight,
   Star,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { AvatarGroup, AvatarGroupCount } from "@gorth/primitive/custom/avatar"
-import { NavIdentity } from "@gorth/primitive/dashboard/nav-user"
-import { Button } from "@gorth/primitive/custom/button"
+import { AvatarGroup, AvatarGroupCount } from "@gorth-io/primitive/custom/avatar"
+import { NavIdentity } from "@gorth-io/primitive/dashboard/nav-user"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
@@ -15,7 +15,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 const customerInitials = ["EM", "OW", "NO", "MM"] as const
 

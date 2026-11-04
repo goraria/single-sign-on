@@ -1,3 +1,5 @@
+import { discoveryIndexScopes, notificationPublishScopes } from "@/utils/oauth-service-scopes"
+
 export interface OAuthResourceSeed {
   identifier: string
   name: string
@@ -116,6 +118,7 @@ export const oauthResourceSeeds = [
     name: "Gorth Notification Center API",
     accessTokenTtl,
     allowedScopes: [
+      ...notificationPublishScopes,
       ...oidcScopes,
       "chat:read",
       "chat:write",
@@ -180,6 +183,7 @@ export const oauthResourceSeeds = [
     name: "Gorth Discovery API",
     accessTokenTtl,
     allowedScopes: [
+      ...discoveryIndexScopes,
       ...oidcScopes,
       "chat:read",
       "chat:write",

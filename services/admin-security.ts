@@ -20,7 +20,7 @@ import {
   session,
   user,
 } from "@/database/schema"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import { APIError } from "better-auth/api"
 import { createServiceError } from "@/services/helper"
 import {
@@ -75,7 +75,9 @@ export async function revokeAdminSession(id: string, headers: Headers) {
     .limit(1)
   if (!target) throw createServiceError("session_not_found", 404)
   try {
-    await auth.api.revokeUserSession({
+    await (
+      await getAuth()
+    ).api.revokeUserSession({
       headers,
       body: { sessionToken: target.token },
     })
@@ -99,7 +101,9 @@ export async function revokeAdminUserSessions(id: string, headers: Headers) {
     .limit(1)
   if (!target) throw createServiceError("user_not_found", 404)
   try {
-    await auth.api.revokeUserSessions({ headers, body: { userId: id } })
+    await (
+      await getAuth()
+    ).api.revokeUserSessions({ headers, body: { userId: id } })
   } catch (error) {
     const status =
       error instanceof APIError && error.statusCode === 403

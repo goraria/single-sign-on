@@ -5,16 +5,16 @@ import {
   UserPlus,
   Users,
   Waves,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 export function MetricCards() {
   return (

@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { decodeJwt } from "@gorth/structure/cores/jose"
+import { decodeJwt } from "@gorth-io/structure/cores/jose"
 import { verifyOAuthQueryParams } from "@better-auth/oauth-provider"
 import { Browser, createFixture, fixtureOrigin } from "./fixtures/multi-session"
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight } from "@gorth/primitive/cores/lucide"
+import { ArrowUpRight } from "@gorth-io/primitive/cores/lucide"
 import {
   Bar,
   BarChart,
@@ -8,7 +8,7 @@ import {
   type LabelProps,
   XAxis,
   YAxis,
-} from "@gorth/primitive/cores/recharts"
+} from "@gorth-io/primitive/cores/recharts"
 import { siEbay, siGoogle, siMeta, siShopify, siTiktok } from "simple-icons"
 
 import { SimpleIcon } from "@/components/dashboard/simple-icon"
@@ -19,11 +19,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   type ChartConfig,
   ChartContainer,
-} from "@gorth/primitive/default/chart"
+} from "@gorth-io/primitive/default/chart"
 
 const trafficSources = [
   {

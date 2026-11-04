@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Separator } from "@gorth/primitive/default/separator"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 interface ContentSectionProps {
   title: string

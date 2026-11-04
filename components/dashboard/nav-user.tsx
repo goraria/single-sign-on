@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, type ComponentProps } from "react"
-import { LayoutDashboard } from "@gorth/primitive/cores/lucide"
-import { AccountSwitcher } from "@gorth/primitive/dashboard/account-switcher"
-import { NavUser as PrimitiveNavUser } from "@gorth/primitive/dashboard/nav-user"
+import { LayoutDashboard } from "@gorth-io/primitive/cores/lucide"
+import { AccountSwitcher } from "@gorth-io/primitive/dashboard/account-switcher"
+import { NavUser as PrimitiveNavUser } from "@gorth-io/primitive/dashboard/nav-user"
 import { useBrowserAccounts } from "@/hooks/use-browser-accounts"
 
 export function NavUser(props: ComponentProps<typeof PrimitiveNavUser>) {

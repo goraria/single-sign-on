@@ -19,11 +19,14 @@ vi.mock("@/utils/fetcher", () => ({ fetcher: state.fetcher }))
 vi.mock("@/services/media-registration", () => ({
   getSsoMediaRegistration: state.registration,
 }))
-vi.mock("@/lib/auth/server/index", () => ({
-  auth: {
-    api: { issueMediaAccessToken: state.issue, getSession: state.getSession },
-  },
-}))
+vi.mock("@/lib/auth/server/index", async () => {
+  const authModule = await (() => ({
+    auth: {
+      api: { issueMediaAccessToken: state.issue, getSession: state.getSession },
+    },
+  }))()
+  return { ...authModule, getAuth: async () => authModule.auth }
+})
 import { uploadAvatar, finishAvatarUpload } from "@/services/media"
 import { POST } from "@/app/(api)/storage/avatar/route"
 import { GET } from "@/app/(api)/storage/avatar/[id]/route"

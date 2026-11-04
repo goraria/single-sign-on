@@ -1,4 +1,4 @@
-import z from "@gorth/structure/cores/zod"
+import z from "@gorth-io/structure/cores/zod"
 import { sql } from "drizzle-orm"
 import {
   auditLog,

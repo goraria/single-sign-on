@@ -1,4 +1,4 @@
-import { LockKeyhole } from "@gorth/primitive/cores/lucide"
+import { LockKeyhole } from "@gorth-io/primitive/cores/lucide"
 
 import {
   Breadcrumb,
@@ -6,14 +6,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@gorth/primitive/default/breadcrumb"
-import { Separator } from "@gorth/primitive/default/separator"
+} from "@gorth-io/primitive/default/breadcrumb"
+import { Separator } from "@gorth-io/primitive/default/separator"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@gorth/primitive/custom/tabs"
+} from "@gorth-io/primitive/custom/tabs"
 
 import type { ProfileRecord } from "./_components/profile-data"
 import { ProfileDocuments } from "./_components/profile-documents"

@@ -1,11 +1,11 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import { useProgress } from "@gorth/primitive/cores/progress/next"
+import { useProgress } from "@gorth-io/primitive/cores/progress/next"
 
 import { logoutCurrentBrowserAccount } from "@/services/client/browser-account"
 import { resolveInternalPath } from "@/utils/client/formatter"
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 
 export function LogoutButton() {
   const { start } = useProgress()

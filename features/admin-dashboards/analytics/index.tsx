@@ -3,7 +3,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@gorth/primitive/custom/tabs"
+} from "@gorth-io/primitive/custom/tabs"
 
 import { AnalyticsKpiStrip } from "./_components/analytics-kpi-strip"
 import { AnalyticsToolbar } from "./_components/analytics-toolbar"

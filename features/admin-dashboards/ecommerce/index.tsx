@@ -1,7 +1,7 @@
 import { format } from "date-fns"
-import { Settings2 } from "@gorth/primitive/cores/lucide"
+import { Settings2 } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Select,
   SelectContent,
@@ -9,8 +9,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gorth/primitive/custom/select"
-import { Separator } from "@gorth/primitive/default/separator"
+} from "@gorth-io/primitive/custom/select"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 import { CustomerReviews } from "./_components/customer-reviews"
 import { Inventory } from "./_components/inventory"

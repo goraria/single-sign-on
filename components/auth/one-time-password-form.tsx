@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "@gorth/primitive/cores/tanstack/form"
-import { Loader2, RotateCcw, ShieldCheck } from "@gorth/primitive/cores/lucide"
+import { useForm } from "@gorth-io/primitive/cores/tanstack/form"
+import { Loader2, RotateCcw, ShieldCheck } from "@gorth-io/primitive/cores/lucide"
 
 import { auth } from "@/lib/auth/client"
 import { continueOAuthRegistration } from "@/lib/auth/client/registration"
@@ -26,9 +26,9 @@ import {
   isExternalRedirect,
 } from "@/utils/client/temp"
 import { oneTimePasswordSchema } from "@/schemas/auth"
-import { Button } from "@gorth/primitive/custom/button"
-import { Label } from "@gorth/primitive/default/label"
-import { InputOTP } from "@gorth/primitive/custom/input-otp"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Label } from "@gorth-io/primitive/default/label"
+import { InputOTP } from "@gorth-io/primitive/custom/input-otp"
 
 const resendDelay = 120
 const maximumAttempts = 3

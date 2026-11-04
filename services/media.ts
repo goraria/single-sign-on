@@ -1,6 +1,6 @@
 import "server-only"
 import { randomUUID } from "node:crypto"
-import { auth } from "@/lib/auth/server/index"
+import { getAuth } from "@/lib/auth/server/index"
 import {
   appUrl,
   mediaAvatarBucketId,
@@ -14,7 +14,7 @@ import {
 } from "@/schemas/media"
 import { createServiceError } from "@/services/helper"
 import { HTTPException } from "hono/http-exception"
-import axios from "@gorth/structure/cores/axios"
+import axios from "@gorth-io/structure/cores/axios"
 
 function configuration() {
   if (!mediaAvatarBucketId || !awsEndpointUrlS3 || !appUrl)
@@ -45,7 +45,9 @@ export async function uploadAvatar(
   headers: Headers
 ) {
   const config = configuration()
-  const { token, resourceIdentifier } = await auth.api.issueMediaAccessToken({
+  const { token, resourceIdentifier } = await (
+    await getAuth()
+  ).api.issueMediaAccessToken({
     headers,
   })
   const server = new URL(resourceIdentifier)
@@ -127,7 +129,9 @@ export async function finishAvatarUpload(
   abort = false
 ) {
   const config = configuration()
-  const { token, resourceIdentifier } = await auth.api.issueMediaAccessToken({
+  const { token, resourceIdentifier } = await (
+    await getAuth()
+  ).api.issueMediaAccessToken({
     headers,
   })
   const base = new URL(resourceIdentifier)

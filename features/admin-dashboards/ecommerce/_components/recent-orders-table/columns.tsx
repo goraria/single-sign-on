@@ -1,11 +1,11 @@
-import type { ColumnDef } from "@gorth/primitive/cores/tanstack/table"
-import { Subscribe } from "@gorth/primitive/cores/tanstack/table"
+import type { ColumnDef } from "@gorth-io/primitive/cores/tanstack/table"
+import { Subscribe } from "@gorth-io/primitive/cores/tanstack/table"
 import { format, parseISO } from "date-fns"
-import { MoreHorizontal } from "@gorth/primitive/cores/lucide"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
 
-import { Badge } from "@gorth/primitive/custom/badge"
-import { Button } from "@gorth/primitive/custom/button"
-import { Checkbox } from "@gorth/primitive/default/checkbox"
+import { Badge } from "@gorth-io/primitive/custom/badge"
+import { Button } from "@gorth-io/primitive/custom/button"
+import { Checkbox } from "@gorth-io/primitive/default/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@gorth/primitive/custom/dropdown"
+} from "@gorth-io/primitive/custom/dropdown"
 import type { DataTableFeatures } from "@/utils/data-table-features"
 
 import type { OrderRow } from "./schema"

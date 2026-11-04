@@ -1,13 +1,13 @@
 import { Children, createElement, type ReactElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { expect, it, vi } from "vitest"
-import { TooltipContent } from "@gorth/primitive/custom/tooltip"
+import { TooltipContent } from "@gorth-io/primitive/custom/tooltip"
 import {
   NavIdentity,
   NavProfile,
   NavName,
   type NavIdentityProps,
-} from "@gorth/primitive/dashboard/nav-user"
+} from "@gorth-io/primitive/dashboard/nav-user"
 
 const user = { name: "A very long account name", email: "account@example.test" }
 

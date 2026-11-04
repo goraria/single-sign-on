@@ -1,4 +1,4 @@
-import { Separator } from "@gorth/primitive/default/separator"
+import { Separator } from "@gorth-io/primitive/default/separator"
 
 import type { ProfileRecord } from "./profile-data"
 

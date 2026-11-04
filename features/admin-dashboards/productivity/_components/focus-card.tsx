@@ -1,12 +1,12 @@
-import { BellOff } from "@gorth/primitive/cores/lucide"
+import { BellOff } from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 
 export function FocusCard() {
   return (

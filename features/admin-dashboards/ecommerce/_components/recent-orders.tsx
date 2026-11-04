@@ -7,15 +7,15 @@ import {
   type PaginationState,
   type SortingState,
   useTable,
-} from "@gorth/primitive/cores/tanstack/table"
+} from "@gorth-io/primitive/cores/tanstack/table"
 import {
   ArrowUpDown,
   ArrowUpRight,
   Download,
   MoreHorizontal,
-} from "@gorth/primitive/cores/lucide"
+} from "@gorth-io/primitive/cores/lucide"
 
-import { Button } from "@gorth/primitive/custom/button"
+import { Button } from "@gorth-io/primitive/custom/button"
 import {
   Card,
   CardAction,
@@ -23,7 +23,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@gorth/primitive/default/card"
+} from "@gorth-io/primitive/default/card"
 import {
   Pagination,
   PaginationContent,
@@ -32,7 +32,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@gorth/primitive/default/pagination"
+} from "@gorth-io/primitive/default/pagination"
 import {
   Table,
   TableBody,
@@ -40,11 +40,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@gorth/primitive/default/table"
+} from "@gorth-io/primitive/default/table"
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@gorth/primitive/default/toggle-group"
+} from "@gorth-io/primitive/default/toggle-group"
 import { dataTableFeatures } from "@/utils/data-table-features"
 
 import { recentOrdersColumns } from "./recent-orders-table/columns"

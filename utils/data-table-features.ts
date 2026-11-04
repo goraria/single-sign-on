@@ -19,7 +19,7 @@ import {
   sortFn_datetime,
   sortFn_text,
   tableFeatures,
-} from "@gorth/primitive/cores/tanstack/table"
+} from "@gorth-io/primitive/cores/tanstack/table"
 
 /**
  * Central TanStack Table v9 feature registry for every dashboard data table.
