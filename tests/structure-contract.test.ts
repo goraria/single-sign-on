@@ -11,7 +11,8 @@ const read = (path: string) =>
 const manifest = JSON.parse(read("package.json"))
 
 it("limits the fullstack workspace to the app root, not the archived pkg", () => {
-  expect(read("pnpm-workspace.yaml")).toContain("packages:\n  - .\n")
+  expect(manifest.packageManager).toMatch(/^bun@/)
+  expect(manifest.workspaces).toEqual(["."])
 })
 
 it("keeps Better Auth app-owned and uses public Structure infrastructure exports", () => {

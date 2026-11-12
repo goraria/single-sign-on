@@ -43,7 +43,17 @@ beforeEach(() => {
   state.config.mockClear()
 })
 
+let authority: ReturnType<typeof createFixture> | undefined
 async function fixture() {
+  const instance = await (authority ??= createFixture())
+  vi.stubGlobal("fetch", async (input: string | URL | Request, init?: RequestInit) => {
+    if (String(input).includes("/auth/jwks"))
+      return Response.json(await instance.server.api.getJwks())
+    return nativeFetch(input, init)
+  })
+  return instance
+}
+async function createFixture() {
   const server = betterAuth({
     baseURL: "https://sso.example",
     basePath: "/auth",

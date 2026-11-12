@@ -5,6 +5,7 @@ import type {
 import { adminServices } from "@/utils/constant"
 
 export interface OAuthResourceFormState {
+  application: string
   identifier: string
   name: string
   accessTokenTtl: string
@@ -29,6 +30,7 @@ export function toOAuthResourceFormState(
   resource?: OAuthResource
 ): OAuthResourceFormState {
   return {
+    application: resource?.application ?? "",
     identifier: resource?.identifier ?? "",
     name: resource?.name ?? "",
     accessTokenTtl: resource?.accessTokenTtl?.toString() ?? "",
@@ -55,6 +57,7 @@ export function toOAuthResourcePayload(
   form: OAuthResourceFormState
 ): OAuthResourcePayload {
   return {
+    application: form.application.trim() || null,
     identifier: form.identifier.trim(),
     name: form.name.trim(),
     accessTokenTtl: form.accessTokenTtl.trim()

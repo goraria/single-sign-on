@@ -408,11 +408,12 @@ export async function createOAuthResource(
 ) {
   try {
     if (input.allowedScopes) await assertSupportedScopes(input.allowedScopes)
+    const { application, ...policy } = input
     const created = await (
       await getAuth()
     ).api.adminCreateOAuthResource({
       headers,
-      body: input,
+      body: { ...policy, ...(application ? { metadata: { application } } : {}) },
     })
     return getOAuthResource(created.id)
   } catch (error) {
@@ -435,14 +436,23 @@ export async function updateOAuthResource(
   if (input.identifier !== current.identifier)
     throw createServiceError("resource_identifier_immutable", 400)
   if (input.allowedScopes) await assertSupportedScopes(input.allowedScopes)
-  const { identifier, ...policy } = input
+  const { identifier, application, ...policy } = input
+  const [registration] = application !== undefined
+    ? await database.select({ metadata: oauthResource.metadata }).from(oauthResource)
+        .where(eq(oauthResource.id, id)).limit(1)
+    : []
   try {
     await (
       await getAuth()
     ).api.adminUpdateOAuthResource({
       headers,
       params: { identifier: encodeURIComponent(identifier) },
-      body: policy,
+      body: {
+        ...policy,
+        ...(application !== undefined ? {
+          metadata: { ...(registration?.metadata && typeof registration.metadata === "object" ? registration.metadata : {}), application },
+        } : {}),
+      },
     })
     return getOAuthResource(id)
   } catch (error) {

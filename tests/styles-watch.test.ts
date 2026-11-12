@@ -30,8 +30,8 @@ it("generates app and Primitive styles without watching Next.js build output", a
     expect(directories).toContain(path.join(root, directory))
   }
   expect(
-    directories.some((entry) =>
-      entry.includes("@gorth-io/primitive/src/components")
+    [...directories, ...files].some((entry) =>
+      entry.startsWith(path.dirname(fileURLToPath(import.meta.resolve("@gorth-io/primitive/globals.css"))))
     )
   ).toBe(true)
   for (const utility of [".h-14", ".size-9", ".gap-2", ".rounded-lg"]) {

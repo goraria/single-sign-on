@@ -2,13 +2,13 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   /* config options here */
-  transpilePackages: ["@gorth-io/primitive"],
+  transpilePackages: [""],
 
   devIndicators: false,
   images: {
     remotePatterns: [],
   },
-  allowedDevOrigins: ["192.168.1.37"],
+  allowedDevOrigins: [""],
 }
 
 export default nextConfig

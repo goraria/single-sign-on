@@ -320,6 +320,7 @@ export const adminOAuthResourceListQuerySchema = z.object({
 })
 
 export const adminOAuthResourcePayloadSchema = z.object({
+  application: z.string().trim().min(1).max(64).regex(/^[a-z][a-z0-9-]*$/).nullable().optional(),
   identifier: z
     .string()
     .trim()

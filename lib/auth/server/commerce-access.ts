@@ -37,6 +37,7 @@ export async function requireCommerceUser(request: Request, mutation = false) {
     !clientIdHeader ||
     ![
       "gorth-online-marketplace-solution",
+      "gorth-online-marketplace-solution-local",
       "gorth-restaurant-chain-management-system",
       "gorth-restaurant-chain-management",
     ].includes(clientIdHeader)
@@ -44,7 +45,8 @@ export async function requireCommerceUser(request: Request, mutation = false) {
     throw createServiceError("commerce_client_required", 403)
   await getCommerceRegistration(resource, clientIdHeader)
   const application =
-    clientIdHeader === "gorth-online-marketplace-solution"
+    clientIdHeader === "gorth-online-marketplace-solution" ||
+    clientIdHeader === "gorth-online-marketplace-solution-local"
       ? "marketplace"
       : "restaurant"
   input.authorizationHeader = "Bearer " + input.authorizationHeader.slice(7)
@@ -101,8 +103,8 @@ export function commerceTeamAccess() {
             return ctx.json(
               await updateCommerceTeamRole(
                 ctx.context.session.user.id,
-                ctx.body,
-              ),
+                ctx.body
+              )
             )
           } catch (error) {
             if (error instanceof HTTPException) {
@@ -118,7 +120,7 @@ export function commerceTeamAccess() {
             }
             throw error
           }
-        },
+        }
       ),
     },
   }

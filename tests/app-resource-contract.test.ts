@@ -1,10 +1,8 @@
 import { readFileSync } from "node:fs"
 import { expect, it } from "vitest"
-import {
-  oauthClientResourceSeeds,
-  oauthResourceSeeds,
-} from "@/database/seeds/oauth-resources"
 
+// The bootstrap manifest is historical input, not the production policy.
+// Database-backed client/resource bindings are verified separately against SSO.
 const apps = [
   ["interactive-messaging-portal", "chat"],
   ["video-streaming-platform", "video"],
@@ -15,28 +13,19 @@ const apps = [
 ] as const
 
 for (const [repo, domain] of apps) {
-  it(`${domain} env example requests only registered, linked resources with its API scopes`, () => {
-    const lines = readFileSync(
-      new URL(`../../${repo}/.env.example`, import.meta.url),
-      "utf8"
-    ).split("\n")
-    const resources = lines
-      .filter((line) => /^NEXT_OAUTH_(?:[A-Z]+_)?AUDIENCE=/.test(line))
-      .map((line) => line.slice(line.indexOf("=") + 1))
-      .filter(Boolean)
-    const client = oauthClientResourceSeeds.find(
-      (client) => client.clientId === `gorth-${repo}`
-    )!
-    expect(client).toBeDefined()
-    for (const resource of resources) {
-      const policy = oauthResourceSeeds.find(
-        (policy) => policy.identifier === resource
-      )
-      expect(policy, resource).toBeDefined()
-      expect([...client.resourceIds], resource).toContain(resource)
-      expect(policy!.allowedScopes).toContain(`${domain}:read`)
-      expect(policy!.allowedScopes).toContain(`${domain}:write`)
-      expect(resource).not.toMatch(/:707[2-8]/)
+  it(domain + " resource examples contain exact HTTPS or loopback origins, never API paths or credentials", () => {
+    const lines = readFileSync(new URL("../../" + repo + "/.env.example", import.meta.url), "utf8").split("\n")
+    const resources = lines.filter((line) => /^NEXT_OAUTH_(?:[A-Z]+_)?AUDIENCE=/.test(line))
+      .map((line) => line.slice(line.indexOf("=") + 1)).filter(Boolean)
+    expect(resources.length).toBeGreaterThan(0)
+    expect(resources.every((resource) => resource.length < 2048)).toBe(true)
+    for (const value of resources) {
+      const url = new URL(value)
+      expect(value).toBe(url.origin)
+      expect(url.username || url.password || url.search || url.hash).toBe("")
+      expect(url.protocol === "https:" ||
+        (url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname))).toBe(true)
+      expect(value).not.toMatch(/:707[2-8]/)
     }
   })
 }

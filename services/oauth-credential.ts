@@ -47,7 +47,9 @@ export async function rotateSsoApplicationCredential(
   if (!current.disabled)
     throw createServiceError("disable_unprovisioned_client_first", 409)
   if (
-    current.clientId !== "gorth-media-storage" ||
+    (current.clientId !== "gorth-media-storage" &&
+      !(current.metadata && typeof current.metadata === "object" &&
+        (current.metadata as Record<string, unknown>).registryDraft === true)) ||
     current.grantTypes?.length !== 1 ||
     current.grantTypes[0] !== "client_credentials"
   )
@@ -96,7 +98,9 @@ export async function rotateSsoApplicationCredential(
             ? (current.metadata as Record<string, unknown>)
             : {}),
           credentialProvisioning: false,
-          storageCredentialReader: "commerce-applications",
+          registryRole: current.metadata && typeof current.metadata === "object" &&
+            typeof (current.metadata as Record<string, unknown>).registryRole === "string"
+              ? (current.metadata as Record<string, unknown>).registryRole : current.clientId,
         },
       },
     })

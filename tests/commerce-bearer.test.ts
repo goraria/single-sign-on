@@ -38,12 +38,12 @@ beforeAll(async () => {
 beforeEach(() => {
   registry.mockReset().mockResolvedValue(resource)
   vi.spyOn(globalThis, "fetch").mockResolvedValue(
-    Response.json({ keys: [jwk] }),
+    Response.json({ keys: [jwk] })
   )
 })
 async function request(
   override: Record<string, unknown> = {},
-  headers: Record<string, string | undefined> = {},
+  headers: Record<string, string | undefined> = {}
 ) {
   const now = Math.floor(Date.now() / 1000),
     token = await new SignJWT({
@@ -64,7 +64,7 @@ async function request(
       "x-oauth-resource": resource,
       "x-oauth-client-id": client,
       ...Object.fromEntries(
-        Object.entries(headers).filter(([, v]) => v !== undefined),
+        Object.entries(headers).filter(([, v]) => v !== undefined)
       ),
     } as Record<string, string>,
   })
@@ -75,6 +75,34 @@ it("uses native Better Auth verification and exact persisted client/resource", a
     resource,
   })
   expect(registry).toHaveBeenCalledWith(resource, client)
+})
+it("accepts the exact local Marketplace client without classifying it as Restaurant", async () => {
+  const local = client + "-local"
+  expect(
+    await requireCommerceUser(
+      await request({ client_id: local }, { "x-oauth-client-id": local })
+    )
+  ).toMatchObject({ subject, resource })
+  expect(registry).toHaveBeenCalledWith(resource, local)
+  await expect(
+    requireCommerceUser(
+      await request(
+        { client_id: local, scope: "restaurant:read" },
+        { "x-oauth-client-id": local }
+      )
+    )
+  ).rejects.toBeDefined()
+  await expect(
+    requireCommerceUser(await request({ client_id: local }))
+  ).rejects.toBeDefined()
+  await expect(
+    requireCommerceUser(
+      await request(
+        { client_id: local + "-attacker" },
+        { "x-oauth-client-id": local + "-attacker" }
+      )
+    )
+  ).rejects.toMatchObject({ status: 403 })
 })
 it.each([
   { aud: "https://other.test" },
@@ -93,7 +121,7 @@ it.each([
   { "sec-fetch-site": "same-origin" },
 ])("denies browser/cookie access %j", async (headers) => {
   await expect(
-    requireCommerceUser(await request({}, headers)),
+    requireCommerceUser(await request({}, headers))
   ).rejects.toMatchObject({ status: 403 })
   expect(registry).not.toHaveBeenCalled()
 })

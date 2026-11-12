@@ -654,6 +654,19 @@ export function OAuthResourceForm({ resource }: { resource?: OAuthResource }) {
                 onChange={(event) => update("name", event.target.value)}
               />
             </TextField>
+            <TextField label="Directory application key" id="resource-application">
+              <Input
+                id="resource-application"
+                value={form.application}
+                maxLength={64}
+                placeholder="shared-payment-gateway"
+                onChange={(event) => update("application", event.target.value)}
+              />
+            </TextField>
+            <p className="text-sm text-muted-foreground">
+              Services resolve this resource through SSO using its directory key.
+              Changing it affects routing; it does not grant client permissions.
+            </p>
             <TextField
               label="Audience / resource identifier"
               id="resource-identifier"

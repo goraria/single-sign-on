@@ -115,6 +115,16 @@ it("rotates an existing credential natively without changing its client ID or re
   expect(mocks.create).not.toHaveBeenCalled()
   expect(mocks.remove).not.toHaveBeenCalled()
 })
+it("provisions an explicitly marked per-service draft while preserving its own scope ceiling", async () => {
+  mocks.current.clientId = "gorth-payment-backend-local"
+  mocks.current.metadata = { registryDraft: true, purpose: "payment-backend" }
+  mocks.current.scopes = ["commerce:payment:sync"]
+  mocks.current.clientCredentialsScopes = ["commerce:payment:sync"]
+  await rotateSsoApplicationCredential("draft", new Headers())
+  expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({
+    body: expect.objectContaining({ client_credentials_scopes: ["commerce:payment:sync"] }),
+  }))
+})
 it("serializes provisioning attempts and refuses to return another request's credential", async () => {
   mocks.updates = [[]]
   await expect(

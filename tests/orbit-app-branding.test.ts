@@ -4,7 +4,7 @@ import { authOrbitData } from "@/utils/constant"
 
 it("uses each app's canonical name, Lucide icon and professional background in the orbit", () => {
   expect(authOrbitData.navSecondary).toEqual([
-    { title: "GorCer", url: "", icon: MessageCircle, description: "var(--professional-main)" },
+    { title: "GorCer", url: "", icon: MessageCircle, description: "var(--professional-secondary)" },
     { title: "GorBox", url: "", icon: Clapperboard, description: "var(--professional-primary-4)" },
     { title: "GorDex", url: "", icon: LibraryBig, description: "var(--professional-primary-2)" },
     { title: "GorMea", url: "", icon: SatelliteDish, description: "var(--professional-primary-5)" },

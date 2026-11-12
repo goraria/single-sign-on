@@ -156,6 +156,7 @@ export interface OAuthResource {
 }
 
 export interface OAuthResourcePayload {
+  application?: string | null
   identifier: string
   name: string
   accessTokenTtl: number | null
