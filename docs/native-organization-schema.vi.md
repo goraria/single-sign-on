@@ -2,18 +2,24 @@
 
 Ngày áp cloud: 2026-11-04. Better Auth đang cài: **1.7.13**. Phạm vi: SSO; không sửa các app, Commerce, package hoặc lockfile.
 
+Cập nhật 2026-11-13 (Better Auth 1.7.21): đã đổi tên vật lý `teamMember` thành `team_member` trên cloud bằng `database/migrations/20261113-team-member-snake-case.sql`. Chỉ rename bảng/index, giữ khóa ngoại và dữ liệu; preflight có 0 hàng. Runner `bun database/migrate-team-member.mjs --apply` kiểm tra fingerprint và chạy lại an toàn. Migration lịch sử phía dưới vẫn mô tả cutover ngày 04/11, không chạy lại riêng sau rename này.
+
+Cloud test: `bun --env-file=.env.local run test -- --config vitest.team-member.cloud.config.ts --configLoader native`. Bun nạp env trực tiếp cho tiến trình vì Next bỏ qua .env.local khi NODE_ENV=test; không in credentials.
+
+Kết quả 13/11: migration đã COMMIT lên Neon; typecheck passed; 42 test liên quan passed; 6 test cloud passed, gồm native Organization API với nhiều team/role và migration chạy lại không đổi dữ liệu. Cần restart/deploy code SSO mới để khớp tên bảng trên cloud.
+
 ## Schema hiện tại
 
 | Trước | Sau |
 |---|---|
 | `auth_team` đang được plugin sử dụng | `team` |
-| `auth_team_member` đang được plugin sử dụng | `teamMember` |
+| `auth_team_member` → `teamMember` ngày 04/11 | `team_member` từ 13/11 |
 | `team`, `team_member` legacy | Đã bỏ, vì cả hai bảng trống tại preflight và tại transaction áp migration |
 | `authentication_event` | `event_log` |
 | `authentication_event_type_enum` | `event_log_type_enum` |
 | `invitation.team_id`: UUID + FK đơn | TEXT nullable, theo cách native lưu một hoặc nhiều team ID |
 
-Hai model `team`/`teamMember` trong `betterAuthSchema` trỏ tới đúng bảng cùng tên; không cấu hình alias `modelName` cho team. Tên cột vẫn theo quy ước snake_case hiện có của toàn DB. Vì tên vật lý `teamMember` có chữ hoa, raw SQL phải dùng `"teamMember"`; Drizzle tự quote đúng tên.
+Model `teamMember` trong `betterAuthSchema` giữ nguyên tên native Better Auth, còn đối tượng Drizzle trỏ tới bảng vật lý `team_member`. `team` vẫn trỏ tới `team`. Không đổi `modelName` plugin hoặc tên field; các câu raw SQL quyền/thông báo và fixture cloud đã dùng `team_member`.
 
 Giữ `teamMember.role` mở rộng, mặc định `member`, các ràng buộc role và logic cấp quyền Commerce hiện có. Cập nhật các query quyền, fixture cloud và relations sang bảng mới. Bỏ relation invitation–team đơn vì một trường TEXT có thể chứa nhiều ID.
 

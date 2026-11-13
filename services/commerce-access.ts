@@ -1,6 +1,7 @@
 import "server-only"
 import { sql } from "drizzle-orm"
 import { database } from "@/database"
+import { resolveCommerceClientApplication } from "@/utils/commerce-client-application"
 import { createServiceError } from "@/services/helper"
 import {
   teamBusinessActions,
@@ -27,11 +28,13 @@ export async function getCommerceRegistration(
   clientId: string
 ) {
   const r = await database.execute(
-    sql`SELECT r.identifier FROM oauth_resource r JOIN oauth_client_resource cr ON cr.resource_id=r.identifier JOIN oauth_client c ON c.client_id=cr.client_id WHERE r.identifier=${resource} AND r.metadata->>'application'='commerce' AND NOT r.disabled AND c.client_id=${clientId} AND NOT c.disabled`
+    sql`SELECT r.identifier,c.metadata,c.scopes,c.reference_id AS "referenceId" FROM oauth_resource r JOIN oauth_client_resource cr ON cr.resource_id=r.identifier JOIN oauth_client c ON c.client_id=cr.client_id WHERE r.identifier=${resource} AND r.metadata->>'application'='commerce' AND NOT r.disabled AND c.client_id=${clientId} AND NOT c.disabled`
   )
   if (r.rows.length !== 1)
     throw createServiceError("commerce_registration_required", 403)
-  return resource
+  const application = resolveCommerceClientApplication(r.rows[0] as unknown as Parameters<typeof resolveCommerceClientApplication>[0])
+  if (!application) throw createServiceError("commerce_client_required", 403)
+  return application
 }
 export async function getCommerceAuthorization(
   subject: string,
@@ -42,7 +45,7 @@ export async function getCommerceAuthorization(
   )
   if (!active.rows.length) throw createServiceError("inactive_user", 403)
   const result = await database.execute(
-    sql`SELECT m.organization_id,m.role org_role,t.id team_id,tm.role team_role FROM member m JOIN "user" u ON u.id=m.user_id AND u.status='active' AND (NOT u.banned OR (u.ban_expires IS NOT NULL AND u.ban_expires<=now())) LEFT JOIN team t ON t.organization_id=m.organization_id LEFT JOIN "teamMember" tm ON tm.team_id=t.id AND tm.user_id=m.user_id WHERE m.user_id=${subject}::uuid ORDER BY m.organization_id,t.id LIMIT 1001`
+    sql`SELECT m.organization_id,m.role org_role,t.id team_id,tm.role team_role FROM member m JOIN "user" u ON u.id=m.user_id AND u.status='active' AND (NOT u.banned OR (u.ban_expires IS NOT NULL AND u.ban_expires<=now())) LEFT JOIN team t ON t.organization_id=m.organization_id LEFT JOIN team_member tm ON tm.team_id=t.id AND tm.user_id=m.user_id WHERE m.user_id=${subject}::uuid ORDER BY m.organization_id,t.id LIMIT 1001`
   )
   if (result.rows.length > 1000)
     throw createServiceError("commerce_authorization_limit", 503)
@@ -94,7 +97,7 @@ export async function updateCommerceTeamRole(
     const org = team.rows[0]?.organization_id
     if (typeof org !== "string") throw createServiceError("team_not_found", 404)
     const caller = await tx.execute(
-      sql`SELECT m.role,tm.role team_role FROM member m JOIN "user" u ON u.id=m.user_id AND u.status='active' AND (NOT u.banned OR (u.ban_expires IS NOT NULL AND u.ban_expires<=now())) LEFT JOIN "teamMember" tm ON tm.user_id=m.user_id AND tm.team_id=${p.teamId}::uuid WHERE m.organization_id=${org}::uuid AND m.user_id=${callerId}::uuid FOR SHARE OF m,u`
+      sql`SELECT m.role,tm.role team_role FROM member m JOIN "user" u ON u.id=m.user_id AND u.status='active' AND (NOT u.banned OR (u.ban_expires IS NOT NULL AND u.ban_expires<=now())) LEFT JOIN team_member tm ON tm.user_id=m.user_id AND tm.team_id=${p.teamId}::uuid WHERE m.organization_id=${org}::uuid AND m.user_id=${callerId}::uuid FOR SHARE OF m,u`
     )
     const role = caller.rows[0]
     const admin =
@@ -105,7 +108,7 @@ export async function updateCommerceTeamRole(
     if (!admin && role?.team_role !== "manager")
       throw createServiceError("team_permission_denied", 403)
     const target = await tx.execute(
-      sql`SELECT tm.id,tm.role,m.role org_role FROM "teamMember" tm JOIN member m ON m.organization_id=${org}::uuid AND m.user_id=tm.user_id WHERE tm.team_id=${p.teamId}::uuid AND tm.user_id=${p.userId}::uuid FOR UPDATE OF tm`
+      sql`SELECT tm.id,tm.role,m.role org_role FROM team_member tm JOIN member m ON m.organization_id=${org}::uuid AND m.user_id=tm.user_id WHERE tm.team_id=${p.teamId}::uuid AND tm.user_id=${p.userId}::uuid FOR UPDATE OF tm`
     )
     const old = target.rows[0]
     if (!old) throw createServiceError("team_member_not_found", 404)
@@ -117,7 +120,7 @@ export async function updateCommerceTeamRole(
     )
       throw createServiceError("org_admin_required", 403)
     await tx.execute(
-      sql`UPDATE "teamMember" SET role=${p.role} WHERE id=${old.id}::uuid`
+      sql`UPDATE team_member SET role=${p.role} WHERE id=${old.id}::uuid`
     )
     await tx.execute(
       sql`INSERT INTO audit_log(actor_user_id,action,outcome,resource_type,resource_id,metadata) VALUES(${callerId}::uuid,'commerce.team-role.update','success','team-member',${String(old.id)},${JSON.stringify({ teamId: p.teamId, userId: p.userId, previousRole: old.role, role: p.role })}::jsonb)`

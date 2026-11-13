@@ -115,7 +115,7 @@ it("native Organization APIs create teams in the final two tables", async () => 
   expect(
     (
       await db.pool.query(
-        "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN('auth_team','auth_team_member','team_member','authentication_event')",
+        "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN('auth_team','auth_team_member','teamMember','authentication_event')",
       )
     ).rows,
   ).toEqual([])
@@ -147,7 +147,7 @@ it("native acceptance creates both memberships with the default member role", as
     body: { invitationId: inviteId },
   })
   const r = await db.pool.query(
-    'SELECT team_id,role,membership_key FROM "teamMember" WHERE user_id=$1 AND team_id=ANY($2::uuid[])',
+    'SELECT team_id,role,membership_key FROM team_member WHERE user_id=$1 AND team_id=ANY($2::uuid[])',
     [inviteeId, [teamA, teamB]],
   )
   expect(r.rows).toHaveLength(2)

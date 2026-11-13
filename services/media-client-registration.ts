@@ -64,7 +64,7 @@ export async function registerMediaStorageClient(headers: Headers) {
     headers,
     body: {
       client_name: "Media storage credential reader",
-      token_endpoint_auth_method: "client_secret_post",
+      token_endpoint_auth_method: "client_secret_basic",
       grant_types: ["client_credentials"],
       client_credentials_scopes: ["storage:sso:credential"],
       metadata: { purpose: "media-storage-credential-reader" },

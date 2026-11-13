@@ -14,12 +14,11 @@ export async function rotateSsoApplicationCredential(
   headers: Headers
 ) {
   const current = await checkSsoApplicationExists(id)
+  const replacingPost = current.tokenEndpointAuthMethod === "client_secret_post"
   if (
     current.referenceId !== oauthManagementReference ||
     current.public ||
-    !["client_secret_post", "client_secret_basic"].includes(
-      current.tokenEndpointAuthMethod ?? ""
-    )
+    (!replacingPost && current.tokenEndpointAuthMethod !== "client_secret_basic")
   )
     throw createServiceError("managed_confidential_client_required", 403)
   const auth = await getAuth()
@@ -31,7 +30,7 @@ export async function rotateSsoApplicationCredential(
     .where(eq(oauthClient.id, id))
     .limit(1)
   if (!credential) throw createServiceError("client_not_found", 404)
-  if (credential.present) {
+  if (credential.present && !replacingPost) {
     const result = await auth.api.rotateClientSecret({
       headers,
       body: { client_id: current.clientId },
@@ -44,14 +43,14 @@ export async function rotateSsoApplicationCredential(
   }
   // Register a disabled draft through the provider. Never invent a secret/hash
   // to make a registry draft look like an already provisioned OAuth client.
-  if (!current.disabled)
+  if (!replacingPost && !current.disabled)
     throw createServiceError("disable_unprovisioned_client_first", 409)
   if (
-    (current.clientId !== "gorth-media-storage" &&
+    !replacingPost && ((current.clientId !== "gorth-media-storage" &&
       !(current.metadata && typeof current.metadata === "object" &&
         (current.metadata as Record<string, unknown>).registryDraft === true)) ||
     current.grantTypes?.length !== 1 ||
-    current.grantTypes[0] !== "client_credentials"
+    current.grantTypes[0] !== "client_credentials")
   )
     throw createServiceError("native_machine_registration_draft_required", 409)
   const links = await database
@@ -66,8 +65,7 @@ export async function rotateSsoApplicationCredential(
     .where(
       and(
         eq(oauthClient.id, id),
-        eq(oauthClient.disabled, true),
-        isNull(oauthClient.clientSecret),
+        ...(!replacingPost ? [eq(oauthClient.disabled, true), isNull(oauthClient.clientSecret)] : []),
         sql`coalesce(${oauthClient.metadata}->>'credentialProvisioning','false')<>'true'`
       )
     )
@@ -81,13 +79,21 @@ export async function rotateSsoApplicationCredential(
       headers,
       body: {
         client_name: current.name ?? current.clientId,
-        token_endpoint_auth_method: current.tokenEndpointAuthMethod as
-          "client_secret_post" | "client_secret_basic",
+        token_endpoint_auth_method: "client_secret_basic",
         grant_types: current.grantTypes ?? ["client_credentials"],
         response_types: current.responseTypes ?? [],
         scope: (current.scopes ?? []).join(" "),
         client_credentials_scopes: current.clientCredentialsScopes,
         resources: links.map((r) => r.identifier),
+        require_pkce: current.requirePKCE ?? true,
+        ...(current.uri ? { client_uri: current.uri } : {}),
+        ...(current.icon ? { logo_uri: current.icon } : {}),
+        ...(current.postLogoutRedirectUris?.length
+          ? { post_logout_redirect_uris: current.postLogoutRedirectUris } : {}),
+        ...(current.backchannelLogoutUri ? {
+          backchannel_logout_uri: current.backchannelLogoutUri,
+          backchannel_logout_session_required: true,
+        } : {}),
         ...(current.redirectUris.length
           ? { redirect_uris: current.redirectUris }
           : {}),
@@ -111,10 +117,15 @@ export async function rotateSsoApplicationCredential(
       .returning({ id: oauthClient.id })
     if (!registered || !created.client_secret)
       throw createServiceError("credential_provisioning_failed", 503)
-    await auth.api.deleteOAuthClient({
-      headers,
-      body: { client_id: current.clientId },
-    })
+    // Never change a registered Post client's auth method/secret in place.
+    // Keep it working until the operator configures and verifies the Basic replacement.
+    if (replacingPost) {
+      await database.update(oauthClient)
+        .set({ metadata: sql`${oauthClient.metadata}-'credentialProvisioning'` })
+        .where(eq(oauthClient.id, id))
+    } else {
+      await auth.api.deleteOAuthClient({ headers, body: { client_id: current.clientId } })
+    }
     return {
       id: registered.id,
       clientId: created.client_id,

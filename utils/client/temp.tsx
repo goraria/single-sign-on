@@ -4,6 +4,7 @@ import type {
 } from "@/services/client/admin"
 
 export interface SsoApplicationFormState {
+  commerceApplication?: "marketplace" | "restaurant" | null
   id: string
   clientId: string
   name: string
@@ -63,6 +64,7 @@ export function toSsoApplicationFormState(
 ): SsoApplicationFormState {
   return {
     id: application.id,
+    commerceApplication: application.commerceApplication ?? null,
     clientId: application.clientId,
     name: application.name,
     environment: application.environment ?? "production",
@@ -88,7 +90,9 @@ export function toSsoApplicationPayload(
   form: SsoApplicationFormState
 ): SsoApplicationPayload {
   return {
+    ...(form.clientId.trim() ? { clientId: form.clientId.trim() } : {}),
     name: form.name.trim(),
+    commerceApplication: form.commerceApplication ?? null,
     environment: form.environment,
     description: form.description.trim() || null,
     homepageUrl: form.homepageUrl.trim() || null,

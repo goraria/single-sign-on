@@ -488,7 +488,7 @@ export const team = pgTable(
 )
 
 export const teamMember = pgTable(
-  "teamMember",
+  "team_member",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     teamId: uuid("team_id")
@@ -502,8 +502,8 @@ export const teamMember = pgTable(
     createdAt: timestamp("created_at", timestampConfig).defaultNow(),
   },
   (table) => [
-    index("teamMember_team_id_idx").on(table.teamId),
-    index("teamMember_user_id_idx").on(table.userId),
+    index("team_member_team_id_idx").on(table.teamId),
+    index("team_member_user_id_idx").on(table.userId),
   ]
 )
 

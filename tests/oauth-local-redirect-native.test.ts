@@ -4,6 +4,7 @@ import { betterAuth } from "better-auth"
 import { memoryAdapter } from "better-auth/adapters/memory"
 import { jwt } from "better-auth/plugins/jwt"
 import { oauthProvider } from "@better-auth/oauth-provider"
+import { allowLocalAppRedirect } from "@/utils/oauth-local-redirect"
 
 const issuer = "https://sso-redirect.fixture.test"
 const local = "http://localhost:3030/auth/callback/gorth"
@@ -47,6 +48,7 @@ function fixture() {
         loginPage: "/auth/sign-in",
         consentPage: "/auth/consent",
         scopes: ["openid"],
+        allowInsecureRedirectUri: allowLocalAppRedirect,
       }),
     ],
     logger: { disabled: true },

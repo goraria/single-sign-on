@@ -1,7 +1,19 @@
 "use client"
 
-import { type FormEvent, useMemo, useState } from "react"
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "@gorth-io/primitive/custom/toast"
 import { useRouter } from "next/navigation"
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+  InputGroupButton,
+} from "@gorth-io/primitive/default/input-group"
+import {
+  handoffOAuthCredential,
+  readOAuthCredential,
+  forgetOAuthCredential,
+} from "@/utils/client/oauth-credential-handoff"
 import { Button } from "@gorth-io/primitive/custom/button"
 import { Badge } from "@gorth-io/primitive/custom/badge"
 import {
@@ -45,9 +57,17 @@ import {
   TableRow,
 } from "@gorth-io/primitive/default/table"
 import { Textarea } from "@gorth-io/primitive/default/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@gorth-io/primitive/default/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@gorth-io/primitive/default/dialog"
 import {
   Check,
+  Copy,
+  RefreshCw,
   ChevronDown,
   Plus,
   Trash2,
@@ -97,9 +117,9 @@ const emptyApplication: SsoApplicationFormState = {
   scopes: ["openid", "profile", "email", "offline_access"],
   grantTypes: ["authorization_code", "refresh_token"],
   responseTypes: ["code"],
-  public: true,
+  public: false,
   requirePKCE: true,
-  tokenEndpointAuthMethod: "none",
+  tokenEndpointAuthMethod: "client_secret_basic",
   skipConsent: true,
   disabled: false,
 }
@@ -112,11 +132,7 @@ const grantTypeOptions = [
 
 const responseTypeOptions = ["code"] as const
 
-const tokenEndpointAuthMethodOptions = [
-  "none",
-  "client_secret_basic",
-  "client_secret_post",
-] as const
+const tokenEndpointAuthMethodOptions = ["none", "client_secret_basic"] as const
 
 export function ApplicationEditor({ id }: { id: string }) {
   const applicationQuery = useSsoApplicationQuery(id)
@@ -149,30 +165,75 @@ export function ApplicationForm({
     id: string
     clientId?: string
     secret: string
-  } | null>(null)
+  } | null>(() => (application ? readOAuthCredential(application.id) : null))
+  const [copied, setCopied] = useState({ id: false, secret: false })
+  const copyTimers = useRef<Partial<Record<"id" | "secret", ReturnType<typeof setTimeout>>>>({})
+  useEffect(() => () => {
+    for (const timer of Object.values(copyTimers.current)) clearTimeout(timer)
+  }, [])
+  useEffect(() => {
+    if (application) forgetOAuthCredential(application.id)
+  }, [application?.id])
+  const changed =
+    !application ||
+    JSON.stringify(toSsoApplicationPayload(form)) !==
+      JSON.stringify(
+        toSsoApplicationPayload(toSsoApplicationFormState(application))
+      )
+  const copy = async (value: string, field: "id" | "secret") => {
+    try {
+      await navigator.clipboard.writeText(value)
+      clearTimeout(copyTimers.current[field])
+      setCopied(current => ({ ...current, [field]: true }))
+      // Match the existing Base UI toast provider's default timeout.
+      copyTimers.current[field] = setTimeout(() => {
+        setCopied(current => ({ ...current, [field]: false }))
+      }, 5000)
+    } catch {
+      toast.add({ type: "error", description: "Unable to copy to clipboard. Please try again." })
+    }
+  }
   const [adopt, adoption] = useAdoptOAuthClientMutation()
   const [createApplication, createResult] = useCreateSsoApplicationMutation()
-  const [rotateCredential, rotateResult] = useRotateSsoApplicationCredentialMutation()
+  const [rotateCredential, rotateResult] =
+    useRotateSsoApplicationCredentialMutation()
   const [confirmRotation, setConfirmRotation] = useState(false)
   const [updateApplication, updateResult] = useUpdateSsoApplicationMutation()
   const [deleteApplication, deleteResult] = useDeleteSsoApplicationMutation()
   const saving =
-    createResult.isLoading || updateResult.isLoading || deleteResult.isLoading || rotateResult.isLoading
-  const error = createResult.error ?? updateResult.error ?? deleteResult.error ?? rotateResult.error
+    createResult.isLoading ||
+    updateResult.isLoading ||
+    deleteResult.isLoading ||
+    rotateResult.isLoading
+  const error =
+    createResult.error ??
+    updateResult.error ??
+    deleteResult.error ??
+    rotateResult.error
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (createdCredential) return
+    if (saving || !changed) return
     try {
       const payload = toSsoApplicationPayload(form)
       const saved = application
         ? await updateApplication({ id: application.id, payload }).unwrap()
         : await createApplication(payload).unwrap()
       if (saved.clientSecret) {
-        setCreatedCredential({ id: saved.id, clientId: saved.clientId, secret: saved.clientSecret })
+        handoffOAuthCredential({
+          id: saved.id,
+          clientId: saved.clientId,
+          secret: saved.clientSecret,
+        })
+        router.replace(`${oauthAdminPaths.client}/edit/${saved.id}`)
         return
       }
-      router.replace(`${oauthAdminPaths.client}/edit/${saved.id}`)
+      router.replace(
+        application
+          ? oauthAdminPaths.client
+          : `${oauthAdminPaths.client}/edit/${saved.id}`
+      )
+      if (application) toast.add({ type: "success", description: "OAuth client updated successfully." })
       router.refresh()
     } catch {
       // Caller exposes the normalized error through the mutation result.
@@ -189,6 +250,7 @@ export function ApplicationForm({
       return
     try {
       await deleteApplication(application.id).unwrap()
+      toast.add({ type: "success", description: "OAuth client deleted successfully." })
       router.replace(oauthAdminPaths.client)
       router.refresh()
     } catch {
@@ -200,6 +262,7 @@ export function ApplicationForm({
     key: Key,
     value: SsoApplicationFormState[Key]
   ) {
+    if (key === "clientId") setCopied(current => ({ ...current, id: false }))
     setForm((current) => ({ ...current, [key]: value }))
   }
 
@@ -250,13 +313,23 @@ export function ApplicationForm({
                 Delete
               </Button>
             ) : null}
-            {application && ["client_secret_post", "client_secret_basic"].includes(application.tokenEndpointAuthMethod) && !createdCredential && (
-              <Button type="button" variant="outline" disabled={saving || !application.centrallyManaged} onClick={() => setConfirmRotation(true)}>Generate / rotate secret</Button>
-            )}
-            <Button
-              type="submit"
-              disabled={saving || Boolean(createdCredential)}
-            >
+            {application &&
+              ["client_secret_basic", "client_secret_post"].includes(
+                application.tokenEndpointAuthMethod
+              ) &&
+              !createdCredential && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={saving || !application.centrallyManaged}
+                  onClick={() => setConfirmRotation(true)}
+                >
+                  {application.tokenEndpointAuthMethod === "client_secret_post"
+                    ? "Create Basic replacement"
+                    : "Generate / rotate secret"}
+                </Button>
+              )}
+            <Button type="submit" disabled={saving || !changed}>
               {saving
                 ? "Saving..."
                 : application
@@ -272,46 +345,59 @@ export function ApplicationForm({
           </div>
         ) : null}
 
-        {createdCredential ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Save the client secret</CardTitle>
-              <CardDescription>
-                This credential is shown once. Store it in the application
-                server secret manager before continuing.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              {createdCredential.clientId && <Input aria-label="OAuth client ID" readOnly value={createdCredential.clientId} />}
-              <Input
-                aria-label="New client secret"
-                readOnly
-                value={createdCredential.secret}
-                autoComplete="off"
-              />
-              <Button
-                type="button"
-                onClick={() =>
-                  router.replace(
-                    `${oauthAdminPaths.client}/edit/${createdCredential.id}`
-                  )
+        <Dialog
+          open={confirmRotation}
+          onOpenChange={(open) => !saving && setConfirmRotation(open)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {application?.tokenEndpointAuthMethod === "client_secret_post"
+                  ? "Create a Basic replacement client?"
+                  : "Generate a new client secret?"}
+              </DialogTitle>
+              <DialogDescription>
+                {application?.tokenEndpointAuthMethod === "client_secret_post"
+                  ? "A new disabled Basic client will copy this client's scopes, resource links and callbacks. The old client remains unchanged. Save the new ID/secret, configure its exact service bindings and backend, then enable the replacement."
+                  : "The current credential will stop working. The new secret is shown once; copy it to the service backend before enabling the client."}
+              </DialogDescription>
+            </DialogHeader>
+            <Button
+              type="button"
+              disabled={saving}
+              onClick={async () => {
+                if (!application) return
+                try {
+                  const result = await rotateCredential({
+                    id: application.id,
+                  }).unwrap()
+                  clearTimeout(copyTimers.current.secret)
+                  setCopied(current => ({ ...current, secret: false }))
+                  if (result.id !== application.id) {
+                    handoffOAuthCredential({
+                      id: result.id,
+                      clientId: result.clientId,
+                      secret: result.clientSecret,
+                    })
+                    router.replace(
+                      `${oauthAdminPaths.client}/edit/${result.id}`
+                    )
+                  } else
+                    setCreatedCredential({
+                      id: result.id,
+                      clientId: result.clientId,
+                      secret: result.clientSecret,
+                    })
+                  setConfirmRotation(false)
+                } catch {
+                  /* The caller exposes the normalized native error. */
                 }
-              >
-                Continue to client settings
-              </Button>
-            </CardContent>
-          </Card>
-        ) : null}
-        <Dialog open={confirmRotation} onOpenChange={open => !saving && setConfirmRotation(open)}>
-          <DialogContent><DialogHeader><DialogTitle>Generate a new client secret?</DialogTitle><DialogDescription>The current credential will stop working. The new secret is shown once; copy it to the service backend before enabling the client.</DialogDescription></DialogHeader>
-            <Button type="button" disabled={saving} onClick={async () => {
-              if (!application) return
-              try {
-                const result = await rotateCredential({ id: application.id }).unwrap()
-                setCreatedCredential({ id: result.id, clientId: result.clientId, secret: result.clientSecret })
-                setConfirmRotation(false)
-              } catch { /* The caller exposes the normalized native error. */ }
-            }}>Confirm rotation</Button>
+              }}
+            >
+              {application?.tokenEndpointAuthMethod === "client_secret_post"
+                ? "Create replacement"
+                : "Confirm rotation"}
+            </Button>
           </DialogContent>
         </Dialog>
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]">
@@ -347,40 +433,118 @@ export function ApplicationForm({
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-2">
-                <TextField label="Client ID">
-                  <Input
-                    value={form.clientId}
-                    placeholder="Generated by Better Auth"
-                    disabled
-                  />
-                </TextField>
-                <TextField label="Environment">
-                  <Select
-                    value={form.environment}
-                    onValueChange={(value) =>
-                      update(
-                        "environment",
-                        value === "local" ? "local" : "production"
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="production">Production</SelectItem>
-                        <SelectItem value="local">Local</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </TextField>
+                <div className="grid gap-4 md:col-span-2 md:grid-cols-5">
+                  <div className="md:col-span-2">
+                    <TextField label="Client ID">
+                      <InputGroup>
+                        <InputGroupInput
+                          aria-label="Client ID"
+                          value={form.clientId}
+                          readOnly={Boolean(application)}
+                          placeholder="Choose an ID or generate one"
+                          onChange={(event) =>
+                            update("clientId", event.target.value)
+                          }
+                        />
+                        <InputGroupAddon align="inline-end">
+                          {!application && (
+                            <InputGroupButton
+                              size="icon-xs"
+                              aria-label="Generate client ID"
+                              onClick={() =>
+                                update(
+                                  "clientId",
+                                  crypto.randomUUID().replaceAll("-", "")
+                                )
+                              }
+                            >
+                              <RefreshCw className="size-4" />
+                            </InputGroupButton>
+                          )}
+                          <InputGroupButton
+                            size="icon-xs"
+                            aria-label={copied.id ? "Client ID copied" : "Copy client ID"}
+                            disabled={!form.clientId}
+                            onClick={() => void copy(form.clientId, "id")}
+                          >
+                            {copied.id ? <Check className="size-4" /> : <Copy className="size-4" />}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </TextField>
+                  </div>
+                  <div className="md:col-span-2">
+                    <TextField label="Client secret">
+                      <InputGroup>
+                        <InputGroupInput
+                          aria-label="Client secret"
+                          disabled
+                          autoComplete="off"
+                          value={
+                            createdCredential?.secret ??
+                            (application && !application.public ? "*****" : "")
+                          }
+                          placeholder="Generated after creation"
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupButton
+                            size="icon-xs"
+                            aria-label={copied.secret ? "Client secret copied" : "Copy client secret"}
+                            disabled={!createdCredential?.secret}
+                            title={
+                              createdCredential?.secret
+                                ? "Copy secret"
+                                : "Rotate to obtain a new secret"
+                            }
+                            onClick={() =>
+                              createdCredential &&
+                              void copy(createdCredential.secret, "secret")
+                            }
+                          >
+                            {copied.secret ? <Check className="size-4" /> : <Copy className="size-4" />}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </TextField>
+                  </div>
+                  <TextField label="Environment">
+                    <Select
+                      value={form.environment}
+                      onValueChange={(value) =>
+                        update(
+                          "environment",
+                          value === "local" ? "local" : "production"
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="production">Production</SelectItem>
+                          <SelectItem value="local">Local</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </TextField>
+                </div>
                 <TextField label="Name">
                   <Input
                     value={form.name}
                     onChange={(event) => update("name", event.target.value)}
                     required
                   />
+                </TextField>
+                <TextField label="Commerce application">
+                  <Select value={form.commerceApplication ?? "auto"} onValueChange={value => update("commerceApplication", value === "marketplace" || value === "restaurant" ? value : null)}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent><SelectGroup>
+                      <SelectItem value="auto">Auto from registered scopes</SelectItem>
+                      <SelectItem value="marketplace">Marketplace</SelectItem>
+                      <SelectItem value="restaurant">Restaurant</SelectItem>
+                    </SelectGroup></SelectContent>
+                  </Select>
                 </TextField>
                 <TextField label="Homepage URL">
                   <Input
@@ -488,7 +652,10 @@ export function ApplicationForm({
                 <Select
                   value={form.tokenEndpointAuthMethod}
                   onValueChange={(value) => {
-                    update("tokenEndpointAuthMethod", value ?? "none")
+                    update(
+                      "tokenEndpointAuthMethod",
+                      value ?? "client_secret_basic"
+                    )
                     update("public", value === "none")
                   }}
                   disabled={Boolean(application)}
@@ -498,6 +665,13 @@ export function ApplicationForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
+                      {application?.tokenEndpointAuthMethod ===
+                        "client_secret_post" && (
+                        <SelectItem value="client_secret_post" disabled>
+                          client_secret_post (legacy; create a Basic
+                          replacement)
+                        </SelectItem>
+                      )}
                       {tokenEndpointAuthMethodOptions.map((option) => (
                         <SelectItem key={option} value={option}>
                           {option}
@@ -654,7 +828,10 @@ export function OAuthResourceForm({ resource }: { resource?: OAuthResource }) {
                 onChange={(event) => update("name", event.target.value)}
               />
             </TextField>
-            <TextField label="Directory application key" id="resource-application">
+            <TextField
+              label="Directory application key"
+              id="resource-application"
+            >
               <Input
                 id="resource-application"
                 value={form.application}
@@ -664,8 +841,9 @@ export function OAuthResourceForm({ resource }: { resource?: OAuthResource }) {
               />
             </TextField>
             <p className="text-sm text-muted-foreground">
-              Services resolve this resource through SSO using its directory key.
-              Changing it affects routing; it does not grant client permissions.
+              Services resolve this resource through SSO using its directory
+              key. Changing it affects routing; it does not grant client
+              permissions.
             </p>
             <TextField
               label="Audience / resource identifier"

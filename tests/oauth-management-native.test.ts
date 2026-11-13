@@ -25,6 +25,7 @@ vi.mock("@/services/audit", () => ({
   newAuditRequestId: () => "fixture",
 }))
 import { createAuth } from "@/lib/auth/server/index"
+import { withRequestedOAuthClientId } from "@/utils/oauth-client-credentials"
 
 it("uses DB-supplied scopes and native shared ownership, exact redirects and per-client resource links", async () => {
   const scopes = [
@@ -88,6 +89,18 @@ it("uses DB-supplied scopes and native shared ownership, exact redirects and per
       skip_consent: true,
     },
   })
+  const createChosen = () => withRequestedOAuthClientId("admin-selected-fixture", () => auth.api.adminCreateOAuthClient({
+    headers,
+    body: { client_name: "Chosen ID", token_endpoint_auth_method: "client_secret_basic", require_pkce: true,
+      redirect_uris: ["https://new-app.example/auth/callback"], scope: "openid new-app:read" },
+  }))
+  const chosen = await createChosen()
+  expect(chosen.client_id).toBe("admin-selected-fixture")
+  expect(chosen.client_secret).toMatch(/^[A-Za-z0-9]{32}$/)
+  const rotated = await auth.api.rotateClientSecret({ headers, body: { client_id: chosen.client_id } })
+  expect(rotated.client_id).toBe(chosen.client_id)
+  expect(rotated.client_secret).toMatch(/^[A-Za-z0-9]{32}$/)
+  expect(rotated.client_secret).not.toBe(chosen.client_secret)
   const context = await auth.$context
   const stored = await context.adapter.findOne<{ referenceId: string }>({
     model: "oauthClient",

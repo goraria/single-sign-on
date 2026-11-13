@@ -41,7 +41,7 @@ const policy = () => ({
   purpose: "media-storage-credential-reader",
   disabled: false,
   resourceDisabled: false,
-  authMethod: "client_secret_post",
+  authMethod: "client_secret_basic",
   grants: ["client_credentials"],
   machineScopes: ["storage:sso:credential"],
   allowedScopes: ["storage:sso:credential"],

@@ -14,7 +14,7 @@ beforeAll(async () => {
   for (const id of [owner,staff,finance,orphan])
     await db.pool.query("INSERT INTO member(organization_id,user_id,role) VALUES($1,$2,$3)",[organization,id,id===owner?"owner":"member"])
   await db.pool.query("INSERT INTO team(id,organization_id,name) VALUES($1,$3,'Fixture A'),($2,$3,'Fixture B')",[teamA,teamB,organization])
-  await db.pool.query('INSERT INTO "teamMember"(team_id,user_id,role) VALUES($1,$2,\'staff\'),($3,$4,\'finance\')',[teamA,staff,teamB,finance])
+  await db.pool.query('INSERT INTO team_member(team_id,user_id,role) VALUES($1,$2,\'staff\'),($3,$4,\'finance\')',[teamA,staff,teamB,finance])
 })
 afterAll(async () => {
   if (!db) return

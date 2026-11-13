@@ -11,6 +11,7 @@ import {
 import type { User } from "@/schemas/users"
 
 export interface SsoApplication {
+  commerceApplication?: "marketplace" | "restaurant" | null
   /** Returned only once by client creation; never by list/get. */
   clientSecret?: string
   id: string
@@ -38,6 +39,8 @@ export interface SsoApplication {
 }
 
 export interface SsoApplicationPayload {
+  commerceApplication?: "marketplace" | "restaurant" | null
+  clientId?: string
   name: string
   environment?: "local" | "production"
   description?: string | null

@@ -4,6 +4,7 @@ import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm"
 import { database } from "@/database"
 import { oauthClient, oauthResource, user } from "@/database/schema"
 import { getAuth } from "@/lib/auth/server/index"
+import { withRequestedOAuthClientId } from "@/utils/oauth-client-credentials"
 import { fromNodeHeaders } from "better-auth/node"
 import { APIError } from "better-auth/api"
 import { formatSsoApplication } from "@/utils/server/formatter"
@@ -484,7 +485,7 @@ export async function createSsoApplication(
     ...input.scopes,
     ...(input.clientCredentialsScopes ?? []),
   ])
-  const created = await (
+  const created = await withRequestedOAuthClientId(input.clientId, async () => (
     await getAuth()
   ).api.adminCreateOAuthClient({
     headers,
@@ -514,10 +515,11 @@ export async function createSsoApplication(
       require_pkce: input.requirePKCE,
       metadata: {
         description: input.description ?? null,
+        commerceApplication: input.commerceApplication ?? null,
         environment: input.environment ?? "production",
       },
     },
-  })
+  }))
 
   const [application] = await database
     .update(oauthClient)
@@ -620,12 +622,13 @@ export async function updateSsoApplication(
         ...(input.skipConsent !== undefined
           ? { skip_consent: input.skipConsent }
           : {}),
-        ...(input.description !== undefined || input.environment !== undefined
+        ...(input.description !== undefined || input.environment !== undefined || input.commerceApplication !== undefined
           ? {
               metadata: {
                 ...(current.metadata && typeof current.metadata === "object"
                   ? current.metadata
                   : {}),
+                ...(input.commerceApplication !== undefined ? { commerceApplication: input.commerceApplication } : {}),
                 ...(input.description !== undefined
                   ? { description: input.description }
                   : {}),

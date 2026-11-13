@@ -42,7 +42,7 @@ beforeAll(async () => {
       [id, org, "Commerce branch fixture"],
     )
   await db.pool.query(
-    `INSERT INTO \"teamMember\"(team_id,user_id,role) VALUES($1,$2,'manager'),($3,$2,'staff'),($1,$4,'member')`,
+    `INSERT INTO team_member(team_id,user_id,role) VALUES($1,$2,'manager'),($3,$2,'staff'),($1,$4,'member')`,
     [teamA, manager, teamB, staff],
   )
 })
@@ -76,7 +76,7 @@ it("owner needs no team row and gets access to all real teams", async () => {
   })
   expect(
     (
-      await db.pool.query('SELECT 1 FROM "teamMember" WHERE user_id=$1', [
+      await db.pool.query('SELECT 1 FROM team_member WHERE user_id=$1', [
         owner,
       ])
     ).rowCount,
@@ -129,7 +129,7 @@ it("role changes and membership revocation affect the next snapshot", async () =
       .authorization_details[0]!.actions,
   ).toContain("inventory:write")
   await db.pool.query(
-    `DELETE FROM \"teamMember\" WHERE user_id=$1 AND team_id=$2`,
+    `DELETE FROM team_member WHERE user_id=$1 AND team_id=$2`,
     [staff, teamA],
   )
   expect(

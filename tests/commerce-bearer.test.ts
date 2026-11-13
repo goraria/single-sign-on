@@ -36,7 +36,10 @@ beforeAll(async () => {
   }
 })
 beforeEach(() => {
-  registry.mockReset().mockResolvedValue(resource)
+  registry.mockReset().mockImplementation(async (_resource, id) => {
+    if (id.endsWith("-attacker")) throw Object.assign(new Error("unregistered"), { status: 403 })
+    return "marketplace"
+  })
   vi.spyOn(globalThis, "fetch").mockResolvedValue(
     Response.json({ keys: [jwk] })
   )
@@ -103,6 +106,21 @@ it("accepts the exact local Marketplace client without classifying it as Restaur
       )
     )
   ).rejects.toMatchObject({ status: 403 })
+})
+it("accepts an exact unified client binding but still rejects machine identity and wrong scopes", async () => {
+  const id = "native-unified-marketplace"
+  const headers = { "x-oauth-client-id": id }
+  expect(await requireCommerceUser(await request({ client_id: id }, headers))).toMatchObject({ subject, resource })
+  for (const claims of [{ sub: id }, { scope: "restaurant:read" }, { client_id: client }]) {
+    await expect(requireCommerceUser(await request({ client_id: id, ...claims }, headers))).rejects.toBeDefined()
+  }
+})
+it("checks the application scope returned by the registry for an arbitrary client ID", async () => {
+  registry.mockResolvedValueOnce("restaurant")
+  const id = "new-generated-restaurant-client"
+  expect(await requireCommerceUser(await request({ client_id: id, scope: "restaurant:read" }, { "x-oauth-client-id": id }))).toMatchObject({ subject, resource })
+  registry.mockResolvedValueOnce("restaurant")
+  await expect(requireCommerceUser(await request({ client_id: id }, { "x-oauth-client-id": id }))).rejects.toBeDefined()
 })
 it.each([
   { aud: "https://other.test" },

@@ -27,7 +27,7 @@ it("registers, disables and rotates a confidential client with native Better Aut
           grantTypes: ["client_credentials"],
           scopes: ["storage:fixture:credential"],
           clientCredentialsScopes: ["storage:fixture:credential"],
-          tokenEndpointAuthMethod: "client_secret_post",
+          tokenEndpointAuthMethod: "client_secret_basic",
           createdAt: now,
           updatedAt: now,
         },
@@ -69,7 +69,7 @@ it("registers, disables and rotates a confidential client with native Better Aut
     headers,
     body: {
       client_name: "Media",
-      token_endpoint_auth_method: "client_secret_post",
+      token_endpoint_auth_method: "client_secret_basic",
       grant_types: ["client_credentials"],
       response_types: [],
       scope: "storage:fixture:credential",

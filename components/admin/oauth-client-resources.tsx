@@ -1,16 +1,19 @@
 "use client"
-
 import { useState } from "react"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@gorth-io/primitive/default/card"
-import { Input } from "@gorth-io/primitive/default/input"
+import { DataTable } from "@gorth-io/primitive/custom/data-table"
+import { Badge } from "@gorth-io/primitive/custom/badge"
 import { Button } from "@gorth-io/primitive/custom/button"
+import { MoreHorizontal } from "@gorth-io/primitive/cores/lucide"
+import type { PaginationState } from "@gorth-io/primitive/cores/tanstack/table"
+import type { DataTableProps } from "@gorth-io/primitive/utils/interface"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@gorth-io/primitive/custom/dropdown"
+import {
+  type OAuthResource,
   useOAuthResourcesQuery,
   useOAuthClientResourcesQuery,
   useChangeOAuthClientResourceMutation,
@@ -18,86 +21,118 @@ import {
 
 export function OAuthClientResources({ id }: { id: string }) {
   const [search, setSearch] = useState("")
-  const [page, setPage] = useState(1)
-  const resources = useOAuthResourcesQuery({ page, limit: 10, search })
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+  const resources = useOAuthResourcesQuery({
+    page: pagination.pageIndex + 1,
+    limit: pagination.pageSize,
+    search,
+  })
   const links = useOAuthClientResourcesQuery(id)
   const [change, result] = useChangeOAuthClientResourceMutation()
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Protected resources</CardTitle>
-        <CardDescription>
-          Link only the audiences this client needs. A link does not grant
-          scopes.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <Input
-          aria-label="Search resources"
-          placeholder="Search resources"
-          value={search}
-          onChange={(event) => {
-            setSearch(event.target.value)
-            setPage(1)
-          }}
-        />
-        {(resources.error ?? links.error ?? result.error) ? (
-          <p role="alert">Unable to load or change resource access.</p>
-        ) : null}
-        {resources.data?.items.map((resource) => {
-          const linked =
-            links.data?.some(
-              (link) => link.resourceIdentifier === resource.identifier
-            ) ?? false
-          return (
-            <div
-              key={resource.id}
-              className="flex items-center justify-between gap-4"
+  const linked = (resource: OAuthResource) =>
+    links.data?.some(
+      (link) => link.resourceIdentifier === resource.identifier
+    ) ?? false
+  const columns: DataTableProps<OAuthResource>["columns"] = [
+    {
+      accessorKey: "name",
+      header: "Resource",
+      cell: ({ row }) => (
+        <div>
+          <p>{row.original.name}</p>
+          <p className="text-sm text-muted-foreground break-all">
+            {row.original.identifier}
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: "linked",
+      header: "Status",
+      size: 120,
+      cell: ({ row }) => (
+        <Badge variant={linked(row.original) ? "success" : "outline"}>
+          {linked(row.original) ? "Linked" : "Not linked"}
+        </Badge>
+      ),
+    },
+    {
+      id: "actions",
+      header: "",
+      size: 50,
+      cell: ({ row }) => {
+        const resource = row.original,
+          active = linked(resource)
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label={"Resource actions: " + resource.name}
+                />
+              }
             >
-              <div className="min-w-0">
-                <p>{resource.name}</p>
-                <p className="truncate text-sm text-muted-foreground">
-                  {resource.identifier}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
+              <MoreHorizontal className="size-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
                 disabled={
                   !links.data ||
                   result.isLoading ||
-                  (!linked && resource.disabled)
+                  (!active && resource.disabled)
                 }
                 onClick={() => {
-                  void change({ id, resourceId: resource.id, linked: !linked })
+                  void change({ id, resourceId: resource.id, linked: !active })
                     .unwrap()
                     .catch(() => undefined)
                 }}
               >
-                {linked ? "Unlink" : "Link"}
-              </Button>
-            </div>
-          )
-        })}
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-          >
-            Previous
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!resources.data || page * 10 >= resources.data.total}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+                {active ? "Unlink" : "Link"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
+  return (
+    <div className="space-y-3 [&_tr>th:first-child]:pl-6 [&_tr>td:first-child]:pl-6 [&_tr>th:last-child]:pr-6 [&_tr>td:last-child]:pr-6">
+      {(resources.error ?? links.error ?? result.error) && (
+        <p role="alert">Unable to load or change resource access.</p>
+      )}
+      <DataTable
+        columns={columns}
+        fluidColumn="name"
+        data={resources.data?.items ?? []}
+        rowCount={resources.data?.total ?? 0}
+        nav={{
+          name: "Protected resources",
+          description:
+            "Link only the audiences this client needs. A link does not grant scopes.",
+        }}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        getRowId={(resource) => resource.id}
+        search={{
+          placeholder: "Search resources...",
+          value: search,
+          onValueChange: (value) => {
+            setSearch(value)
+            setPagination((current) => ({ ...current, pageIndex: 0 }))
+          },
+        }}
+        loading={resources.isLoading || links.isLoading}
+        onReload={() => {
+          void resources.refetch()
+          void links.refetch()
+        }}
+      />
+    </div>
   )
 }

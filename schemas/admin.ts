@@ -160,6 +160,7 @@ export const adminOptionalUrlSchema = z.preprocess(
 )
 
 const adminSsoApplicationSchema = z.object({
+  commerceApplication: z.enum(["marketplace", "restaurant"]).nullable().optional(),
   clientId: z
     .string()
     .trim()
@@ -188,6 +189,7 @@ const adminSsoApplicationSchema = z.object({
 export const adminSsoApplicationPayloadSchema = adminSsoApplicationSchema
   .omit({ clientId: true })
   .extend({
+    clientId: adminSsoApplicationSchema.shape.clientId.optional(),
     scopes: adminScopeListSchema.default([
       "openid",
       "profile",
@@ -199,9 +201,9 @@ export const adminSsoApplicationPayloadSchema = adminSsoApplicationSchema
       "refresh_token",
     ]),
     responseTypes: adminResponseTypeListSchema.default(["code"]),
-    public: z.boolean().default(true),
+    public: z.boolean().default(false),
     requirePKCE: z.boolean().default(true),
-    tokenEndpointAuthMethod: oauthTokenEndpointAuthMethodSchema.default("none"),
+    tokenEndpointAuthMethod: oauthTokenEndpointAuthMethodSchema.default("client_secret_basic"),
     skipConsent: z.boolean().default(true),
     disabled: z.boolean().default(false),
   })

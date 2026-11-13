@@ -67,7 +67,7 @@ export async function authorizeStorageClient(
     client.resourceDisabled ||
     client.dpop ||
     client.purpose !== "media-storage-credential-reader" ||
-    client.authMethod !== "client_secret_post" ||
+    client.authMethod !== "client_secret_basic" ||
     client.grants?.length !== 1 ||
     client.grants[0] !== "client_credentials" ||
     !client.machineScopes?.includes("storage:sso:credential") ||

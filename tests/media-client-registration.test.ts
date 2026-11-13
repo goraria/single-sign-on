@@ -73,7 +73,7 @@ it("provisions only a machine client and exact resource through native Better Au
   expect(state.createClient).toHaveBeenCalledWith(
     expect.objectContaining({
       body: expect.objectContaining({
-        token_endpoint_auth_method: "client_secret_post",
+        token_endpoint_auth_method: "client_secret_basic",
         grant_types: ["client_credentials"],
         client_credentials_scopes: ["storage:sso:credential"],
       }),

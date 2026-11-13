@@ -33,22 +33,9 @@ export async function requireCommerceUser(request: Request, mutation = false) {
   if (!betterAuthUrl || !resource)
     throw createServiceError("commerce_resource_required", 400)
   const clientIdHeader = request.headers.get("x-oauth-client-id")
-  if (
-    !clientIdHeader ||
-    ![
-      "gorth-online-marketplace-solution",
-      "gorth-online-marketplace-solution-local",
-      "gorth-restaurant-chain-management-system",
-      "gorth-restaurant-chain-management",
-    ].includes(clientIdHeader)
-  )
+  if (!clientIdHeader)
     throw createServiceError("commerce_client_required", 403)
-  await getCommerceRegistration(resource, clientIdHeader)
-  const application =
-    clientIdHeader === "gorth-online-marketplace-solution" ||
-    clientIdHeader === "gorth-online-marketplace-solution-local"
-      ? "marketplace"
-      : "restaurant"
+  const application = await getCommerceRegistration(resource, clientIdHeader)
   input.authorizationHeader = "Bearer " + input.authorizationHeader.slice(7)
   const claims = await verifyAccessTokenRequest(input, {
     jwksUrl: new URL("/auth/jwks", betterAuthUrl).href,

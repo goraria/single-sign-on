@@ -111,8 +111,10 @@ function getSsoApplicationDescription(metadata: unknown) {
 }
 
 export function formatSsoApplication(application: AdminSsoApplicationRecord) {
+  const commerceApplication = getOAuthClientMetadata(application.metadata).commerceApplication
   return {
     id: application.id,
+    commerceApplication: commerceApplication === "marketplace" || commerceApplication === "restaurant" ? commerceApplication : null,
     clientId: application.clientId,
     name: application.name ?? application.clientId,
     centrallyManaged: application.referenceId === oauthManagementReference,

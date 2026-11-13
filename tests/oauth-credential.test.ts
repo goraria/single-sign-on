@@ -57,7 +57,7 @@ beforeEach(() => {
     referenceId: "sso-administration",
     public: false,
     disabled: true,
-    tokenEndpointAuthMethod: "client_secret_post",
+    tokenEndpointAuthMethod: "client_secret_basic",
     grantTypes: ["client_credentials"],
     responseTypes: [],
     scopes: ["storage:fixture:credential"],
@@ -98,7 +98,7 @@ it("registers a machine draft through the native provider and copies its registe
       body: expect.objectContaining({
         resources: ["https://app.test/internal/storage/credential"],
         grant_types: ["client_credentials"],
-        token_endpoint_auth_method: "client_secret_post",
+        token_endpoint_auth_method: "client_secret_basic",
       }),
     })
   )
@@ -114,6 +114,29 @@ it("rotates an existing credential natively without changing its client ID or re
   expect(mocks.rotate).toHaveBeenCalledOnce()
   expect(mocks.create).not.toHaveBeenCalled()
   expect(mocks.remove).not.toHaveBeenCalled()
+})
+it("creates a native Basic replacement without rotating or deleting the old Post client", async () => {
+  mocks.current.tokenEndpointAuthMethod = "client_secret_post"
+  mocks.current.disabled = false
+  mocks.current.requirePKCE = true
+  mocks.current.grantTypes = ["authorization_code", "refresh_token", "client_credentials"]
+  mocks.current.redirectUris = ["https://app.test/auth/callback/gorth"]
+  mocks.current.postLogoutRedirectUris = ["https://app.test"]
+  mocks.current.backchannelLogoutUri = "https://app.test/auth/backchannel-logout"
+  mocks.select[0] = [{ present: true }]
+  const result = await rotateSsoApplicationCredential("draft", new Headers())
+  expect(result.clientId).toBe("native-id")
+  expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({ body: expect.objectContaining({
+    token_endpoint_auth_method: "client_secret_basic", require_pkce: true,
+    redirect_uris: mocks.current.redirectUris,
+    post_logout_redirect_uris: mocks.current.postLogoutRedirectUris,
+    backchannel_logout_uri: mocks.current.backchannelLogoutUri,
+    resources: ["https://app.test/internal/storage/credential"],
+    client_credentials_scopes: mocks.current.clientCredentialsScopes,
+  }) }))
+  expect(mocks.rotate).not.toHaveBeenCalled()
+  expect(mocks.remove).not.toHaveBeenCalled()
+  expect(mocks.values).toContainEqual({ disabled: true })
 })
 it("provisions an explicitly marked per-service draft while preserving its own scope ceiling", async () => {
   mocks.current.clientId = "gorth-payment-backend-local"

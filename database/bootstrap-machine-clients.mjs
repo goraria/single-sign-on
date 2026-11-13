@@ -38,7 +38,7 @@ try {
       const ceiling = [...new Set(draft.links.flatMap((link) => link.scopes))].sort();
       await connection.query(
         'INSERT INTO oauth_client(client_id,name,reference_id,disabled,public,require_pkce,token_endpoint_auth_method,grant_types,response_types,redirect_uris,scopes,client_credentials_scopes,metadata) VALUES($1,$2,$3,true,false,false,$4,$5,$6,$7,$8,$8,$9::jsonb)',
-        [draft.clientId,draft.name,"sso-administration","client_secret_post",["client_credentials"],[],[],ceiling,
+        [draft.clientId,draft.name,"sso-administration","client_secret_basic",["client_credentials"],[],[],ceiling,
           JSON.stringify({environment:draft.environment,purpose:draft.purpose,registryDraft:true,registryRole:draft.clientId})]);
       for (const link of draft.links) {
         const current = await connection.query("SELECT disabled,access_token_ttl,allowed_scopes FROM oauth_resource WHERE identifier=$1 FOR UPDATE",[link.identifier]);

@@ -25,7 +25,7 @@ export async function getCommerceNotificationRecipients(input: CommerceRecipient
     FROM member m JOIN "user" u ON u.id=m.user_id
     LEFT JOIN team t ON t.organization_id=m.organization_id
       ${input.teamId ? sql`AND t.id=${input.teamId}::uuid` : sql``}
-    LEFT JOIN "teamMember" tm ON tm.team_id=t.id AND tm.user_id=m.user_id
+    LEFT JOIN team_member tm ON tm.team_id=t.id AND tm.user_id=m.user_id
     WHERE m.organization_id=${input.organizationId}::uuid
       AND u.status='active' AND u.deleted_at IS NULL
       AND (NOT u.banned OR (u.ban_expires IS NOT NULL AND u.ban_expires<=now()))

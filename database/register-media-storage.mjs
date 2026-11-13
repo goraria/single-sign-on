@@ -57,7 +57,7 @@ try {
   if (!matches.length)
     await client.query(
       `INSERT INTO oauth_client(client_id,name,disabled,public,require_pkce,redirect_uris,post_logout_redirect_uris,token_endpoint_auth_method,grant_types,response_types,scopes,client_credentials_scopes,reference_id,metadata)
- VALUES($1,'Media storage credential reader',true,false,false,ARRAY[]::text[],ARRAY[]::text[],'client_secret_post',ARRAY['client_credentials']::oauth_grant_type_enum[],ARRAY[]::oauth_response_type_enum[],$2,$2,'sso-administration','{"application":"media","environment":"local"}'::jsonb) ON CONFLICT(client_id) DO NOTHING`,
+ VALUES($1,'Media storage credential reader',true,false,false,ARRAY[]::text[],ARRAY[]::text[],'client_secret_basic',ARRAY['client_credentials']::oauth_grant_type_enum[],ARRAY[]::oauth_response_type_enum[],$2,$2,'sso-administration','{"application":"media","environment":"local"}'::jsonb) ON CONFLICT(client_id) DO NOTHING`,
       [clientId, scopes]
     )
   const registered =
@@ -71,7 +71,7 @@ try {
   if (
     !registered ||
     registered.public ||
-    registered.token_endpoint_auth_method !== "client_secret_post" ||
+    registered.token_endpoint_auth_method !== "client_secret_basic" ||
     !scopes.every((s) => registered.client_credentials_scopes.includes(s))
   )
     throw Object.assign(Error(), {

@@ -103,8 +103,13 @@ it("requires a live resource/client registry binding", async () => {
   await expect(getCommerceRegistration("r", "c")).rejects.toMatchObject({
     status: 403,
   })
-  state.rows = [[{ identifier: "r" }]]
-  expect(await getCommerceRegistration("r", "c")).toBe("r")
+  state.rows = [[{ identifier: "r", referenceId: "sso-administration", metadata: {}, scopes: ["marketplace:read"] }]]
+  expect(await getCommerceRegistration("r", "any-new-client-id")).toBe("marketplace")
+})
+it("rechecks database policy on every call rather than caching an ID allowlist", async () => {
+  state.rows = [[{ metadata: { commerceApplication: "restaurant" }, referenceId: "sso-administration", scopes: ["restaurant:read"] }], []]
+  expect(await getCommerceRegistration("r", "any-generated-id")).toBe("restaurant")
+  await expect(getCommerceRegistration("r", "any-generated-id")).rejects.toMatchObject({ status: 403 })
 })
 const input = {
   teamId: crypto.randomUUID(),

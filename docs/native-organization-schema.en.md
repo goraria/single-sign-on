@@ -2,16 +2,22 @@
 
 Cloud applied 2026-11-04; installed Better Auth **1.7.13**. Scope: SSO only. Applications, Commerce, dependencies and lockfiles were not modified.
 
+Update 2026-11-13 (Better Auth 1.7.21): the physical table was renamed from `teamMember` to `team_member` on cloud using `database/migrations/20261113-team-member-snake-case.sql`. Only table/index names changed; foreign keys and rows were preserved (0 rows at preflight). `bun database/migrate-team-member.mjs --apply` verifies data fingerprints and supports retries. Historical sections below describe the earlier cutover; do not rerun that older migration alone after this rename.
+
+Cloud verification: `bun --env-file=.env.local run test -- --config vitest.team-member.cloud.config.ts --configLoader native`. Bun loads the configured server environment into the process because Next skips .env.local under NODE_ENV=test; credentials are not printed.
+
+November 13 results: migration committed on Neon; typecheck passed; 42 related tests and 6 cloud tests passed, including native multi-team/role Organization APIs and idempotent migration verification. Restart/deploy the updated SSO code to match the cloud table name.
+
 | Previous | Current |
 |---|---|
 | Active `auth_team` | `team` |
-| Active `auth_team_member` | `teamMember` |
+| `auth_team_member` → `teamMember` on November 4 | `team_member` since November 13 |
 | Legacy `team`, `team_member` | Removed after confirming both were empty |
 | `authentication_event` | `event_log` |
 | `authentication_event_type_enum` | `event_log_type_enum` |
 | `invitation.team_id` UUID with single-team FK | Nullable TEXT supporting native multiple-team invitations |
 
-`betterAuthSchema.team` and `.teamMember` now resolve to identically named physical tables; no team `modelName` alias is configured. Existing snake_case column conventions remain. Raw SQL must quote the case-sensitive table as `"teamMember"`; Drizzle quotes it automatically.
+The native Better Auth model key `betterAuthSchema.teamMember` is unchanged; its Drizzle object now targets the physical `team_member` table. `team` still targets `team`. No plugin `modelName` or fields changed. Authorization/notification SQL and current cloud fixtures now use `team_member`.
 
 The application extension `teamMember.role`, its default/member-role constraint and Commerce authorization behavior remain. Queries, cloud fixtures and relations use the new tables. Single-team invitation relations were removed because the native value may contain multiple IDs. Existing `role`, `permission`, `member_role` and `role_permission` tables remain; they are not automatically Better Auth Dynamic Access Control.
 

@@ -12,6 +12,7 @@ import {
 } from "better-auth/plugins"
 import { waitUntil } from "@vercel/functions"
 import { oauthProvider } from "@better-auth/oauth-provider"
+import { generateOAuthClientId, generateOAuthClientSecret } from "@/utils/oauth-client-credentials"
 import { sso } from "@better-auth/sso"
 import { dash } from "@better-auth/infra"
 import {
@@ -45,6 +46,8 @@ import { oauthManagementReference } from "@/utils/oauth-management"
 import { getOAuthAdministratorRole } from "@/services/oauth-management"
 import { oidcScopes } from "@/schemas/oauth-registry"
 import { onceAsync } from "@/utils/server/once"
+import { allowLocalAppRedirect } from "@/utils/oauth-local-redirect"
+import { basicClientRegistration } from "@/utils/oauth-client-authentication"
 
 const gorthAppClaim = "https://gorth-auth.vercel.app/claims/app"
 const accessTokenExpiresIn = 60 * 10
@@ -119,6 +122,7 @@ async function getGorthUserInfoClaims(
 
 export function createAuth(scopes: string[]) {
   const auth = betterAuth({
+    hooks: { before: basicClientRegistration },
     basePath: "/auth",
     baseURL: betterAuthUrl,
     // Better Auth reads BETTER_AUTH_SECRET directly. Keep its existing value;
@@ -147,6 +151,9 @@ export function createAuth(scopes: string[]) {
       mediaAccess(jwtOptions),
       adminAudit(),
       oauthProvider({
+        generateClientId: generateOAuthClientId,
+        generateClientSecret: generateOAuthClientSecret,
+        allowInsecureRedirectUri: allowLocalAppRedirect,
         loginPage: "/auth/sign-in",
         consentPage: "/auth/consent",
         selectAccount: {

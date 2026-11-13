@@ -11,9 +11,9 @@ import {
   eventLog,
   eventLogType,
 } from "@/database/schema"
-it("uses native team model/table names with no duplicate legacy models", () => {
+it("maps native teamMember to the snake_case physical table without duplicate models", () => {
   expect(getTableConfig(team).name).toBe("team")
-  expect(getTableConfig(teamMember).name).toBe("teamMember")
+  expect(getTableConfig(teamMember).name).toBe("team_member")
   expect(betterAuthSchema.team).toBe(team)
   expect(betterAuthSchema.teamMember).toBe(teamMember)
   const native = getAuthTables({

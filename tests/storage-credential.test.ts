@@ -111,7 +111,7 @@ async function createFixture() {
     headers,
     body: {
       client_name: "Media",
-      token_endpoint_auth_method: "client_secret_post",
+      token_endpoint_auth_method: "client_secret_basic",
       grant_types: ["client_credentials"],
       client_credentials_scopes: [scope],
       metadata: { purpose: "media-storage-credential-reader" },
@@ -141,11 +141,12 @@ async function createFixture() {
     server.handler(
       new Request("https://sso.example/auth/oauth2/token", {
         method: "POST",
-        headers: { "content-type": "application/x-www-form-urlencoded" },
+        headers: {
+          "content-type": "application/x-www-form-urlencoded",
+          authorization: "Basic " + Buffer.from(`${client.client_id}:${secret}`).toString("base64"),
+        },
         body: new URLSearchParams({
           grant_type: "client_credentials",
-          client_id: client.client_id,
-          client_secret: secret,
           scope: requestedScope,
           resource,
         }),
@@ -186,7 +187,7 @@ it("uses real Better Auth client credentials and JWKS verification, not custom a
 it("native grant rejects wrong secrets, user-delegated scopes and unlinked audiences", async () => {
   const { requestToken } = await fixture()
   const invalid = await requestToken("incorrect")
-  expect(invalid.status).toBe(400)
+  expect(invalid.status).toBe(401)
   expect(await invalid.json()).toMatchObject({ error: "invalid_client" })
   expect((await requestToken(undefined, "openid")).status).toBe(400)
   expect(
